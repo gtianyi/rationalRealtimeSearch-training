@@ -49,21 +49,21 @@ then
       do
         for lookahead in "${@:8}"
         do
-          mkdir ../../results/TreeWorld/backupTests/AS/b${b}d${d}
+          mkdir ../../../results/TreeWorld/backupTests/AS/b${b}d${d}
           instance=$firstInstance
           while ((instance < lastInstance))
           do
-		    file="../../worlds/treeWorld/b${b}d${d}-${instance}.tw"
+		    file="../../../worlds/treeWorld/b${b}d${d}-${instance}.tw"
             if ((numProcs >= ${maxProcs}))
             then
               wait
               numProcs=0
             fi		  
-		    if [ -f ../../results/TreeWorld/backupTests/AS/b${b}d${d}/LA${lookahead}-${instance}.json ]
+		    if [ -f ../../../results/TreeWorld/backupTests/AS/b${b}d${d}/LA${lookahead}-${instance}.json ]
 		    then 
 		      let instance++
 		    else
-		      ./../../backupTestsAS.sh ${domainType} ${lookahead} ../../results/TreeWorld/backupTests/AS/b${b}d${d}/LA${lookahead}-${instance}.json < ${file} &
+		      ./../../../build_release/backupTestsAS ${domainType} ${lookahead} ../../../results/TreeWorld/backupTests/AS/b${b}d${d}/LA${lookahead}-${instance}.json < ${file} &
 		      let instance++
               let numProcs++
 		    fi
@@ -76,21 +76,21 @@ then
     dimensions=$6
     for lookahead in "${@:7}"
     do
-      mkdir ../../results/SlidingTilePuzzle/backupTests/AS/${dimensions}x${dimensions}
+      mkdir ../../../results/SlidingTilePuzzle/backupTests/AS/${dimensions}x${dimensions}
       instance=$firstInstance
 	  while ((instance < lastInstance))
       do
-	    file="../../worlds/slidingTile/${instance}-${dimensions}x${dimensions}.st"
+	    file="../../../worlds/slidingTile/${instance}-${dimensions}x${dimensions}.st"
         if ((numProcs >= ${maxProcs}))
         then
           wait
           numProcs=0
         fi		  
-	    if [ -f ../../results/SlidingTilePuzzle/backupTests/AS/${dimensions}x${dimensions}/LA${lookahead}-${instance}.json ]
+	    if [ -f ../../../results/SlidingTilePuzzle/backupTests/AS/${dimensions}x${dimensions}/LA${lookahead}-${instance}.json ]
 	    then 
 	      let instance++
 	    else
-	      ./../../backupTestsAS.sh ${domainType} ${lookahead} ../../results/SlidingTilePuzzle/backupTests/AS/${dimensions}x${dimensions}/LA${lookahead}-${instance}.json < ${file} &
+	      ./../../../build_release/backupTestsAS ${domainType} ${lookahead} ../../../results/SlidingTilePuzzle/backupTests/AS/${dimensions}x${dimensions}/LA${lookahead}-${instance}.json < ${file} &
 	      let instance++
           let numProcs++
 	    fi
@@ -114,21 +114,21 @@ then
       do
         for lookahead in "${@:8}"
         do
-          mkdir ../../results/TreeWorld/backupTests/DFS/b${b}d${d}
+          mkdir ../../../results/TreeWorld/backupTests/DFS/b${b}d${d}
           instance=$firstInstance
           while ((instance < lastInstance))
           do
-		    file="../../worlds/treeWorld/b${b}d${d}-${instance}.tw"
+		    file="../../../worlds/treeWorld/b${b}d${d}-${instance}.tw"
             if ((numProcs >= ${maxProcs}))
             then
               wait
               numProcs=0
             fi		  
-		    if [ -f ../../results/TreeWorld/backupTests/DFS/b${b}d${d}/LA${lookahead}-${instance}.json ]
+		    if [ -f ../../../results/TreeWorld/backupTests/DFS/b${b}d${d}/LA${lookahead}-${instance}.json ]
 		    then 
 		      let instance++
 		    else
-		      ./../../backupTestsDFS.sh ${domainType} ${lookahead} ../../results/TreeWorld/backupTests/DFS/b${b}d${d}/LA${lookahead}-${instance}.json < ${file} &
+		      ./../../../build_release/backupTestsDFS ${domainType} ${lookahead} ../../../results/TreeWorld/backupTests/DFS/b${b}d${d}/LA${lookahead}-${instance}.json < ${file} &
 		      let instance++
               let numProcs++
 		    fi
@@ -141,21 +141,21 @@ then
     dimensions=$6
     for lookahead in "${@:7}"
     do
-      mkdir ../../results/SlidingTilePuzzle/backupTests/DFS/${dimensions}x${dimensions}
+      mkdir ../../../results/SlidingTilePuzzle/backupTests/DFS/${dimensions}x${dimensions}
       instance=$firstInstance
 	  while ((instance < lastInstance))
       do
-	    file="../../worlds/slidingTile/${instance}-${dimensions}x${dimensions}.st"
+	    file="../../../worlds/slidingTile/${instance}-${dimensions}x${dimensions}.st"
         if ((numProcs >= ${maxProcs}))
         then
           wait
           numProcs=0
         fi		  
-	    if [ -f ../../results/SlidingTilePuzzle/backupTests/DFS/${dimensions}x${dimensions}/LA${lookahead}-${instance}.json ]
+	    if [ -f ../../../results/SlidingTilePuzzle/backupTests/DFS/${dimensions}x${dimensions}/LA${lookahead}-${instance}.json ]
 	    then 
 	      let instance++
 	    else
-	      ./../../backupTestsDFS.sh ${domainType} ${lookahead} ../../results/SlidingTilePuzzle/backupTests/DFS/${dimensions}x${dimensions}/LA${lookahead}-${instance}.json < ${file} &
+	      ./../../../build_release/backupTestsDFS ${domainType} ${lookahead} ../../../results/SlidingTilePuzzle/backupTests/DFS/${dimensions}x${dimensions}/LA${lookahead}-${instance}.json < ${file} &
 	      let instance++
           let numProcs++
 	    fi
