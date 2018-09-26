@@ -49,7 +49,7 @@ then
       do
         for lookahead in "${@:8}"
         do
-          mkdir ../../../results/TreeWorld/backupTests/AS/b${b}d${d}
+          mkdir -p ../../../results/TreeWorld/backupTests/AS/b${b}d${d}
           instance=$firstInstance
           while ((instance < lastInstance))
           do
@@ -76,7 +76,7 @@ then
     dimensions=$6
     for lookahead in "${@:7}"
     do
-      mkdir ../../../results/SlidingTilePuzzle/backupTests/AS/${dimensions}x${dimensions}
+      mkdir -p ../../../results/SlidingTilePuzzle/backupTests/AS/${dimensions}x${dimensions}
       instance=$firstInstance
 	  while ((instance < lastInstance))
       do
@@ -114,7 +114,7 @@ then
       do
         for lookahead in "${@:8}"
         do
-          mkdir ../../../results/TreeWorld/backupTests/DFS/b${b}d${d}
+          mkdir -p ../../../results/TreeWorld/backupTests/DFS/b${b}d${d}
           instance=$firstInstance
           while ((instance < lastInstance))
           do
@@ -141,7 +141,7 @@ then
     dimensions=$6
     for lookahead in "${@:7}"
     do
-      mkdir ../../../results/SlidingTilePuzzle/backupTests/DFS/${dimensions}x${dimensions}
+      mkdir -p ../../../results/SlidingTilePuzzle/backupTests/DFS/${dimensions}x${dimensions}
       instance=$firstInstance
 	  while ((instance < lastInstance))
       do
