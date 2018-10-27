@@ -36,7 +36,7 @@ def makeDifferencePlot(width, height, xAxis, yAxis, dataframe, dodge, hue, order
     return
 
 # Hard coded result directories
-resultDirs = {"b2d100"}
+resultDirs = {"b2d100-bel100"}
 #"K-Best 3 One Level Belief", "K-Best 10 One Level Belief", "K-Best 30 One Level Belief", 
 algorithms = ["Minimin", "Bellman", "Nancy", "K-Best 3", "K-Best 10", "K-Best 30", "Cserna", "Cserna One Level Belief"]
 
@@ -58,34 +58,34 @@ differenceCostAS = []
 
 print("reading in data...")
 
+# for dir in resultDirs:
+    # for file in listdir("../../../results/TreeWorld/backupTests/DFS/" + dir):
+        # with open("../../../results/TreeWorld/backupTests/DFS/" + dir + "/" + file) as json_data:
+            # resultData = json.load(json_data)
+            # for algo in algorithms:
+                # instanceDFS.append(str(dir))
+                # lookAheadValsDFS.append(resultData["Lookahead"])
+                # algorithmDFS.append(algo)
+                # solutionCostDFS.append(resultData[algo.replace("One Level", "Pemberton")])
+                # differenceCostDFS.append(resultData[algo.replace("One Level", "Pemberton")] - resultData["Cserna Pemberton Belief"])
+
+# dfDFS = pd.DataFrame({
+    # "instance":instanceDFS,
+    # "Depth Limit":lookAheadValsDFS,
+    # "Solution Cost":solutionCostDFS,
+    # "Algorithm":algorithmDFS
+# })
+
+# dfDiffDFS = pd.DataFrame({
+    # "instance":instanceDFS,
+    # "Depth Limit":lookAheadValsDFS,
+    # "Algorithm Cost - Cserna Cost":differenceCostDFS,
+    # "Algorithm":algorithmDFS
+# })
+
 for dir in resultDirs:
-    for file in listdir("../../results/TreeWorld/backupTests/DFS/" + dir):
-        with open("../../results/TreeWorld/backupTests/DFS/" + dir + "/" + file) as json_data:
-            resultData = json.load(json_data)
-            for algo in algorithms:
-                instanceDFS.append(str(dir))
-                lookAheadValsDFS.append(resultData["Lookahead"])
-                algorithmDFS.append(algo)
-                solutionCostDFS.append(resultData[algo.replace("One Level", "Pemberton")])
-                differenceCostDFS.append(resultData[algo.replace("One Level", "Pemberton")] - resultData["Cserna Pemberton Belief"])
-
-dfDFS = pd.DataFrame({
-    "instance":instanceDFS,
-    "Depth Limit":lookAheadValsDFS,
-    "Solution Cost":solutionCostDFS,
-    "Algorithm":algorithmDFS
-})
-
-dfDiffDFS = pd.DataFrame({
-    "instance":instanceDFS,
-    "Depth Limit":lookAheadValsDFS,
-    "Algorithm Cost - Cserna Cost":differenceCostDFS,
-    "Algorithm":algorithmDFS
-})
-
-for dir in resultDirs:
-    for file in listdir("../../results/TreeWorld/backupTests/AS/" + dir):
-        with open("../../results/TreeWorld/backupTests/AS/" + dir + "/" + file) as json_data:
+    for file in listdir("../../../results/TreeWorld/backupTests/AS/" + dir):
+        with open("../../../results/TreeWorld/backupTests/AS/" + dir + "/" + file) as json_data:
             resultData = json.load(json_data)
             for algo in algorithms:
                 instanceAS.append(str(dir))
@@ -112,13 +112,13 @@ print("building plots...")
 
 for instance in resultDirs:
     sns.set(rc={'figure.figsize': (11, 8), 'font.size': 26, 'text.color': 'black'})
-    instanceDataDFS = dfDFS.loc[dfDFS["instance"] == instance]
-    instanceDataDiffDFS = dfDiffDFS.loc[dfDiffDFS["instance"] == instance]
+    # instanceDataDFS = dfDFS.loc[dfDFS["instance"] == instance]
+    # instanceDataDiffDFS = dfDiffDFS.loc[dfDiffDFS["instance"] == instance]
     instanceDataAS = dfAS.loc[dfAS["instance"] == instance]
     instanceDataDiffAS = dfDiffAS.loc[dfDiffAS["instance"] == instance]
 
-    makeViolinPlot(11, 8, "Depth Limit", "Solution Cost", instanceDataDFS, 0.70, "Algorithm", depthsDFS, algorithms, "Depth Limit", "Solution Cost", "../../plots/Experiment1BViolin" + instance + ".pdf")
-    makeDifferencePlot(11, 8, "Depth Limit", "Algorithm Cost - Cserna Cost", instanceDataDiffDFS, 0.35, "Algorithm", depthsDFS, algorithms, "Depth Limit", "Algorithm Cost - Cserna One Level Belief Cost", "../../plots/Experiment1BDifference" + instance + ".pdf")
+#     makeViolinPlot(11, 8, "Depth Limit", "Solution Cost", instanceDataDFS, 0.70, "Algorithm", depthsDFS, algorithms, "Depth Limit", "Solution Cost", "../../../plots/Experiment1BViolin" + instance + ".pdf")
+    # makeDifferencePlot(11, 8, "Depth Limit", "Algorithm Cost - Cserna Cost", instanceDataDiffDFS, 0.35, "Algorithm", depthsDFS, algorithms, "Depth Limit", "Algorithm Cost - Cserna One Level Belief Cost", "../../../plots/Experiment1BDifference" + instance + ".pdf")
 
-    makeViolinPlot(11, 8, "Node Expansion Limit", "Solution Cost", instanceDataAS, 0.70, "Algorithm", depthsAS, algorithms, "Node Expansion Limit", "Solution Cost", "../../plots/Experiment1CViolin" + instance + ".pdf")
-    makeDifferencePlot(11, 8, "Node Expansion Limit", "Algorithm Cost - Cserna Cost", instanceDataDiffAS, 0.35, "Algorithm", depthsAS, algorithms, "Node Expansion Limit", "Algorithm Cost - Cserna One Level Belief Cost", "../../plots/Experiment1CDifference" + instance + ".pdf")
+    makeViolinPlot(11, 8, "Node Expansion Limit", "Solution Cost", instanceDataAS, 0.70, "Algorithm", depthsAS, algorithms, "Node Expansion Limit", "Solution Cost", "../../../plots/Experiment1CViolin" + instance + ".pdf")
+    makeDifferencePlot(11, 8, "Node Expansion Limit", "Algorithm Cost - Cserna Cost", instanceDataDiffAS, 0.35, "Algorithm", depthsAS, algorithms, "Node Expansion Limit", "Algorithm Cost - Cserna One Level Belief Cost", "../../../plots/Experiment1CDifference" + instance + ".pdf")

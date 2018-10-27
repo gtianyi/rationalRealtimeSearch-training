@@ -29,10 +29,10 @@ for b in ${branchFactors[@]}
 do
   for d in ${depths[@]}
   do
-	mkdir ../../results/TreeWorld/lastIncrementalDecision/b${b}d${d}
+	mkdir -p ../../../results/TreeWorld/lastIncrementalDecision/b${b}d${d}
 	instance=0
 	testInstancesRun=0
-	for file in ../../worlds/treeWorld/b${b}d${d}-*
+	for file in ../../../worlds/treeWorld/b${b}d${d}-*
 	do
 	  if ((testInstancesRun >= maxInstances))
 	  then
@@ -43,11 +43,11 @@ do
 		wait
 		numProcs=0
 	  fi
-	  if [ -f ../../results/TreeWorld/lastIncrementalDecision/b${b}d${d}/LID-b${b}d${d}-${instance}.json ]
+	  if [ -f ../../../results/TreeWorld/lastIncrementalDecision/b${b}d${d}/LID-b${b}d${d}-${instance}.json ]
 	  then 
 		let instance++
 	  else
-		./../../lastIncremental.sh "$((d - 1))" ../../results/TreeWorld/lastIncrementalDecision/b${b}d${d}/LID-b${b}d${d}-${instance}.json < $file &
+		./../../../build_release/lastIncremental "$((d - 1))" ../../../results/TreeWorld/lastIncrementalDecision/b${b}d${d}/LID-b${b}d${d}-${instance}.json < $file &
 		let instance++
 		let numProcs++
 	  fi
