@@ -18,257 +18,264 @@
 #include "learningAlgorithms/Dijkstra.h"
 #include "learningAlgorithms/Ignorance.h"
 
+#include <time.h>
+
 using namespace std;
 
 template <class Domain>
 class RealTimeSearch
 {
 public:
-	typedef typename Domain::State State;
-	typedef typename Domain::Cost Cost;
-	typedef typename Domain::HashState Hash;
+    typedef typename Domain::State State;
+    typedef typename Domain::Cost Cost;
+    typedef typename Domain::HashState Hash;
 
-	struct Node
-	{
-		Cost g;
-		Cost h;
-		Cost d;
-		Cost derr;
-		Cost epsH;
-		Cost epsD;
-		Node* parent;
-		State stateRep;
-		int owningTLA;
-		bool open;
-		int delayCntr;
-		DiscreteDistribution distribution;
+    struct Node {
+        Cost g;
+        Cost h;
+        Cost d;
+        Cost derr;
+        Cost epsH;
+        Cost epsD;
+        Node* parent;
+        State stateRep;
+        int owningTLA;
+        bool open;
+        int delayCntr;
+        DiscreteDistribution distribution;
 
-	public:
-		Cost getGValue() const { return g; }
-		Cost getHValue() const { return h; }
-		Cost getDValue() const { return d; }
-		Cost getDErrValue() const { return derr; }
-		Cost getFValue() const { return g + h; }
-		Cost getEpsilonH() const { return epsH; }
-		Cost getEpsilonD() const { return epsD; }
-		Cost getFHatValue() const { return g + getHHatValue(); }
-		Cost getDHatValue() const { return (derr / (1.0 - epsD)); }
-		Cost getHHatValue() const { return h + getDHatValue() * epsH; }
-		State getState() const { return stateRep; }
-		Node* getParent() const { return parent; }
-		int getOwningTLA() const { return owningTLA; }
+    public:
+        Cost getGValue() const { return g; }
+        Cost getHValue() const { return h; }
+        Cost getDValue() const { return d; }
+        Cost getDErrValue() const { return derr; }
+        Cost getFValue() const { return g + h; }
+        Cost getEpsilonH() const { return epsH; }
+        Cost getEpsilonD() const { return epsD; }
+        Cost getFHatValue() const { return g + getHHatValue(); }
+        Cost getDHatValue() const { return (derr / (1.0 - epsD)); }
+        Cost getHHatValue() const { return h + getDHatValue() * epsH; }
+        State getState() const { return stateRep; }
+        Node* getParent() const { return parent; }
+        int getOwningTLA() const { return owningTLA; }
 
-		void setHValue(Cost val) { h = val; }
-		void setGValue(Cost val) { g = val; }
-		void setDValue(Cost val) { d = val; }
-		void setDErrValue(Cost val) { derr = val; }
-		void setEpsilonH(Cost val) { epsH = val; }
-		void setEpsilonD(Cost val) { epsD = val; }
-		void setState(State s) { stateRep = s; }
-		void setOwningTLA(int tla) { owningTLA = tla; }
-		void setParent(Node* p) { parent = p; }
+        void setHValue(Cost val) { h = val; }
+        void setGValue(Cost val) { g = val; }
+        void setDValue(Cost val) { d = val; }
+        void setDErrValue(Cost val) { derr = val; }
+        void setEpsilonH(Cost val) { epsH = val; }
+        void setEpsilonD(Cost val) { epsD = val; }
+        void setState(State s) { stateRep = s; }
+        void setOwningTLA(int tla) { owningTLA = tla; }
+        void setParent(Node* p) { parent = p; }
 
-		bool onOpen() { return open; }
-		void close() { open = false; }
-		void reOpen() { open = true; }
+        bool onOpen() { return open; }
+        void close() { open = false; }
+        void reOpen() { open = true; }
 
-		void incDelayCntr() { delayCntr++; }
-		int getDelayCntr() { return delayCntr; }
+        void incDelayCntr() { delayCntr++; }
+        int getDelayCntr() { return delayCntr; }
 
-		void markStart() { stateRep.markStart(); }
+        void markStart() { stateRep.markStart(); }
 
-		Node(Cost g, Cost h, Cost d, Cost derr, Cost epsH, Cost epsD, State state, Node* parent, int tla)
-			: g(g), h(h), d(d), derr(derr), epsH(epsH), epsD(epsD), stateRep(state), parent(parent), owningTLA(tla)
-		{
-			open = true;
-			delayCntr = 0;
-		}
+        Node(Cost g,
+                Cost h,
+                Cost d,
+                Cost derr,
+                Cost epsH,
+                Cost epsD,
+                State state,
+                Node* parent,
+                int tla)
+                : g(g),
+                  h(h),
+                  d(d),
+                  derr(derr),
+                  epsH(epsH),
+                  epsD(epsD),
+                  stateRep(state),
+                  parent(parent),
+                  owningTLA(tla) {
+            open = true;
+            delayCntr = 0;
+        }
 
-		friend std::ostream& operator<<(std::ostream& stream, const Node& node) {
-			stream << node.getState() << endl;
-			stream << "f: " << node.getFValue() << endl;
-			stream << "g: " << node.getGValue() << endl;
-			stream << "h: " << node.getHValue() << endl;
-			stream << "derr: " << node.getDErrValue() << endl;
-			stream << "d: " << node.getDValue() << endl;
-			stream << "epsilon-h: " << node.getEpsilonH() << endl;
-			stream << "epsilon-d: " << node.getEpsilonD() << endl;
-			stream << "f-hat: " << node.getFHatValue() << endl;
-			stream << "d-hat: " << node.getDHatValue() << endl;
-			stream << "h-hat: " << node.getHHatValue() << endl;
-			stream << "action generated by: " << node.getState().getLabel() << endl;
-			stream << "-----------------------------------------------" << endl;
-			stream << endl;
-			return stream;
-		}
+        friend std::ostream& operator<<(std::ostream& stream,
+                const Node& node) {
+            stream << node.getState() << endl;
+            stream << "f: " << node.getFValue() << endl;
+            stream << "g: " << node.getGValue() << endl;
+            stream << "h: " << node.getHValue() << endl;
+            stream << "derr: " << node.getDErrValue() << endl;
+            stream << "d: " << node.getDValue() << endl;
+            stream << "epsilon-h: " << node.getEpsilonH() << endl;
+            stream << "epsilon-d: " << node.getEpsilonD() << endl;
+            stream << "f-hat: " << node.getFHatValue() << endl;
+            stream << "d-hat: " << node.getDHatValue() << endl;
+            stream << "h-hat: " << node.getHHatValue() << endl;
+            stream << "action generated by: " << node.getState().getLabel()
+                   << endl;
+            stream << "-----------------------------------------------" << endl;
+            stream << endl;
+            return stream;
+        }
 
-		static bool compareNodesF(const Node* n1, const Node* n2)
-		{
-			// Tie break on g-value
-			if (n1->getFValue() == n2->getFValue())
-			{
-				return n1->getGValue() > n2->getGValue();
-			}
-			return n1->getFValue() < n2->getFValue();
-		}
+        static bool compareNodesF(const Node* n1, const Node* n2) {
+            // Tie break on g-value
+            if (n1->getFValue() == n2->getFValue()) {
+                return n1->getGValue() > n2->getGValue();
+            }
+            return n1->getFValue() < n2->getFValue();
+        }
 
-		static bool compareNodesFHat(const Node* n1, const Node* n2)
-		{
-			// Tie break on g-value
-			if (n1->getFHatValue() == n2->getFHatValue())
-			{
-				return n1->getGValue() > n2->getGValue();
-			}
-			return n1->getFHatValue() < n2->getFHatValue();
-		}
+        static bool compareNodesFHat(const Node* n1, const Node* n2) {
+            // Tie break on g-value
+            if (n1->getFHatValue() == n2->getFHatValue()) {
+                return n1->getGValue() > n2->getGValue();
+            }
+            return n1->getFHatValue() < n2->getFHatValue();
+        }
 
-		static bool compareNodesH(const Node* n1, const Node* n2)
-		{
-			if (n1->getHValue() == n2->getHValue())
-			{
-				return n1->getGValue() > n2->getGValue();
-			}
-			return n1->getHValue() < n2->getHValue();
-		}
-	};
+        static bool compareNodesH(const Node* n1, const Node* n2) {
+            if (n1->getHValue() == n2->getHValue()) {
+                return n1->getGValue() > n2->getGValue();
+            }
+            return n1->getHValue() < n2->getHValue();
+        }
+    };
 
-	struct TopLevelAction
-	{
-	public:
-		PriorityQueue<Node*> open;
-		Cost expectedMinimumPathCost;
-		Node* topLevelNode;
-		vector<Node*> kBestNodes;
-		DiscreteDistribution belief;
+    struct TopLevelAction {
+    public:
+        PriorityQueue<Node*> open;
+        Cost expectedMinimumPathCost;
+        Node* topLevelNode;
+        vector<Node*> kBestNodes;
+        DiscreteDistribution belief;
 
-		TopLevelAction()
-		{
-			open.swapComparator(Node::compareNodesFHat);
-		}
+        TopLevelAction() { open.swapComparator(Node::compareNodesFHat); }
 
-		TopLevelAction(const TopLevelAction& tla)
-		{
-			open = tla.open;
-			expectedMinimumPathCost = tla.expectedMinimumPathCost;
-			topLevelNode = tla.topLevelNode;
-			kBestNodes = tla.kBestNodes;
-			belief = tla.belief;
-		}
+        TopLevelAction(const TopLevelAction& tla) {
+            open = tla.open;
+            expectedMinimumPathCost = tla.expectedMinimumPathCost;
+            topLevelNode = tla.topLevelNode;
+            kBestNodes = tla.kBestNodes;
+            belief = tla.belief;
+        }
 
-		TopLevelAction& operator=(const TopLevelAction& rhs)
-		{
-			if (&rhs == this)
-				return *this;
-			open = rhs.open;
-			expectedMinimumPathCost = rhs.expectedMinimumPathCost;
-			topLevelNode = rhs.topLevelNode;
-			kBestNodes = rhs.kBestNodes;
-			belief = rhs.belief;
-			return *this;
-		}
-	};
+        TopLevelAction& operator=(const TopLevelAction& rhs) {
+            if (&rhs == this)
+                return *this;
+            open = rhs.open;
+            expectedMinimumPathCost = rhs.expectedMinimumPathCost;
+            topLevelNode = rhs.topLevelNode;
+            kBestNodes = rhs.kBestNodes;
+            belief = rhs.belief;
+            return *this;
+        }
+    };
 
-	RealTimeSearch(Domain& domain, string expansionModule, string learningModule,
-		string decisionModule, double lookahead, double k = 1, string belief = "normal")
-		: domain(domain), expansionPolicy(expansionModule), learningPolicy(learningModule),
-		decisionPolicy(decisionModule), lookahead(lookahead)
-	{
-		if (expansionModule == "a-star")
-		{
-			expansionAlgo = new AStar<Domain, Node, TopLevelAction>(domain, lookahead, "f");
-		}
-		else if (expansionModule == "f-hat")
-		{
-			expansionAlgo = new AStar<Domain, Node, TopLevelAction>(domain, lookahead, "fhat");
-		}
-		else if (expansionModule == "dfs")
-		{
-			expansionAlgo = new DepthFirst<Domain, Node, TopLevelAction>(domain, lookahead);
-		}
-		else if (expansionModule == "bfs")
-		{
-			expansionAlgo = new BreadthFirst<Domain, Node, TopLevelAction>(domain, lookahead);
-		}
-		else if (expansionModule == "risk")
-		{
-			expansionAlgo = new Risk<Domain, Node, TopLevelAction>(domain, lookahead, 1);
-		}
+    RealTimeSearch(Domain& domain,
+            string expansionModule,
+            string learningModule,
+            string decisionModule,
+            double lookahead,
+            double k = 1,
+            string belief = "normal")
+            : domain(domain),
+              expansionPolicy(expansionModule),
+              learningPolicy(learningModule),
+              decisionPolicy(decisionModule),
+              lookahead(lookahead) {
+        if (expansionModule == "a-star") {
+            expansionAlgo = new AStar<Domain, Node, TopLevelAction>(
+                    domain, lookahead, "f");
+        } else if (expansionModule == "f-hat") {
+            expansionAlgo = new AStar<Domain, Node, TopLevelAction>(
+                    domain, lookahead, "fhat");
+        } else if (expansionModule == "dfs") {
+            expansionAlgo = new DepthFirst<Domain, Node, TopLevelAction>(
+                    domain, lookahead);
+        } else if (expansionModule == "bfs") {
+            expansionAlgo = new BreadthFirst<Domain, Node, TopLevelAction>(
+                    domain, lookahead);
+        } else if (expansionModule == "risk") {
+            expansionAlgo = new Risk<Domain, Node, TopLevelAction>(
+                    domain, lookahead, 1);
+        }
 
-		if (learningModule == "none")
-		{
-			learningAlgo = new Ignorance<Domain, Node, TopLevelAction>;
-		}
-		else if (learningModule == "learn")
-		{
-			learningAlgo = new Dijkstra<Domain, Node, TopLevelAction>(domain);
-		}
+        if (learningModule == "none") {
+            learningAlgo = new Ignorance<Domain, Node, TopLevelAction>;
+        } else if (learningModule == "learn") {
+            learningAlgo = new Dijkstra<Domain, Node, TopLevelAction>(domain);
+        }
 
-		if (decisionModule == "minimin")
-		{
-			decisionAlgo = new ScalarBackup<Domain, Node, TopLevelAction>("minimin");
-		}
-		else if (decisionModule == "bellman")
-		{
-			decisionAlgo = new ScalarBackup<Domain, Node, TopLevelAction>("bellman");
-		}
-		else if (decisionModule == "k-best")
-		{
-			decisionAlgo = new KBestBackup<Domain, Node, TopLevelAction>(domain, k, belief, lookahead);
-		}
-	}
+        if (decisionModule == "minimin") {
+            decisionAlgo =
+                    new ScalarBackup<Domain, Node, TopLevelAction>("minimin");
+        } else if (decisionModule == "bellman") {
+            decisionAlgo =
+                    new ScalarBackup<Domain, Node, TopLevelAction>("bellman");
+        } else if (decisionModule == "k-best") {
+            decisionAlgo = new KBestBackup<Domain, Node, TopLevelAction>(
+                    domain, k, belief, lookahead);
+        }
+    }
 
-	~RealTimeSearch()
-	{
-		clean();
-	}
+    ~RealTimeSearch() { clean(); }
 
-	ResultContainer search()
-	{
-		domain.initialize(expansionPolicy, lookahead);
+    ResultContainer search() {
+        domain.initialize(expansionPolicy, lookahead);
 
-		ResultContainer res;
+        ResultContainer res;
 
-		// Get the start node
-		Node* start = new Node(0, domain.heuristic(domain.getStartState()), domain.distance(domain.getStartState()),
-			domain.distanceErr(domain.getStartState()), domain.epsilonHGlobal(), domain.epsilonDGlobal(), 
-			domain.getStartState(), NULL, -1);
+        // Get the start node
+        Node* start = new Node(0,
+                domain.heuristic(domain.getStartState()),
+                domain.distance(domain.getStartState()),
+                domain.distanceErr(domain.getStartState()),
+                domain.epsilonHGlobal(),
+                domain.epsilonDGlobal(),
+                domain.getStartState(),
+                NULL,
+                -1);
 
-		while (1)
-		{
-			// Check if a goal has been reached
-			if (domain.isGoal(start->getState()))
-			{
-				// Calculate path cost and return solution
-				calculateCost(start, res);
+        clock_t startTime = clock();
 
-				return res;
-			}
-			
-			restartLists(start);
+        while (1) {
+            // Check if a goal has been reached
+            if (domain.isGoal(start->getState())) {
+                // Calculate path cost and return solution
+                calculateCost(start, res);
 
-			// Exploration Phase
-			domain.updateEpsilons();
+                res.totalCpuTime = double(clock() - startTime) / CLOCKS_PER_SEC;
 
-			// First, generate the top-level actions
-			generateTopLevelActions(start, res);
+                return res;
+            }
 
-			// Expand some nodes until expnasion limit
-			expansionAlgo->expand(open, closed, tlas, duplicateDetection, res);
+            restartLists(start);
 
-			// Check if this is a dead end
-			if (open.empty())
-			{
-				break;
-			}
+            // Exploration Phase
+            domain.updateEpsilons();
 
-			//  Learning Phase
-			learningAlgo->learn(open, closed);
+            // First, generate the top-level actions
+            generateTopLevelActions(start, res);
 
-			// Decision-making Phase
-			start = decisionAlgo->backup(open, tlas, start);
-		}
+            // Expand some nodes until expnasion limit
+            expansionAlgo->expand(open, closed, tlas, duplicateDetection, res);
 
-		return res;
+            // Check if this is a dead end
+            if (open.empty()) {
+                break;
+            }
+
+            //  Learning Phase
+            learningAlgo->learn(open, closed);
+
+            // Decision-making Phase
+            start = decisionAlgo->backup(open, tlas, start);
+        }
+
+        return res;
 	}
 
 	ResultContainer lastIncrementalDecision()

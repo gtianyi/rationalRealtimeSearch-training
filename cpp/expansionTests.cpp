@@ -78,7 +78,9 @@ int main(int argc, char** argv)
 	string result = "{ \"BFS\": " + to_string(bfsRes.solutionCost) + ", \"A*\": " +
 		to_string(astarRes.solutionCost) + ", \"F-Hat\": " + to_string(fhatRes.solutionCost) +
 		", \"Risk\": " + to_string(riskRes.solutionCost) + ", \"LSS-LRTA*\": " + to_string(lsslrtaRes.solutionCost) +
-		", \"Lookahead\": " + to_string(lookaheadDepth) + " }";
+		", \"Lookahead\": " + to_string(lookaheadDepth) + ", \"BFS-CPUTime\": " + to_string(bfsRes.totalCpuTime) + ", \"A*-CPUTime\": " +
+		to_string(astarRes.totalCpuTime) + ", \"F-Hat-CPUTime\": " + to_string(fhatRes.totalCpuTime) +
+		", \"Risk-CPUTime\": " + to_string(riskRes.totalCpuTime) + ", \"LSS-LRTA*-CPUTime\": " + to_string(lsslrtaRes.totalCpuTime)  +" }";
 
 	if (argc < 4)
 	{
