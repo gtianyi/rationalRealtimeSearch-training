@@ -261,7 +261,7 @@ private:
 				tla.open.pop();
 
 				// Make this node's PDF a discrete distribution...
-				best->distribution = DiscreteDistribution(100, best->getFValue(), best->getFHatValue(),
+				best->distribution = DiscreteDistribution(5, best->getFValue(), best->getFHatValue(),
 					best->getDValue(), best->getFHatValue() - best->getFValue());
 
 				tla.kBestNodes.push_back(best);
