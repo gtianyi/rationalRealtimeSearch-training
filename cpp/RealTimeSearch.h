@@ -240,6 +240,7 @@ public:
                 -1);
 
         clock_t startTime = clock();
+        int iteration = 0;
 
         while (1) {
             // Check if a goal has been reached
@@ -247,7 +248,8 @@ public:
                 // Calculate path cost and return solution
                 calculateCost(start, res);
 
-                res.totalCpuTime = double(clock() - startTime) / CLOCKS_PER_SEC;
+                res.totalCpuTime = double(clock() - startTime) /
+                        CLOCKS_PER_SEC / iteration;
 
                 return res;
             }
@@ -273,6 +275,8 @@ public:
 
             // Decision-making Phase
             start = decisionAlgo->backup(open, tlas, start);
+
+            iteration++;
         }
 
         return res;
@@ -429,7 +433,7 @@ private:
 			TopLevelAction tla;
 			tla.topLevelNode = childNode;
 
-			childNode->distribution = DiscreteDistribution(100, childNode->getFValue(), childNode->getFHatValue(), 
+			childNode->distribution = DiscreteDistribution(5, childNode->getFValue(), childNode->getFHatValue(), 
 				childNode->getDValue(), childNode->getFHatValue() - childNode->getFValue());
 
 			tla.expectedMinimumPathCost = childNode->distribution.expectedCost();
