@@ -16,113 +16,124 @@ class Risk : public ExpansionAlgorithm<Domain, Node, TopLevelAction>
 	typedef typename Domain::HashState Hash;
 
 public:
-	Risk(Domain& domain, double lookahead, int expansionAllocation)
-		: domain(domain), lookahead(lookahead), expansionsPerIteration(expansionAllocation)
-	{}
+    Risk(Domain& domain, double lookahead, int expansionAllocation)
+            : domain(domain),
+              lookahead(lookahead),
+              expansionsPerIteration(expansionAllocation) {}
 
-	void incrementLookahead()
-	{
-		lookahead++;
-	}
+    void incrementLookahead() { lookahead++; }
 
-	void expand(PriorityQueue<Node*>& open, unordered_map<State, Node*, Hash>& closed, vector<TopLevelAction>& tlas,
-		std::function<bool(Node*, unordered_map<State, Node*, Hash>&, PriorityQueue<Node*>&, vector<TopLevelAction>&)> duplicateDetection,
-		ResultContainer& res)
-	{
-		// This starts at 1, because we had to expand start to get the top level actions
-		int expansions = 1;
+    void expand(PriorityQueue<Node*>& open,
+            unordered_map<State, Node*, Hash>& closed,
+            vector<TopLevelAction>& tlas,
+            std::function<bool(Node*,
+                    unordered_map<State, Node*, Hash>&,
+                    PriorityQueue<Node*>&,
+                    vector<TopLevelAction>&)> duplicateDetection,
+            ResultContainer& res) {
+        // This starts at 1, because we had to expand start to get the top
+        // level actions
+        int expansions = 1;
 
-		while (expansions < lookahead && !open.empty())
-		{
-			// At the beginning of each expansion we are going to update our beliefs at every TLA.
-			// Why? Because this could be the first expansion in the phase.
-			// If it isn't? Wouldn't we only need to update the TLA of the node we expanded last iteration?
-			// In a tree, yes. But in a graph, this could have placed nodes onto the open lists of other TLAs.
-			// Therefore, the beliefs of all TLAs should be updated before every expansion.
-			kBestDecision(tlas);
+        while (expansions < lookahead && !open.empty()) {
+            // At the beginning of each expansion we are going to update our
+            // beliefs at every TLA.
+            // Why? Because this could be the first expansion in the phase.
+            // If it isn't? Wouldn't we only need to update the TLA of the
+            // node we expanded last iteration?
+            // In a tree, yes. But in a graph, this could have placed nodes
+            // onto the open lists of other TLAs.
+            // Therefore, the beliefs of all TLAs should be updated before
+            // every expansion.
+            kBestDecision(tlas);
 
-			// Simulate expansion of best node under each TLA
-			int chosenTLAIndex = simulateExpansion(tlas);
+            // Simulate expansion of best node under each TLA
+            int chosenTLAIndex = simulateExpansion(tlas);
 
-			// Expand under the TLA which holds the lowest risk
-			Node* chosenNode = tlas[chosenTLAIndex].open.top();
+            // Expand under the TLA which holds the lowest risk
+            Node* chosenNode = tlas[chosenTLAIndex].open.top();
 
-			// Add this node to the expansion delay window
-			domain.pushDelayWindow(chosenNode->getDelayCntr());
+            // Add this node to the expansion delay window
+            domain.pushDelayWindow(chosenNode->getDelayCntr());
 
-			// Check if current node is goal. If it is, then the expansion phase is over, time to move.
-			if (domain.isGoal(chosenNode->getState()))
-			{
-				return;
-			}
+            // Check if current node is goal. If it is, then the expansion
+            // phase is over, time to move.
+            if (domain.isGoal(chosenNode->getState())) {
+                return;
+            }
 
-			// Remove the chosen node from open
-			tlas[chosenTLAIndex].open.pop();
-			open.remove(chosenNode);
-			chosenNode->close();
+            // Remove the chosen node from open
+            tlas[chosenTLAIndex].open.pop();
+            open.remove(chosenNode);
+            chosenNode->close();
 
-			// Book keeping for expansion count
-			res.nodesExpanded++;
-			expansions++;
+            // Book keeping for expansion count
+            res.nodesExpanded++;
+            expansions++;
 
-			// Increment the delay counts of every other node on open...
-			for (Node* n : open)
-			{
-				n->incDelayCntr();
-			}
+            // Increment the delay counts of every other node on open...
+            for (Node* n : open) {
+                n->incDelayCntr();
+            }
 
-			// Generate the successors of the chosen node
-			vector<State> children = domain.successors(chosenNode->getState());
+            // Generate the successors of the chosen node
+            vector<State> children = domain.successors(chosenNode->getState());
 
-			// Book keeping for number of nodes generated
-			res.nodesGenerated += children.size();
+            // Book keeping for number of nodes generated
+            res.nodesGenerated += children.size();
 
-			State bestChild;
-			Cost bestF = numeric_limits<double>::infinity();
+            State bestChild;
+            Cost bestF = numeric_limits<double>::infinity();
 
-			// Iterate over the successor states
-			for (State child : children)
-			{
-				// Create a node for this state
-				Node* childNode = new Node(chosenNode->getGValue() + domain.getEdgeCost(child),
-					domain.heuristic(child), domain.distance(child), domain.distanceErr(child), 
-					domain.epsilonHGlobal(), domain.epsilonDGlobal(), child, chosenNode, chosenNode->getOwningTLA());
+            // Iterate over the successor states
+            for (State child : children) {
+                // Create a node for this state
+                Node* childNode = new Node(
+                        chosenNode->getGValue() + domain.getEdgeCost(child),
+                        domain.heuristic(child),
+                        domain.distance(child),
+                        domain.distanceErr(child),
+                        domain.epsilonHGlobal(),
+                        domain.epsilonDGlobal(),
+                        child,
+                        chosenNode,
+                        chosenNode->getOwningTLA());
 
-				bool dup = duplicateDetection(childNode, closed, open, tlas);
+                bool dup = duplicateDetection(childNode, closed, open, tlas);
 
-				if (!dup && childNode->getFValue() < bestF)
-				{
-					bestF = childNode->getFValue();
-					bestChild = child;
-				}
+                if (!dup && childNode->getFValue() < bestF) {
+                    bestF = childNode->getFValue();
+                    bestChild = child;
+                }
 
-				// Duplicate detection performed
-				if (!dup)
-				{
-					// If this state hasn't yet been reached, add this node open 
-					open.push(childNode);
-					closed[child] = childNode;
+                // Duplicate detection performed
+                if (!dup) {
+                    // If this state hasn't yet been reached, add this node
+                    // open
+                    open.push(childNode);
+                    closed[child] = childNode;
 
-					// Add to open of generating TLA
-					tlas[chosenTLAIndex].open.push(childNode);
-				}
-				else
-				{
-					// If this state has already been visited, delete the node, one already exists with minimal g-value
-					delete childNode;
-				}
-			}
+                    // Add to open of generating TLA
+                    tlas[chosenTLAIndex].open.push(childNode);
+                } else {
+                    // If this state has already been visited, delete the
+                    // node, one already exists with minimal g-value
+                    delete childNode;
+                }
+            }
 
-			// Learn the one-step error
-			if (bestF != numeric_limits<double>::infinity())
-			{
-				Cost epsD = (1 + domain.distance(bestChild)) - chosenNode->getDValue();
-				Cost epsH = (domain.getEdgeCost(bestChild) + domain.heuristic(bestChild)) - chosenNode->getHValue();
+            // Learn the one-step error
+            if (bestF != numeric_limits<double>::infinity()) {
+                Cost epsD = (1 + domain.distance(bestChild)) -
+                        chosenNode->getDValue();
+                Cost epsH = (domain.getEdgeCost(bestChild) +
+                                    domain.heuristic(bestChild)) -
+                        chosenNode->getHValue();
 
-				domain.pushEpsilonHGlobal(epsH);
-				domain.pushEpsilonDGlobal(epsD);
-			}
-		}
+                domain.pushEpsilonHGlobal(epsH);
+                domain.pushEpsilonDGlobal(epsD);
+            }
+        }
 	}
 
 private:
