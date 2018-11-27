@@ -42,7 +42,7 @@ for dir in resultDirs:
                 algorithm.append(algo)
                 solutionCost.append(resultData[algo])
                 differenceCost.append(resultData[algo] - resultData["A*"])
-                cpuTimePerLookahead.append(resultData[algo+"-CPUTime"] / resultData["Lookahead"])
+                cpuTimePerLookahead.append(resultData[algo+"-CPUTime"])
 
 categoryPercent = 20
 category = []
