@@ -20,6 +20,8 @@
 
 #include <time.h>
 
+test
+
 using namespace std;
 
 template <class Domain>
