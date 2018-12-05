@@ -240,6 +240,7 @@ public:
                 -1);
 
         clock_t startTime = clock();
+        int iterationCounter = 1;
 
         while (1) {
             // Check if a goal has been reached
@@ -247,7 +248,8 @@ public:
                 // Calculate path cost and return solution
                 calculateCost(start, res);
 
-                res.totalCpuTime = double(clock() - startTime) / CLOCKS_PER_SEC;
+                res.totalCpuTime = double(clock() - startTime) /
+                        CLOCKS_PER_SEC / iterationCounter;
 
                 return res;
             }
@@ -266,7 +268,8 @@ public:
             // Check if this is a dead end 
 			// or reach the lookahead limit
             if (open.empty()) {
-                res.totalCpuTime = double(clock() - startTime) / CLOCKS_PER_SEC;
+                res.totalCpuTime = double(clock() - startTime) /
+                        CLOCKS_PER_SEC / iterationCounter;
                 break;
             }
 
@@ -275,6 +278,8 @@ public:
 
             // Decision-making Phase
             start = decisionAlgo->backup(open, tlas, start);
+
+            iterationCounter++;
         }
 
         return res;
