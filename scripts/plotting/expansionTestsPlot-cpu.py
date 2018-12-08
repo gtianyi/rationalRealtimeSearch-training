@@ -68,8 +68,8 @@ algorithmsExpA = ["A*", "F-Hat"]
 
 algorithmsExpB = ["A*", "F-Hat", "BFS"]
 
-#algorithmsExpC = ["A*", "F-Hat", "BFS", "Risk", "LSS-LRTA*"]
-algorithmsExpC = ["A*", "F-Hat", "BFS", "Risk"]
+algorithmsExpC = ["A*", "F-Hat", "BFS", "Risk", "LSS-LRTA*"]
+#algorithmsExpC = ["A*", "F-Hat", "BFS", "Risk"]
 
 print("building plots...")
 
