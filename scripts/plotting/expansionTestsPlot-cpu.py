@@ -8,9 +8,9 @@ from os import listdir
 
 def makeDifferencePlot(width, height, xAxis, yAxis, dataframe, dodge, hue, orderList, hueOrderList, xLabel, yLabel, outputName):
     sns.set(rc={'figure.figsize': (width, height), 'font.size': 26, 'text.color': 'black'})
-    ax = sns.pointplot(x=xAxis, y=yAxis, hue=hue,  order=orderList ,hue_order=hueOrderList, data=dataframe, ci=95, join=False, dodge=dodge, palette="Set2")
-    ax.tick_params(colors='black', labelsize=12)
-    ax.xaxis.set_major_locator(ticker.MultipleLocator(5))
+    ax = sns.pointplot(x=xAxis, y=yAxis, hue=hue, hue_order=hueOrderList, data=dataframe, ci=95, join=False, dodge=dodge, palette="Set2")
+    ax.tick_params(colors='black', labelsize=12, rotation=90)
+    # ax.xaxis.set_major_locator(ticker.MultipleLocator(5))
     plt.ylabel(yLabel, color='black', fontsize=18)
     plt.xlabel(xLabel, color='black', fontsize=18)
     plt.savefig(outputName, bbox_inches="tight", pad_inches=0)
@@ -18,6 +18,35 @@ def makeDifferencePlot(width, height, xAxis, yAxis, dataframe, dodge, hue, order
     plt.clf()
     plt.cla()
     return
+
+def makeAvgLmPlot(width, height, xAxis, yAxis, dataframe, style, hue, orderList, hueOrderList, xLabel, yLabel, outputName):
+    sns.set(rc={'figure.figsize': (width, height), 'font.size': 26, 'text.color': 'black'})
+    ax = sns.scatterplot(x=xAxis, y=yAxis, hue=hue, style=style, hue_order=hueOrderList, data=dataframe, ci=95, palette="Set2")
+    #ax.tick_params(colors='black', labelsize=12, rotation=90)
+    # ax.xaxis.set_major_locator(ticker.MultipleLocator(5))
+    plt.ylabel(yLabel, color='black', fontsize=18)
+    plt.xlabel(xLabel, color='black', fontsize=18)
+    plt.savefig(outputName, bbox_inches="tight", pad_inches=0)
+    plt.close()
+    plt.clf()
+    plt.cla()
+    return
+
+def makeLmPlot(width, height, xAxis, yAxis, dataframe, style, hue, orderList, hueOrderList, xLabel, yLabel, outputName):
+    sns.set(rc={'figure.figsize': (width, height), 'font.size': 26, 'text.color': 'black'})
+    ax = sns.scatterplot(x=xAxis, y=yAxis, hue=hue, style=style, hue_order=hueOrderList, data=dataframe, ci=95, palette="Set2")
+    #ax.tick_params(colors='black', labelsize=12, rotation=90)
+    # ax.xaxis.set_major_locator(ticker.MultipleLocator(5))
+    plt.ylabel(yLabel, color='black', fontsize=18)
+    plt.xlabel(xLabel, color='black', fontsize=18)
+    plt.savefig(outputName, bbox_inches="tight", pad_inches=0)
+    plt.close()
+    plt.clf()
+    plt.cla()
+    return
+
+
+
 
 # Hard coded result directories
 resultDirs = {"4x4"}
@@ -56,6 +85,7 @@ df = pd.DataFrame({
 dfDiff = pd.DataFrame({
     "instance":instance,
     "Node Expansion Limit":lookAheadVals,
+    "Solution Cost":solutionCost,
     "Algorithm Cost - A* Cost":differenceCost,
     "Algorithm":algorithm,
     "CPU Time Per Lookahead":cpuTimePerLookahead
@@ -78,4 +108,6 @@ for instance in resultDirs:
     instanceDataExp = df.loc[df["instance"] == instance]
     instanceDataDiffExp = dfDiff.loc[dfDiff["instance"] == instance]
 
-    makeDifferencePlot(11, 8, "avg cpu time per action", "Algorithm Cost - A* Cost", instanceDataDiffExp, 0.35, "Algorithm",None , algorithmsExpC, "avg cpu time per action", "Algorithm Cost - A* Cost", "../../../plots/Experiment2CDifference" + instance + ".pdf")
+    #makeDifferencePlot(11, 8, "avg cpu time per action", "Solution Cost", instanceDataDiffExp, 0.35, "Algorithm",None , algorithmsExpC, "avg cpu time per action", "Solution Cost", "../../../plots/Experiment2CDifference" + instance + ".pdf")
+    makeAvgLmPlot(11, 8, "avg cpu time per action", "Solution Cost", instanceDataDiffExp, "Node Expansion Limit", "Algorithm",None , algorithmsExpC, "avg cpu time per action", "Solution Cost", "../../../plots/Experiment2CLmAVG" + instance + ".pdf")
+    makeLmPlot(11, 8, "CPU Time Per Lookahead", "Solution Cost", instanceDataDiffExp, "Node Expansion Limit", "Algorithm",None , algorithmsExpC, "cpu time per action", "Solution Cost", "../../../plots/Experiment2CLm" + instance + ".pdf")
