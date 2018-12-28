@@ -51,7 +51,7 @@ def makeLmPlot(width, height, xAxis, yAxis, dataframe, style, hue, orderList, hu
 
 
 # Hard coded result directories
-resultDirs = {"4x4"}
+resultDirs = {"4x4-b500"}
 limits = [3, 10, 30, 100, 300, 1000]
 algorithms = ["A*", "F-Hat", "BFS", "Risk", "LSS-LRTA*"]
 
@@ -110,6 +110,6 @@ for instance in resultDirs:
     instanceDataExp = df.loc[df["instance"] == instance]
     instanceDataDiffExp = dfDiff.loc[dfDiff["instance"] == instance]
 
-    #makeDifferencePlot(11, 8, "avg cpu time per action", "Solution Cost", instanceDataDiffExp, 0.35, "Algorithm",None , algorithmsExpC, "avg cpu time per action", "Solution Cost", "../../../plots/Experiment2CDifference" + instance + ".pdf")
+    makeDifferencePlot(11, 8, "Node Expansion Limit", "Algorithm Cost - A* Cost", instanceDataDiffExp, 0.35, "Algorithm",limits , algorithmsExpC, "Node Expansion Limit", "Algorithm Cost - A* Cost", "../../../plots/Experiment2CDifferenceNew" + instance + ".pdf")
     makeAvgLmPlot(11, 8, "avg cpu time per action", "Solution Cost", instanceDataDiffExp, "Node Expansion Limit", "Algorithm",None , algorithmsExpC, "avg cpu time per action", "Solution Cost", "../../../plots/Experiment2CLmAVG" + instance + ".pdf")
     makeLmPlot(11, 8, "CPU Time Per Lookahead", "Solution Cost", instanceDataDiffExp, "Node Expansion Limit", "Algorithm",None , algorithmsExpC, "cpu time per action", "Solution Cost", "../../../plots/Experiment2CLm" + instance + ".pdf")

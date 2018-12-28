@@ -49,13 +49,13 @@ def makeLmPlot(width, height, xAxis, yAxis, dataframe, style, hue, orderList, hu
 
 # Hard coded result directories
 #resultDirs = {"4x4-b5","4x4-b10","4x4-b50","4x4-b100","4x4-b500"}
-resultDirs = {"4x4-b5","4x4-b10"}
+resultDirs = {"4x4_old-b5","4x4_old-b10","4x4_old-b50","4x4_old-b100"}
 limits = [3, 10, 30, 100, 300, 1000]
 algorithms = ["Risk"]
 
 instance = []
 lookAheadVals = []
-histro = []
+algorithm = []
 solutionCost = []
 differenceCost = []
 cpuTimePerLookahead = []
@@ -102,7 +102,7 @@ algorithmsExpC = ["A*", "F-Hat", "BFS", "Risk", "LSS-LRTA*"]
 #algorithmsExpC = ["A*", "F-Hat", "BFS", "Risk"]
 
 #instanceExp = ["4x4-b5","4x4-b10","4x4-b50","4x4-b100","4x4-b500"]
-instanceExp = ["4x4-b5","4x4-b10"]
+instanceExp = ["4x4_old-b5","4x4_old-b10","4x4_old-b50","4x4_old-b100"]
 
 print("building plots...")
 
