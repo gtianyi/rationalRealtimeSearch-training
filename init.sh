@@ -1,5 +1,5 @@
 mkdir ../realtime-nancy
-cd ../reatime-nancy
+cd ../realtime-nancy
 mv ../nancybackup .
 mkdir build_release
 mkdir build_debug
