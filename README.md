@@ -1,12 +1,19 @@
 # INIT Scripts. 
 ## RUN inside nancybackup dir
 mkdir ../realtime-nancy
+
 cd ../realtime-nancy
+
 mv ../nancybackup .
+
 mkdir build_release
+
 mkdir build_debug
+
 mkdir plots
+
 mkdir results
+
 mkdir worlds
 
 # TO BUILD
@@ -15,7 +22,7 @@ cd scripts/
 
 ./make.sh
 
-# TO GET TOY PROBLEM
+# TO GET TOY PROBLEMS
 
 I would suggest clone Andrew's git repo to your local and move what you need to your relevent local dir
 
