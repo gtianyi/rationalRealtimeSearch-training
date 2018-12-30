@@ -7,18 +7,22 @@ using namespace std;
 
 int main(int argc, char** argv) {
     if (argc > 3) {
-        cout << "Wrong number of arguments: ./distributionPractice.sh <weight> "
-                "<optional: output file> < <domain file>"
+        cout << "Wrong number of arguments: ./distributionPractice.sh <puzzle type> <weight> <optional: output file> < <domain file>"
              << endl;
-        cout << "Domains is SlidingPuzzle, fixed" << endl;
+        cout << "puzzle type: uniform, invers, heavy, sqrt" << endl;
         exit(1);
     }
 
-    float weight = stof(argv[1]);
+	string puzzleType = argv[1];
 
-    SlidingTilePuzzle world = SlidingTilePuzzle(cin);
+    float weight = stof(argv[2]);
 
-    WAStarSearch wastarsearch(world, weight);
+    SlidingTilePuzzle* world;
+			
+	if(puzzleType == "uniform")
+		world = new SlidingTilePuzzle(cin);
+
+    WAStarSearch wastarsearch(*world, weight);
 
     WAStarResult wastarRes = wastarsearch.search();
 
@@ -36,4 +40,6 @@ int main(int argc, char** argv) {
         out << result;
         out.close();
     }
+
+	delete world;
 }

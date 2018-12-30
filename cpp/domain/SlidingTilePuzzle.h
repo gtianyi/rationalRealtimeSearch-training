@@ -489,6 +489,7 @@ public:
 		return startState;
 	}
 
+	//heavy, inverse, make a extansion class, and overwrite this method
 	Cost getEdgeCost(State state) {
 		return 1;
 	}
