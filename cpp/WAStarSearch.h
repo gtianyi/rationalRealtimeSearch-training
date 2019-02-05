@@ -21,23 +21,27 @@ public:
     struct Node {
         Cost g;
         Cost h;
+		Cost d;
         Node* parent;
         State stateRep;
+		bool open;
 
     public:
         Cost getGValue() const { return g; }
         Cost getHValue() const { return h; }
         Cost getFValue() const { return g + h; }
+        Cost getDValue() const { return d; }
         State getState() const { return stateRep; }
         Node* getParent() const { return parent; }
 
         void setHValue(Cost val) { h = val; }
         void setGValue(Cost val) { g = val; }
+        void setDValue(Cost val) { d = val; }
         void setState(State s) { stateRep = s; }
         void setParent(Node* p) { parent = p; }
 
         Node(Cost g, Cost h, State state, Node* parent)
-                : g(g), h(h), stateRep(state), parent(parent) {}
+                : g(g), h(h), stateRep(state), parent(parent), open(true) {}
 
         friend std::ostream& operator<<(std::ostream& stream,
                 const Node& node) {
@@ -51,6 +55,9 @@ public:
             stream << endl;
             return stream;
         }
+
+        bool onOpen() { return open; }
+        void close() { open = false; }
 
         static bool compareNodesF(const Node* n1, const Node* n2) {
             // Tie break on g-value
@@ -107,11 +114,7 @@ private:
                     it->second->setParent(node->getParent());
                     it->second->setHValue(node->getHValue());
                     it->second->setDValue(node->getDValue());
-                    it->second->setDErrValue(node->getDErrValue());
-                    it->second->setEpsilonH(node->getEpsilonH());
-                    it->second->setEpsilonD(node->getEpsilonD());
                     it->second->setState(node->getState());
-                    it->second->setOwningTLA(node->getOwningTLA());
                     return true;
                 }
             } else {

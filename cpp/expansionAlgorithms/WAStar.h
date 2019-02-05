@@ -62,13 +62,9 @@ public:
 	}
 
 private:
-	void sortOpen(PriorityQueue<Node*>& open)
-	{
-		if (sortingFunction == "f")
-			open.swapComparator(Node::compareNodesF);
-		else if (sortingFunction == "fhat")
-			open.swapComparator(Node::compareNodesFHat);
-	}
+    void sortOpen(PriorityQueue<Node*>& open) {
+        open.swapComparator(Node::compareNodesF);
+    }
 
 protected:
 	Domain & domain;
