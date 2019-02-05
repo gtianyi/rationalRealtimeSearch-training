@@ -24,22 +24,23 @@ int main(int argc, char** argv) {
 
     WAStarSearch<SlidingTilePuzzle> wastarsearch(world, weight);
 
-    WAStarResult wastarRes = wastarsearch.search();
+    WAStarResultContainer wastarRes = wastarsearch.search();
 
-    PracticeResults practiceRes = wastarsearch.practice(wastarRes);
+    //PracticeResults practiceRes = wastarsearch.practice(wastarRes);
 
-    JSONObject json = new JSONObject(practiceRes);
+	//JSONObject json = new JSONObject(wastarRes);
 
-    string result = json.toString(2);
+	//string result = json.toString(2);
 
     if (argc < 2) {
-        cout << result << endl;
+        cout << wastarRes.nodesExpanded << " " << wastarRes.solutionFound
+             << endl;
     } else {
         ofstream out(argv[2]);
 
-        out << result;
+        out << wastarRes.nodesExpanded << " " << wastarRes.solutionFound;
+
         out.close();
     }
 
-	delete world;
 }

@@ -4,7 +4,7 @@
 #include <functional>
 #include <unordered_map>
 #include "utility/PriorityQueue.h"
-#include "utility/WAStarResult.h"
+#include "utility/WAStarResultContainer.h"
 #include "expansionAlgorithms/WAStar.h"
 #include "domain/SlidingTilePuzzle.h"
 
@@ -72,8 +72,8 @@ public:
 
     ~WAStarSearch() { clean(); }
 
-    WAStarResult search() {
-        WAStarResult res;
+    WAStarResultContainer search() {
+        WAStarResultContainer res;
 
         // Get the start node
         Node* cur = new Node(0,
@@ -141,7 +141,7 @@ private:
         delete wastar;
     }
 
-    void calculateCost(Node* solution, ResultContainer& res) {
+    void calculateCost(Node* solution, WAStarResultContainer& res) {
         res.solutionFound = true;
         res.solutionCost = solution->getFValue();
     }
