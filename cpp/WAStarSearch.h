@@ -81,6 +81,8 @@ public:
                 domain.getStartState(),
                 NULL);
 
+		open.push(cur);
+
         // Expand some nodes
         wastar->expand(open, closed, duplicateDetection, res);
 
