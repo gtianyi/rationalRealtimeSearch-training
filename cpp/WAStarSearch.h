@@ -10,6 +10,7 @@
 
 using namespace std;
 
+template<class Domain>
 class WAStarSearch
 {
 public:
@@ -35,14 +36,8 @@ public:
         void setState(State s) { stateRep = s; }
         void setParent(Node* p) { parent = p; }
 
-        Node(Cost g,
-                Cost h,
-                State state,
-                Node* parent)
-                : g(g),
-                  h(h),
-                  stateRep(state),
-                  parent(parent) {} 
+        Node(Cost g, Cost h, State state, Node* parent)
+                : g(g), h(h), stateRep(state), parent(parent) {}
 
         friend std::ostream& operator<<(std::ostream& stream,
                 const Node& node) {
@@ -87,7 +82,7 @@ public:
                 NULL);
 
         // Expand some nodes
-        expansionAlgo->expand(open, closed, duplicateDetection, res);
+        wastar->expand(open, closed, duplicateDetection, res);
 
         return res;
 	}
@@ -106,7 +101,6 @@ private:
             if (it->second->onOpen()) {
                 // This node is on OPEN, keep the better g-value
                 if (node->getGValue() < it->second->getGValue()) {
-                    tlaList[it->second->getOwningTLA()].open.remove(it->second);
                     it->second->setGValue(node->getGValue());
                     it->second->setParent(node->getParent());
                     it->second->setHValue(node->getHValue());
@@ -116,37 +110,20 @@ private:
                     it->second->setEpsilonD(node->getEpsilonD());
                     it->second->setState(node->getState());
                     it->second->setOwningTLA(node->getOwningTLA());
-                    tlaList[node->getOwningTLA()].open.push(it->second);
+                    return true;
                 }
             } else {
                 // This node is on CLOSED, compare the f-values. If this new
-                // f-value is better, reset g, h, and d. Then reopen the node.
-                if (node->getFValue() < it->second->getFValue()) {
-                    it->second->setGValue(node->getGValue());
-                    it->second->setParent(node->getParent());
-                    it->second->setHValue(node->getHValue());
-                    it->second->setDValue(node->getDValue());
-                    it->second->setDErrValue(node->getDErrValue());
-                    it->second->setEpsilonH(node->getEpsilonH());
-                    it->second->setEpsilonD(node->getEpsilonD());
-                    it->second->setState(node->getState());
-                    it->second->setOwningTLA(node->getOwningTLA());
-                    tlaList[node->getOwningTLA()].open.push(it->second);
-                    it->second->reOpen();
-                    open.push(it->second);
-                }
+                // f-value is better, reset g, h, and d. 
+				// We don't reopen the node for weighted A*.
             }
 
-            return true;
         }
 
         return false;
     }
 
     void clean() {
-        // clear the TLA list
-        tlas.clear();
-
         // Empty OPEN and CLOSED
         open.clear();
 
@@ -159,9 +136,7 @@ private:
 
         closed.clear();
 
-        delete expansionAlgo;
-        delete learningAlgo;
-        delete decisionAlgo;
+        delete wastar;
     }
 
     void calculateCost(Node* solution, ResultContainer& res) {
@@ -171,7 +146,7 @@ private:
 
 protected:
     SlidingTilePuzzle& domain;
-    WAStar* wastar;
+    WAStar<Domain, Node>* wastar;
     PriorityQueue<Node*> open;
     unordered_map<State, Node*, Hash> closed;
 
