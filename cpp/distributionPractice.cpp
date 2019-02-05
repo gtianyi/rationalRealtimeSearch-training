@@ -6,7 +6,7 @@
 using namespace std;
 
 int main(int argc, char** argv) {
-    if (argc > 3 || argc < 2) {
+    if (argc > 4 || argc < 3) {
         cout << "Wrong number of arguments: ./distributionPractice <puzzle type> <weight> <optional: output file> < <domain file>"
              << endl;
         cout << "puzzle type: uniform, invers, heavy, sqrt" << endl;
@@ -32,11 +32,11 @@ int main(int argc, char** argv) {
 
 	//string result = json.toString(2);
 
-    if (argc < 2) {
+    if (argc < 4) {
         cout << wastarRes.nodesExpanded << " " << wastarRes.solutionFound
              << endl;
     } else {
-        ofstream out(argv[2]);
+        ofstream out(argv[3]);
 
         out << wastarRes.nodesExpanded << " " << wastarRes.solutionFound;
 

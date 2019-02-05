@@ -93,6 +93,8 @@ public:
         // Expand some nodes
         wastar->expand(open, closed, duplicateDetection, res);
 
+		calculateCost(cur,res);
+
         return res;
 	}
 
