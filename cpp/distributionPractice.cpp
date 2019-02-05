@@ -6,7 +6,7 @@
 using namespace std;
 
 int main(int argc, char** argv) {
-    if (argc > 3) {
+    if (argc > 3 || argc < 2) {
         cout << "Wrong number of arguments: ./distributionPractice <puzzle type> <weight> <optional: output file> < <domain file>"
              << endl;
         cout << "puzzle type: uniform, invers, heavy, sqrt" << endl;
