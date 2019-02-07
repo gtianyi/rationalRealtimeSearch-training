@@ -16,7 +16,7 @@ public:
     WAStar(Domain& domain, float weight, string sorting)
             : domain(domain), weight(weight), sortingFunction(sorting) {}
 
-    void expand(PriorityQueue<Node*>& open,
+    double expand(PriorityQueue<Node*>& open,
             unordered_map<State, Node*, Hash>& closed,
             std::function<bool(Node*,
                     unordered_map<State, Node*, Hash>&,
@@ -31,7 +31,7 @@ public:
 
             // Check if current node is goal
             if (domain.isGoal(cur->getState())) {
-                return;
+                return cur->getFValue();
             }
 
             res.nodesExpanded++;

@@ -33,12 +33,15 @@ int main(int argc, char** argv) {
 	//string result = json.toString(2);
 
     if (argc < 4) {
-        cout << wastarRes.nodesExpanded << " " << wastarRes.solutionFound
-             << endl;
+        cout << wastarRes.nodesExpanded << " " << wastarRes.solutionFound << " "
+             << wastarRes.solutionCost << endl;
     } else {
         ofstream out(argv[3]);
 
-        out << wastarRes.nodesExpanded << " " << wastarRes.solutionFound;
+        out << wastarRes.nodesExpanded << " " << wastarRes.solutionFound << " "
+            << wastarRes.solutionCost << endl;
+
+		wastarsearch.dumpClosedList(out);
 
         out.close();
     }

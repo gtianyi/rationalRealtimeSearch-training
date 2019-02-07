@@ -91,12 +91,24 @@ public:
 		open.push(cur);
 
         // Expand some nodes
-        wastar->expand(open, closed, duplicateDetection, res);
+        double solutionCost = wastar->expand(open, closed, duplicateDetection, res);
 
-		calculateCost(cur,res);
+		calculateCost(solutionCost,res);
 
         return res;
-	}
+    }
+
+    void dumpClosedList(ofstream& out) {
+        for (typename unordered_map<State, Node*, Hash>::iterator it =
+                        closed.begin();
+                it != closed.end();
+                it++) {
+            out << it->first;
+            out << it->second->getHValue() << " " << it->second->getDValue()
+                << " " << it->first.key() << endl;
+
+        }
+    }
 
 private:
     static bool duplicateDetection(Node* node,
@@ -117,14 +129,10 @@ private:
                     it->second->setHValue(node->getHValue());
                     it->second->setDValue(node->getDValue());
                     it->second->setState(node->getState());
-                    return true;
                 }
-            } else {
-                // This node is on CLOSED, compare the f-values. If this new
-                // f-value is better, reset g, h, and d. 
-				// We don't reopen the node for weighted A*.
             }
 
+            return true;
         }
 
         return false;
@@ -146,9 +154,9 @@ private:
         delete wastar;
     }
 
-    void calculateCost(Node* solution, WAStarResultContainer& res) {
+    void calculateCost(double solutionCost, WAStarResultContainer& res) {
         res.solutionFound = true;
-        res.solutionCost = solution->getFValue();
+        res.solutionCost = solutionCost;
     }
 
 protected:
