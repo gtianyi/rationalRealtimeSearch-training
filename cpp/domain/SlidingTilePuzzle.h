@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <limits>
 #include <ostream>
+#include <fstream>
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -70,6 +71,24 @@ public:
             }
             return s;
         }
+
+        void dumpToProblemFile(ofstream& f) {
+            f << "4 4\n";
+            f << "starting positions for each tile:";
+
+            for (int r = 0; r < board.size(); r++) {
+                for (int c = 0; c < board[r].size(); c++) {
+                   f << board[r][c] << "\n";
+                }
+            }
+
+
+            f << "goal positions:";
+
+            for (int i = 0; i < 16; i++) {
+                f << i << "\n";	
+			}
+		}
 
         std::vector<std::vector<int>> getBoard() const { return board; }
 
