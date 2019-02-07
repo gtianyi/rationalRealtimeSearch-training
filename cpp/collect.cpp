@@ -17,11 +17,11 @@ public:
     typedef typename Domain::Cost Cost;
 
     struct Node {
-        Cost h;
-        Cost d;
+        int h;
+        int d;
         State state;
 
-        Node(Cost _h, Cost _d, State _s) : h(h), d(_d), state(_s) {}
+        Node(int _h, int _d, State _s) : h(_h), d(_d), state(_s) {}
     };
 
     void parsingDumpFile(ifstream& f) {
@@ -54,7 +54,7 @@ public:
             ss2 >> d;
             ss2 >> key;
 
-            if (nodeCollection.find(key) != nodeCollection.end()) {
+            if (nodeCollection.find(key) == nodeCollection.end()) {
                 State s(board, 's');
                 shared_ptr<Node> n = make_shared<Node>(h, d, s);
                 nodeCollection[key] = n;
@@ -62,10 +62,31 @@ public:
         }
     };
 
+    void arrangeCollectionByH() {
+        for (typename unordered_map<unsigned long long,
+                     shared_ptr<Node>>::iterator it = nodeCollection.begin();
+                it != nodeCollection.end();
+                it++) {
+            hCollection[it->second->h].push_back(it->second);
+        }
+    }
+
+    void sampleStatesForH() {
+        for (typename unordered_map<int,
+                     std::vector<shared_ptr<Node>>>::iterator it =
+                        hCollection.begin();
+                it != hCollection.end();
+                it++) {
+            cout << "h " << it->first << " allN: " << it->second.size() << endl;
+        }
+	}
+
     Collection() : fileCount(0){};
 
 private:
     unordered_map<unsigned long long, shared_ptr<Node>> nodeCollection;
+    unordered_map<int, std::vector<shared_ptr<Node>>> hCollection;
+
     int fileCount;
 
 };
@@ -96,5 +117,6 @@ int main(int argc, char** argv) {
 		f.close();
     }
 
-    
+	collection.arrangeCollectionByH();
+	collection.sampleStatesForH();
 }
