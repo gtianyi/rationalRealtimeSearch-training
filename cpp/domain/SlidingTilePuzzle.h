@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <limits>
 #include <ostream>
+#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -74,7 +75,7 @@ public:
 
         void dumpToProblemFile(ofstream& f) {
             f << "4 4\n";
-            f << "starting positions for each tile:";
+            f << "starting positions for each tile:\n";
 
             for (int r = 0; r < board.size(); r++) {
                 for (int c = 0; c < board[r].size(); c++) {
@@ -83,7 +84,7 @@ public:
             }
 
 
-            f << "goal positions:";
+            f << "goal positions:\n";
 
             for (int i = 0; i < 16; i++) {
                 f << i << "\n";	

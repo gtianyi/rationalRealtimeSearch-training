@@ -89,6 +89,7 @@ public:
                 NULL);
 
 		open.push(cur);
+		res.initialH = domain.heuristic(domain.getStartState());
 
         // Expand some nodes
         double solutionCost = wastar->expand(open, closed, duplicateDetection, res);

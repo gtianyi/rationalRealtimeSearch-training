@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
 
     if (argc < 4) {
         cout << wastarRes.nodesExpanded << " " << wastarRes.solutionFound << " "
-             << wastarRes.solutionCost << endl;
+             << wastarRes.solutionCost << " " << wastarRes.initialH << endl;
     } else {
         ofstream out(argv[3]);
 

@@ -4,7 +4,9 @@
 #include <fstream>
 #include <sstream>
 #include <unordered_map>
+#include <unordered_set>
 #include <memory>
+#include <random>
 #include "domain/SlidingTilePuzzle.h"
 
 
@@ -77,15 +79,58 @@ public:
                         hCollection.begin();
                 it != hCollection.end();
                 it++) {
-            cout << "h " << it->first << " allN: " << it->second.size() << endl;
+            if (it->second.size() <= 200) {
+                sampleSet.insert(
+                        sampleSet.end(), it->second.begin(), it->second.end());
+            } else {
+                // obtain a random number from hardware
+                std::random_device rd;
+
+                // seed the generator
+                std::mt19937 eng(rd());
+
+                // define the range
+                std::uniform_int_distribution<> distr(
+                        0, it->second.size() - 1); 
+
+				//sample from range
+                unordered_set<int> sampleIDSet;
+
+                while (sampleIDSet.size() < 200) {
+                    sampleIDSet.insert(distr(eng)); // generate numbers
+                }
+
+                for (typename unordered_set<int>::iterator idit =
+                                sampleIDSet.begin();
+                        idit != sampleIDSet.end();
+                        idit++) {
+                    sampleSet.push_back(it->second[*idit]);
+                }
+            }
         }
-	}
+    }
+
+    void dumpSampleSet() {
+        int id = 0;
+        for (auto n : sampleSet) {
+            id++;
+            string fileName = "../results/SlidingTilePuzzle/sampleProblem/h" +
+                    to_string(n->h) + "-" + to_string(id) + ".st";
+
+            ofstream f(fileName);
+
+            n->state.dumpToProblemFile(f);
+            f.close();
+        }
+        cout << "dump count " << id << endl;
+    }
 
     Collection() : fileCount(0){};
 
 private:
     unordered_map<unsigned long long, shared_ptr<Node>> nodeCollection;
     unordered_map<int, std::vector<shared_ptr<Node>>> hCollection;
+	vector<shared_ptr<Node>> sampleSet;
 
     int fileCount;
 
@@ -118,5 +163,8 @@ int main(int argc, char** argv) {
     }
 
 	collection.arrangeCollectionByH();
+
 	collection.sampleStatesForH();
+
+	collection.dumpSampleSet();
 }
