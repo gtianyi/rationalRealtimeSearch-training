@@ -7,6 +7,7 @@ struct WAStarResultContainer
 {
     bool solutionFound;
     double solutionCost;
+    double initialH;
     int nodesGenerated;
     int nodesExpanded;
     double totalCpuTime;
