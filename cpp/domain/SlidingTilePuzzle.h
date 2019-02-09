@@ -310,6 +310,7 @@ public:
                 }
 
                 manhattanSum += abs(value / size - r) + abs(value % size - c);
+                //cout << value << " sum " << manhattanSum << endl;
             }
         }
 

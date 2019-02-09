@@ -74,6 +74,8 @@ public:
     }
 
     void sampleStatesForH() {
+			
+        cout << "h count " << hCollection.size() << endl;
         for (typename unordered_map<int,
                      std::vector<shared_ptr<Node>>>::iterator it =
                         hCollection.begin();
@@ -114,8 +116,8 @@ public:
         int id = 0;
         for (auto n : sampleSet) {
             id++;
-            string fileName = "../results/SlidingTilePuzzle/sampleProblem/h" +
-                    to_string(n->h) + "-" + to_string(id) + ".st";
+            string fileName = "../results/SlidingTilePuzzle/sampleProblem/" +
+                    to_string(id) + ".st";
 
             ofstream f(fileName);
 
