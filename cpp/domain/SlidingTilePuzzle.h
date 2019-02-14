@@ -28,6 +28,10 @@ public:
             generateKey();
         }
 
+        State(std::vector<std::vector<int>> b, char l, int f) : board(b), label(l), movedFace(f) {
+            generateKey();
+        }
+
         friend std::ostream& operator<<(std::ostream& stream,
                 const SlidingTilePuzzle::State& state) {
             for (int r = 0; r < state.getBoard().size(); r++) {
@@ -95,11 +99,14 @@ public:
 
         char getLabel() const { return label; }
 
+        int getFace() const { return movedFace; }
+
         void markStart() { label = 's'; }
 
     private:
         std::vector<std::vector<int>> board;
         char label;
+		int movedFace;
         unsigned long long theKey = -1;
     };
 
@@ -340,7 +347,7 @@ public:
         // Now try to move the blank tile up one row...
         if (r - 1 > -1) {
             std::swap(board[r][c], board[r - 1][c]);
-            succs.push_back(State(board, 'U'));
+            succs.push_back(State(board, 'U', board[r][c]));
         }
     }
 
@@ -365,7 +372,7 @@ public:
         // Now try to move the blank tile down one row...
         if (r + 1 < size) {
             std::swap(board[r][c], board[r + 1][c]);
-            succs.push_back(State(board, 'D'));
+            succs.push_back(State(board, 'D', board[r][c]));
         }
     }
 
@@ -390,7 +397,7 @@ public:
         // Now try to move the blank tile left one column...
         if (c - 1 > -1) {
             std::swap(board[r][c], board[r][c - 1]);
-            succs.push_back(State(board, 'L'));
+            succs.push_back(State(board, 'L', board[r][c]));
         }
     }
 
@@ -415,7 +422,7 @@ public:
         // Now try to move the blank tile left one column...
         if (c + 1 < size) {
             std::swap(board[r][c], board[r][c + 1]);
-            succs.push_back(State(board, 'R'));
+            succs.push_back(State(board, 'R', board[r][c]));
         }
     }
 

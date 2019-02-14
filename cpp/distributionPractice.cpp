@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <memory>
 #include "WAStarSearch.h"
 
 using namespace std;
@@ -17,12 +18,14 @@ int main(int argc, char** argv) {
 
     float weight = stof(argv[2]);
 
-    // SlidingTilePuzzle* world;
+	 shared_ptr<SlidingTilePuzzle> world;
 			
-	// if(puzzleType == "uniform")
-	 SlidingTilePuzzle	world(cin);
+	 if(puzzleType == "uniform")
+             world = make_shared<SlidingTilePuzzle>(cin);
+	 else if(puzzleType == "heavy")
+             world = make_shared<HeavyTilePuzzle>(cin);
 
-    WAStarSearch<SlidingTilePuzzle> wastarsearch(world, weight);
+    WAStarSearch<SlidingTilePuzzle> wastarsearch(*world, weight);
 
     WAStarResultContainer wastarRes = wastarsearch.search();
 

@@ -7,6 +7,7 @@
 #include "utility/WAStarResultContainer.h"
 #include "expansionAlgorithms/WAStar.h"
 #include "domain/SlidingTilePuzzle.h"
+#include "domain/HeavyTilePuzzle.h"
 
 using namespace std;
 
