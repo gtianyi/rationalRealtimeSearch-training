@@ -21,6 +21,14 @@ def makeHistrogram(h, hs):
     plt.cla()
     return
 
+def dump2file(h, hs, outFile):
+    hsSet = set(hs)
+    outFile.write(str(h)+' '+str(len(hs))+' ')
+    for hsvalue in hsSet:
+        valueCount = hs.count(hsvalue)
+        outFile.write(str(hsvalue)+' '+str(valueCount)+' ')
+    outFile.write("\n")
+
 # Hard coded result directories
 resultDirs = {"w2"}
 
@@ -54,7 +62,10 @@ print("h count "+str(len(h_collection)))
 
 print("plotting...")
 
-for h, hslist in h_collection.items():
-    if len(hslist) == 200:
 
+f = open("../../../results/SlidingTilePuzzle/sampleData/"+min(resultDirs)+"-statSummary.txt","w")
+
+for h, hslist in h_collection.items():
+    dump2file(h,hslist,f)
+    if len(hslist) == 200:
         makeHistrogram(h,hslist)
