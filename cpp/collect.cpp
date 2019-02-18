@@ -73,7 +73,7 @@ public:
         }
     }
 
-    void sampleStatesForH() {
+    void sampleStatesForH(int sampleCount) {
 			
         cout << "h count " << hCollection.size() << endl;
         for (typename unordered_map<int,
@@ -81,7 +81,7 @@ public:
                         hCollection.begin();
                 it != hCollection.end();
                 it++) {
-            if (it->second.size() <= 200) {
+            if (it->second.size() <= sampleCount) {
                 sampleSet.insert(
                         sampleSet.end(), it->second.begin(), it->second.end());
             } else {
@@ -98,7 +98,7 @@ public:
 				//sample from range
                 unordered_set<int> sampleIDSet;
 
-                while (sampleIDSet.size() < 200) {
+                while (sampleIDSet.size() < sampleCount) {
                     sampleIDSet.insert(distr(eng)); // generate numbers
                 }
 
@@ -112,12 +112,12 @@ public:
         }
     }
 
-    void dumpSampleSet() {
+    void dumpSampleSet(string tileType) {
         int id = 0;
         for (auto n : sampleSet) {
             id++;
             string fileName = "../results/SlidingTilePuzzle/sampleProblem/" +
-                    to_string(id) + ".st";
+                    tileType + "/" + to_string(id) + ".st";
 
             ofstream f(fileName);
 
@@ -139,8 +139,8 @@ private:
 };
 
 int main(int argc, char** argv) {
-    if (argc != 4) {
-        cout << "Wrong number of arguments: ./collect <weight> <first instance> <last instance>"
+    if (argc != 6) {
+        cout << "Wrong number of arguments: ./collect <weight> <first instance> <last instance> <tile type> <sample count>"
              << endl;
         exit(1);
     }
@@ -151,22 +151,27 @@ int main(int argc, char** argv) {
 
     int lastNum = stoi(argv[3]);
 
+	string tileType = argv[4];
+
+    int sampleCount = stoi(argv[5]);
+
+
 	Collection<SlidingTilePuzzle> collection;
 
     for (int i = firstNum; i <= lastNum; i++) {
-        string fileName = "../results/SlidingTilePuzzle/distributionTest/W" +
-                weight + "-" + std::to_string(i) + ".txt";
+        string fileName = "../results/SlidingTilePuzzle/distributionTest/" +
+                tileType + "/W" + weight + "-" + std::to_string(i) + ".txt";
 
-		std::ifstream f(fileName);
+        std::ifstream f(fileName);
 
-		collection.parsingDumpFile(f);
+        collection.parsingDumpFile(f);
 
-		f.close();
+        f.close();
     }
 
 	collection.arrangeCollectionByH();
 
-	collection.sampleStatesForH();
+	collection.sampleStatesForH(sampleCount);
 
-	collection.dumpSampleSet();
+	collection.dumpSampleSet(tileType);
 }
