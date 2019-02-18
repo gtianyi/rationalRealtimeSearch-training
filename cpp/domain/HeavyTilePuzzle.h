@@ -13,10 +13,29 @@ public:
             return correctedH[state];
         }
 
-        Cost h = manhattanDistance(state) * state.getFace();
+        Cost h = manhattanDistanceWithFaceCost(state);
 
         updateHeuristic(state, h);
 
         return correctedH[state];
+    }
+
+    Cost manhattanDistanceWithFaceCost(const State& state) const {
+        Cost manhattanSum = 0;
+
+        for (int r = 0; r < size; r++) {
+            for (int c = 0; c < size; c++) {
+                auto value = state.getBoard()[r][c];
+                if (value == 0) {
+                    continue;
+                }
+
+                manhattanSum +=
+                        value * (abs(value / size - r) + abs(value % size - c));
+				//cout << "value " << value << " sum " << manhattanSum << endl;
+            }
+        }
+
+        return manhattanSum;
     }
 };

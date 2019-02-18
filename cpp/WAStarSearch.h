@@ -89,13 +89,14 @@ public:
                 domain.getStartState(),
                 NULL);
 
-		open.push(cur);
-		res.initialH = domain.heuristic(domain.getStartState());
+        open.push(cur);
+        res.initialH = domain.heuristic(domain.getStartState());
 
         // Expand some nodes
-        double solutionCost = wastar->expand(open, closed, duplicateDetection, res);
+        double solutionCost =
+                wastar->expand(open, closed, duplicateDetection, res);
 
-		calculateCost(solutionCost,res);
+        calculateCost(solutionCost, res);
 
         return res;
     }

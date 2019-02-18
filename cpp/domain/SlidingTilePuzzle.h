@@ -244,7 +244,7 @@ public:
         return correctedDerr[state];
     }
 
-    Cost heuristic(const State& state) {
+    virtual Cost heuristic(const State& state) {
         // Check if the heuristic of this state has been updated
         if (correctedH.find(state) != correctedH.end()) {
             return correctedH[state];
@@ -306,7 +306,7 @@ public:
         correctedH[state] = value;
     }
 
-    virtual Cost manhattanDistance(const State& state) const {
+    Cost manhattanDistance(const State& state) const {
         Cost manhattanSum = 0;
 
         for (int r = 0; r < size; r++) {
