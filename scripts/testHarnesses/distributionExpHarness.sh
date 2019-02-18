@@ -33,21 +33,21 @@ weight=$5
 
 numProcs=0
 
-mkdir -p ../../../results/SlidingTilePuzzle/distributionTest/
+mkdir -p ../../../results/SlidingTilePuzzle/distributionTest/${domainType}
   instance=$firstInstance
   while ((instance < lastInstance))
   do
-    file="../../../worlds/slidingTile/${instance}-4x4.st"
+    file="../../../worlds/slidingTile_300sec/easy/${instance}-4x4.st"
     if ((numProcs >= ${maxProcs}))
       then
         wait
         numProcs=0
       fi		  
-      if [ -f ../../../results/SlidingTilePuzzle/distributionTest/W${weight}-${instance}.txt ]
+      if [ -f ../../../results/SlidingTilePuzzle/distributionTest/${domainType}/W${weight}-${instance}.txt ]
 	  then 
 	    let instance++
 	  else
-	    ./../../../build_release/distributionPractice ${domainType} ${weight} ../../../results/SlidingTilePuzzle/distributionTest/W${weight}-${instance}.txt < ${file} &
+		  ./../../../build_release/distributionPractice ${domainType} ${weight} ../../../results/SlidingTilePuzzle/distributionTest/${domainType}/W${weight}-${instance}.txt < ${file} &
 	    let instance++
         let numProcs++
 	  fi
