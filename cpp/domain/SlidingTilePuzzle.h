@@ -306,7 +306,7 @@ public:
         correctedH[state] = value;
     }
 
-    Cost manhattanDistance(const State& state) const {
+    virtual Cost manhattanDistance(const State& state) const {
         Cost manhattanSum = 0;
 
         for (int r = 0; r < size; r++) {
@@ -459,7 +459,7 @@ public:
     const State getStartState() const { return startState; }
 
     // heavy, inverse, make a extansion class, and overwrite this method
-    Cost getEdgeCost(State state) { return 1; }
+    virtual Cost getEdgeCost(State state) { return 1; }
 
     string getDomainInformation() {
         string info =
