@@ -24,6 +24,10 @@ int main(int argc, char** argv) {
              world = make_shared<SlidingTilePuzzle>(cin);
 	 else if(puzzleType == "heavy")
              world = make_shared<HeavyTilePuzzle>(cin);
+	 else{
+             cout << "wrong puzzle type: uniform, invers, heavy, sqrt" << endl;
+             exit(1);
+	 }
 
     WAStarSearch<SlidingTilePuzzle> wastarsearch(*world, weight);
 
