@@ -8,6 +8,7 @@
 #include "expansionAlgorithms/WAStar.h"
 #include "domain/SlidingTilePuzzle.h"
 #include "domain/HeavyTilePuzzle.h"
+#include "domain/InverseTilePuzzle.h"
 
 using namespace std;
 
