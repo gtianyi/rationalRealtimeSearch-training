@@ -2,13 +2,13 @@
 
 if [ "$1" = "help" ] || [ "$1" = "-help" ] || [ "$1" = "?" ]
 then
-  echo "./fastAstarHarness.sh <starting instance #> <# of instances to test> <# of processes> <tile type>"
+  echo "./fastAstarHarness.sh <starting instance #> <# of instances to test> <# of processes> <tile type> <search algorithm>"
   exit 1
 fi
 
-if (($# < 3))
+if (($# < 4))
 then
-  echo "./fastAstarHarness.sh <starting instance #> <# of instances to test> <# of processes> <tile type>"
+  echo "./fastAstarHarness.sh <starting instance #> <# of instances to test> <# of processes> <tile type> <search algorithm>"
   exit 1
 fi
 
@@ -23,6 +23,8 @@ lastInstance=$(( $firstInstance + $maxInstances ))
 maxProcs=$3
 
 tileType=$4
+
+searchalg=$5
 
 numProcs=0
 
@@ -40,7 +42,7 @@ mkdir -p ../../../results/SlidingTilePuzzle/sampleData/${tileType}
 	  then 
 	    let instance++
 	  else
-	    ../../../build_release/tiles idastar ${tileType} < ${file} > ../../../results/SlidingTilePuzzle/sampleData/${tileType}/${instance}.txt &
+	    ../../../build_release/tiles-${tileType} ${searchalg} ${tileType} < ${file} > ../../../results/SlidingTilePuzzle/sampleData/${tileType}/${instance}.txt &
 	    let instance++
         let numProcs++
 	  fi
