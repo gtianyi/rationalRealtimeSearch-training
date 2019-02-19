@@ -20,6 +20,11 @@ template<class D> struct Edge {
 	typename D::Undo undo;
 };
 
+template<class D> struct SolPath{
+		std::vector<typename D::State> path;
+		int cost;
+};
+
 // SearchAlg defines the common interface to all search
 // algorithms.
 template<class D> struct SearchAlg {
@@ -31,7 +36,7 @@ template<class D> struct SearchAlg {
 	// search searches for a goal from the initial state
 	// The return value is the path to the goal which can
 	// be empty if the goal was no found.
-	virtual std::vector<typename D::State> search(typename D::State&) = 0;
+	virtual SolPath<D> search(typename D::State&) = 0;
 
 	// dom is the domain over which this search is defined.
 	D &dom;

@@ -5,14 +5,14 @@
 #include "utils.hpp"
 
 template<class D> class Idastar : public SearchAlg<D> {
-	std::vector<typename D::State> path;
+	SolPath<D> path;
 	int bound, minoob;
 
 public:
 
 	Idastar(D &d) : SearchAlg<D>(d) { }
 
-	virtual std::vector<typename D::State> search(typename D::State &root) {
+	virtual SolPath<D> search(typename D::State &root) {
 		bound = this->dom.h(root);
 
 		dfrowhdr(stdout, "iteration", 4, "number", "bound",
@@ -25,7 +25,7 @@ public:
 			dfrow(stdout, "iteration", "uduu", (unsigned long) n, (long) bound,
 				this->expd, this->gend);
 			bound = minoob;
-		} while (path.size() == 0);
+		} while (path.path.size() == 0);
 
 		return path;
 	}
@@ -36,7 +36,8 @@ private:
 		int f = cost + this->dom.h(n);
 
 		if (f <= bound && this->dom.isgoal(n)) {
-			path.push_back(n);
+		    path.cost =f;
+			path.path.push_back(n);
 			return true;
 		}
 
@@ -58,7 +59,7 @@ private:
 			bool goal = dfs(n, e.cost + cost, e.pop);
 			this->dom.undo(n, e);
 			if (goal) {
-				path.push_back(n);
+				path.path.push_back(n);
 				return true;
 			}
 		}

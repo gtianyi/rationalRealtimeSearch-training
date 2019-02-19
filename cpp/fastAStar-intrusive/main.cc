@@ -38,14 +38,14 @@ int main(int argc, const char *argv[]) {
         dfpair(stdout, "initial heuristic", "%d", tiles->h(init));
         double wall0 = walltime(), cpu0 = cputime();
 
-        std::vector<Tiles::State> path = search->search(init);
+        SolPath<Tiles> path = search->search(init);
 
         double wtime = walltime() - wall0, ctime = cputime() - cpu0;
         dfpair(stdout, "total wall time", "%g", wtime);
         dfpair(stdout, "total cpu time", "%g", ctime);
         dfpair(stdout, "total nodes expanded", "%lu", search->expd);
         dfpair(stdout, "total nodes generated", "%lu", search->gend);
-        dfpair(stdout, "solution length", "%u", (unsigned int)path.size());
+        dfpair(stdout, "solution length", "%u", (unsigned int)path.cost);
         dffooter(stdout);
 	} catch (const Fatal &f) {
 		fputs(f.msg, stderr);

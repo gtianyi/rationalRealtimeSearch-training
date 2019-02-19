@@ -29,18 +29,20 @@ template<class D> class Astar : public SearchAlg<D> {
 		HashEntry<Node> &hashentry() { return hentry; }
 	};
 
+	
+
 	HashTable<typename D::PackedState, Node> closed;
+	SolPath<D> path;
 	Heap<Node> open;
-	std::vector<typename D::State> path;
 	Pool<Node> nodes;
 
 public:
 	Astar(D &d) : SearchAlg<D>(d), closed(512927357) {}
 
-	std::vector<typename D::State> search(typename D::State &init) {
+	SolPath<D> search(typename D::State &init) {
 		open.push(wrap(init, 0, 0, -1));
 
-		while (!open.isempty() && path.size() == 0) {
+		while (!open.isempty() && path.path.size() == 0) {
 			Node *n = static_cast<Node*>(open.pop());
 			if (closed.find(n->packed)) {
 				nodes.destruct(n);
@@ -51,10 +53,11 @@ public:
 			this->dom.unpack(state, n->packed);
 
 			if (this->dom.isgoal(state)) {
+				path.cost = n->g;
 				for (Node *p = n; p; p = p->parent) {
 					typename D::State s;
 					this->dom.unpack(s, p->packed);
-					path.push_back(s);
+					path.path.push_back(s);
 				}
 				break;
 			}
