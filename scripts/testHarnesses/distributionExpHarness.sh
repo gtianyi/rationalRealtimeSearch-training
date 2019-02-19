@@ -3,7 +3,7 @@
 if [ "$1" = "help" ] || [ "$1" = "-help" ] || [ "$1" = "?" ]
 then
   echo "./distributionExpHarness.sh <starting instance #> <# of instances to test> <# of processes> <Puzzle Type> <Weight> "
-  echo "Available puzzle types are Uniform"
+  echo "Available puzzle types are Uniform heavy"
   echo "Domain variables for SlidingPuzzle: weight"
   exit 1
 fi
@@ -11,7 +11,7 @@ fi
 if (($# < 5))
 then
   echo "./distributionExpHarness.sh <starting instance #> <# of instances to test> <# of processes> <Puzzle Type> <Weight> "
-  echo "Available puzzle types are Uniform"
+  echo "Available puzzle types are Uniform heavy"
   echo "Domain variables for SlidingPuzzle: weight"
   exit 1
 fi

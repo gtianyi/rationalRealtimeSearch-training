@@ -7,15 +7,15 @@ import numpy as np
 from os import listdir
 from collections import defaultdict
 
-def makeHistrogram(h, hs):
+def makeHistrogram(h, hs, fileDir):
     sns.set(rc={'figure.figsize': (11, 8), 'font.size': 26, 'text.color': 'black'})
-    ax = sns.distplot(np.array(hs))
+    ax = sns.distplot(np.array(hs), kde=False)
     #ax.tick_params(colors='black', labelsize=12, rotation=90)
     # ax.xaxis.set_major_locator(ticker.MultipleLocator(5))
     # ax.set_xscale('log')
     plt.ylabel("h="+str(h), color='black', fontsize=18)
     plt.xlabel("h*", color='black', fontsize=18)
-    plt.savefig("../../../plots/hist/h"+str(h).zfill(2)+".eps", bbox_inches="tight", pad_inches=0)
+    plt.savefig(fileDir+"h"+str(h).zfill(2)+".eps", bbox_inches="tight", pad_inches=0)
     plt.close()
     plt.clf()
     plt.cla()
@@ -30,7 +30,7 @@ def dump2file(h, hs, outFile):
     outFile.write("\n")
 
 # Hard coded result directories
-resultDirs = {"w2"}
+resultDirs = {"uniform"}
 
 h_collection = defaultdict(list)
 
@@ -64,8 +64,9 @@ print("plotting...")
 
 
 f = open("../../../results/SlidingTilePuzzle/sampleData/"+min(resultDirs)+"-statSummary.txt","w")
+plotDir ="../../../plots/hist/"+min(resultDirs)+"/"
 
 for h, hslist in h_collection.items():
     dump2file(h,hslist,f)
-    if len(hslist) == 200:
-        makeHistrogram(h,hslist)
+    if len(hslist) > 0:
+        makeHistrogram(h,hslist,plotDir)
