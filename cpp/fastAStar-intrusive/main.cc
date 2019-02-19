@@ -21,6 +21,9 @@ int main(int argc, const char *argv[]) {
         } else if (strcmp(argv[2], "uniform") == 0) {
             tiles = make_shared<Tiles>(stdin);
         }
+		else{
+            throw Fatal("Wrong tile type: heavy, uniform");
+		}
 
         SearchAlg<Tiles>* search = NULL;
         if (strcmp(argv[1], "idastar") == 0)

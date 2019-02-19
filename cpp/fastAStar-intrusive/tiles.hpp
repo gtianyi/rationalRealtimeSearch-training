@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <cassert>
 #include <stdint.h>
+#include <iostream>
 
 struct Tiles {
 	enum {
@@ -17,9 +18,9 @@ struct Tiles {
 	};
 
 	struct State {
-		char tiles[Ntiles];
-		char blank;
-		char h;
+		int tiles[Ntiles];
+		int blank;
+		int h;
 	};
 
 	struct PackedState {
@@ -40,7 +41,7 @@ struct Tiles {
 	// format.
 	Tiles(FILE*);
 
-	State initial() const {
+	virtual State initial() const {
 		State s;
 		s.blank = -1;
 		for (int i = 0; i < Ntiles; i++) {
@@ -72,7 +73,7 @@ struct Tiles {
 
 	struct Undo { int h, blank; };
 
-	Edge<Tiles> apply(State &s, int newb) const {
+	virtual Edge<Tiles> apply(State &s, int newb) const {
 		Edge<Tiles> e(1, newb, s.blank);
 		e.undo.h = s.h;
 		e.undo.blank = s.blank;
@@ -100,7 +101,7 @@ struct Tiles {
 	}
 
 	// unpack unpacks the packed state s into the state dst.
-	void unpack(State &dst, PackedState s) const {
+	virtual void unpack(State &dst, PackedState s) const {
 		dst.h = 0;
 		dst.blank = -1;
 		for (int i = Ntiles - 1; i >= 0; i--) {
@@ -118,7 +119,7 @@ struct Tiles {
 protected:
 
 	// mdist returns the Manhattan distance of the given tile array.
-	int mdist(int blank, char tiles[]) const {
+	virtual int mdist(int blank, int tiles[]) const {
 		int sum = 0;
 		for (int i = 0; i < Ntiles; i++) {
 			if (i == blank)

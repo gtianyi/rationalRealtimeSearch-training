@@ -20,7 +20,8 @@ Tiles::Tiles(FILE *in) {
 		int r = fscanf(in, " %u", &p);
 		if (r != 1)
 			throw Fatal("Failed to read the starting positions: r=%d", r);
-		init[p] = t;
+		//swap by tianyi to be consistent with andrew's code
+		init[t] = p;
 	}
 
 	if (fscanf(in, " goal positions:") != 0)

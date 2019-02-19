@@ -6,11 +6,12 @@
 #include "hashtbl.hpp"
 #include "heap.hpp"
 #include "pool.hpp"
+#include <iostream>
 
 template<class D> class Astar : public SearchAlg<D> {
 
 	struct Node {
-		char f, g, pop;
+		int f, g, pop;
 		Node *parent;
 		typename D::PackedState packed;
 		HashEntry<Node> hentry;
