@@ -60,7 +60,7 @@ struct Tiles {
 	}
 
 	bool isgoal(const State &s) const {
-		return s.h == 0;
+		return s.h == 0.0;
 	}
 
 	int nops(const State &s) const {
@@ -71,7 +71,7 @@ struct Tiles {
 		return optab[(int) s.blank].ops[n];
 	}
 
-	struct Undo { int h, blank; };
+	struct Undo { double h, blank; };
 
 	virtual Edge<Tiles> apply(State &s, int newb) const {
 		Edge<Tiles> e(1, newb, s.blank);

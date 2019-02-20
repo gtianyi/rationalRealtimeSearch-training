@@ -3,67 +3,112 @@
 // license that can be found in the LICENSE file.
 #include "search.hpp"
 #include "utils.hpp"
+#include <iostream>
+#include <cmath>
 
-template<class D> class Idastar : public SearchAlg<D> {
-	SolPath<D> path;
-	int bound, minoob;
+template <class D>
+class Idastar : public SearchAlg<D> {
+    SolPath<D> path;
+    double bound;
+	static constexpr int bucketSize = 20;
+    unsigned long outboundHist[bucketSize];
+    double bucketInterval = 0.05;
+    double incumbentCost = 1000;
 
 public:
+    Idastar(D& d) : SearchAlg<D>(d) {}
 
-	Idastar(D &d) : SearchAlg<D>(d) { }
+    virtual SolPath<D> search(typename D::State& root) {
+        bound = this->dom.h(root);
+        resetHistAndIncumbentCost();
+		path.cost = 1000;
 
-	virtual SolPath<D> search(typename D::State &root) {
-		bound = this->dom.h(root);
+        dfrowhdr(stdout,
+                "iteration",
+                4,
+                "number",
+                "bound",
+                "nodes expanded",
+                "nodes generated");
+        unsigned int n = 0;
+        do {
+            dfs(root, 0, -1);
+            n++;
+            dfrow(stdout,
+                    "iteration",
+                    "ufuu",
+                    (unsigned long)n,
+                    bound,
+                    this->expd,
+                    this->gend);
+            setBound(this->expd);
+            resetHistAndIncumbentCost();
+        } while (path.cost == 1000);
 
-		dfrowhdr(stdout, "iteration", 4, "number", "bound",
-			"nodes expanded", "nodes generated");
-		unsigned int n = 0;
-		do {
-			minoob = -1;
-			dfs(root, 0, -1);
-			n++;
-			dfrow(stdout, "iteration", "uduu", (unsigned long) n, (long) bound,
-				this->expd, this->gend);
-			bound = minoob;
-		} while (path.path.size() == 0);
-
-		return path;
-	}
+        return path;
+    }
 
 private:
+    void resetHistAndIncumbentCost() {
+        for (int i = 0; i < bucketSize; ++i) {
+            outboundHist[i] = 0;
+        }
+        incumbentCost = 1000;
+    }
 
-	bool dfs(typename D::State &n,  int cost, int pop) {
-		int f = cost + this->dom.h(n);
+    void setBound(unsigned long prevExpd) {
+        unsigned long accumulate = 0;
 
-		if (f <= bound && this->dom.isgoal(n)) {
-		    path.cost =f;
-			path.path.push_back(n);
-			return true;
-		}
+        int i = 0;
 
-		if (f > bound) {
-			if (minoob < 0 || f < minoob)
-				minoob = f;
-			return false;
-		}
+        while (i < bucketSize) {
+            accumulate += outboundHist[i];
+            if (accumulate >= prevExpd) {
+                break;
+            }
+            i++;
+        }
 
-		this->expd++;
-		int nops = this->dom.nops(n);
-		for (int i = 0; i < nops; i++) {
-			int op = this->dom.nthop(n, i);
-			if (op == pop)
-				continue;
+        bound += (double)i * bucketInterval;
+    }
 
-			this->gend++;
-			Edge<D> e = this->dom.apply(n, op);
-			bool goal = dfs(n, e.cost + cost, e.pop);
+    bool dfs(typename D::State& n, double cost, int pop) {
+        double f = cost + this->dom.h(n);
+
+        if (f >= incumbentCost) {
+            return false;
+        }
+
+        if (f <= bound && this->dom.isgoal(n)) {
+            incumbentCost = f;
+            std::cout << "incumbentCost " << f << "\n";
+            path.cost =f;
+        }
+
+        if (f > bound) {
+            double outdiff = f - bound;
+            int bucket = std::min(
+                    bucketSize - 1, (int)std::floor(outdiff / bucketInterval));
+            outboundHist[bucket]++;
+            return false;
+        }
+
+        this->expd++;
+        int nops = this->dom.nops(n);
+        for (int i = 0; i < nops; i++) {
+            int op = this->dom.nthop(n, i);
+            if (op == pop)
+                continue;
+
+            this->gend++;
+            Edge<D> e = this->dom.apply(n, op);
+            dfs(n, e.cost + cost, e.pop);
 			this->dom.undo(n, e);
-			if (goal) {
-				path.path.push_back(n);
-				return true;
-			}
-		}
+        }
 
-		return false;
+        return false;
 	}
 };
+
+template <typename D>
+constexpr int Idastar<D>::bucketSize;
