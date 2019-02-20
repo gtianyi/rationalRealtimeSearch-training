@@ -37,7 +37,7 @@ mkdir -p ../../../results/SlidingTilePuzzle/distributionTest/${domainType}
   instance=$firstInstance
   while ((instance < lastInstance))
   do
-    file="../../../worlds/slidingTile_300sec/easy/${instance}-4x4.st"
+    file="../../../worlds/slidingTile/${instance}-4x4.st"
     if ((numProcs >= ${maxProcs}))
       then
         wait

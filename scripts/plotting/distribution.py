@@ -56,7 +56,8 @@ for dir in resultDirs:
                     if s.isdigit():
                         hs = int(s)
 
-        h_collection[h].append(hs)
+        if h!=999 and hs!=999:
+            h_collection[h].append(hs)
 
 print("h count "+str(len(h_collection))) 
 
