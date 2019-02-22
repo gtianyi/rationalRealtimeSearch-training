@@ -12,7 +12,7 @@ class Idastar : public SearchAlg<D> {
     double bound;
 	static constexpr int bucketSize = 50;
     unsigned long outboundHist[bucketSize];
-    double bucketInterval = 0.04;
+    double bucketInterval = 0.01;
     double incumbentCost = 1000;
 
 public:
@@ -41,7 +41,7 @@ public:
                     bound,
                     this->expd,
                     this->gend);
-            setBound(this->expd);
+            setBound((int)std::pow(4, n));
             resetHistAndIncumbentCost();
         } while (path.cost == 1000);
 
@@ -61,13 +61,16 @@ private:
 
         int i = 0;
 
+        //std::cout << "bucket accu: ";
         while (i < bucketSize) {
             accumulate += outboundHist[i];
             if (accumulate >= prevExpd) {
                 break;
             }
+            //std::cout << "i: " << i << " accu: " << outboundHist[i] << " ";
             i++;
         }
+        //std::cout << "\n";
 
         bound += (double)i * bucketInterval;
     }
@@ -90,9 +93,9 @@ private:
 
         if (f > bound) {
             double outdiff = f - bound;
-            int bucket = std::min(
-                    bucketSize - 1, (int)std::floor(outdiff / bucketInterval));
-            outboundHist[bucket]++;
+            int bucket = (int)std::floor(outdiff / bucketInterval);
+            if (bucket < bucketSize)
+                outboundHist[bucket]++;
             return false;
         }
 
