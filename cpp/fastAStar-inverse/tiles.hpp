@@ -11,82 +11,83 @@
 #include <iostream>
 
 struct Tiles {
-	enum {
-		Width = 4,
-		Height = 4,
-		Ntiles = Width*Height,
-	};
+    enum {
+        Width = 4,
+        Height = 4,
+        Ntiles = Width * Height,
+    };
 
-	struct State {
-		int tiles[Ntiles];
-		int blank;
-		double h;
-	};
+    struct State {
+        int tiles[Ntiles];
+        int blank;
+        double h;
+    };
 
-	struct PackedState {
-		uint64_t word;
+    struct PackedState {
+        uint64_t word;
 
-		unsigned long hash() const {
-			return word;
-		}
+        unsigned long hash() const { return word; }
 
-		bool eq(const PackedState &h) const {
-			return word == h.word;
-		}
-	};
+        bool eq(const PackedState& h) const { return word == h.word; }
+    };
 
-	// Tiles constructs a new instance by reading
-	// the initial state from the given file which is
-	// expected to be in Wheeler's tiles instance
-	// format.
-	Tiles(FILE*);
+    // Tiles constructs a new instance by reading
+    // the initial state from the given file which is
+    // expected to be in Wheeler's tiles instance
+    // format.
+    Tiles(FILE*);
 
-	virtual State initial() const {
-		State s;
-		s.blank = -1;
-		for (int i = 0; i < Ntiles; i++) {
-			if (init[i] == 0)
-				s.blank = i;
-			s.tiles[i] = init[i];
-		}
-		if (s.blank < 0)
-			throw Fatal("No blank tile");
-		s.h = mdist(s.blank, s.tiles);
-		return s;
+    virtual State initial() const {
+        State s;
+        s.blank = -1;
+        for (int i = 0; i < Ntiles; i++) {
+            if (init[i] == 0)
+                s.blank = i;
+            s.tiles[i] = init[i];
+        }
+        if (s.blank < 0)
+            throw Fatal("No blank tile");
+        s.h = mdist(s.blank, s.tiles);
+        return s;
+    }
+
+    double h(const State& s) const { return s.h; }
+
+    bool isgoal(const State& s) const { return s.h == 0.0; }
+
+    void printState(const State& s) const {
+        for (int i = 0; i < Ntiles; i++) {
+            std::cout << s.tiles[i] << " ";
+        }
+        std::cout << s.blank;
+        std::cout << "\n";
+    }
+
+    int nops(const State& s) const { return optab[(int)s.blank].n; }
+
+    int nthop(const State& s, int n) const {
+        return optab[(int)s.blank].ops[n];
+    }
+
+    struct Undo {
+        double h;
+        int blank;
+    };
+
+    virtual Edge<Tiles> apply(State& s, int newb) const {
+        Edge<Tiles> e(1, newb, s.blank);
+        e.undo.h = s.h;
+        e.undo.blank = s.blank;
+
+        int tile = s.tiles[newb];
+        s.tiles[(int)s.blank] = tile;
+        s.h += mdincr[tile][newb][(int)s.blank];
+        s.blank = newb;
+
+        return e;
 	}
 
-	double h(const State &s) const {
-		return s.h;
-	}
-
-	bool isgoal(const State &s) const {
-		return s.h == 0.0;
-	}
-
-	int nops(const State &s) const {
-		return optab[(int) s.blank].n;
-	}
-
-	int nthop(const State &s, int n) const {
-		return optab[(int) s.blank].ops[n];
-	}
-
-	struct Undo { double h, blank; };
-
-	virtual Edge<Tiles> apply(State &s, int newb) const {
-		Edge<Tiles> e(1, newb, s.blank);
-		e.undo.h = s.h;
-		e.undo.blank = s.blank;
-
-		int tile = s.tiles[newb];
-		s.tiles[(int) s.blank] = tile;
-		s.h += mdincr[tile][newb][(int) s.blank];
-		s.blank = newb;
-
-		return e;
-	}
-
-	void undo(State &s, const Edge<Tiles> &e) const {
+	virtual void undo(State &s, const Edge<Tiles> &e) const {
 		s.h = e.undo.h;
 		s.tiles[(int) s.blank] = s.tiles[(int) e.undo.blank];
 		s.blank = e.undo.blank;

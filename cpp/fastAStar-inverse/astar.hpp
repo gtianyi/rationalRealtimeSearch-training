@@ -9,27 +9,25 @@
 #include <iostream>
 
 template<class D> class Astar : public SearchAlg<D> {
+    struct Node {
+        double f, g;
+        int pop;
+        Node* parent;
+        typename D::PackedState packed;
+        HashEntry<Node> hentry;
 
-	struct Node {
-		double f, g, pop;
-		Node *parent;
-		typename D::PackedState packed;
-		HashEntry<Node> hentry;
+        bool pred(Node* o) {
+            if (f == o->f)
+                return g > o->g;
+            return f < o->f;
+        }
 
-		bool pred(Node *o) {
-			if (f == o->f)
-				return g > o->g;
-			return f < o->f;
-		}
+        void setindex(int i) {}
 
- 		void setindex(int i) { }
+        const typename D::PackedState& key() { return packed; }
 
-		const typename D::PackedState &key() { return packed; }
-
-		HashEntry<Node> &hashentry() { return hentry; }
+        HashEntry<Node>& hashentry() { return hentry; }
 	};
-
-	
 
 	HashTable<typename D::PackedState, Node> closed;
 	SolPath<D> path;
@@ -53,7 +51,7 @@ public:
 			this->dom.unpack(state, n->packed);
 
 			if (this->dom.isgoal(state)) {
-				path.cost = n->g;
+				path.cost = n->f;
 				for (Node *p = n; p; p = p->parent) {
 					typename D::State s;
 					this->dom.unpack(s, p->packed);

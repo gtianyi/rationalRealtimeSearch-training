@@ -19,7 +19,8 @@ public:
     Idastar(D& d) : SearchAlg<D>(d) {}
 
     virtual SolPath<D> search(typename D::State& root) {
-        bound = this->dom.h(root);
+        //bound = this->dom.h(root);
+		bound = 12.752679;
         resetHistAndIncumbentCost();
 		path.cost = 1000;
 
@@ -75,14 +76,17 @@ private:
     bool dfs(typename D::State& n, double cost, int pop) {
         double f = cost + this->dom.h(n);
 
-        if (f >= incumbentCost) {
+        if (f > incumbentCost) {
             return false;
-        }
+		}
 
         if (f <= bound && this->dom.isgoal(n)) {
-            incumbentCost = f;
-            std::cout << "incumbentCost " << f << "\n";
+			incumbentCost = f;
+			std::cout << "incumbentCost " << f << "\n";
             path.cost =f;
+			path.path.clear();
+			path.path.push_back(n);
+			return true;
         }
 
         if (f > bound) {
@@ -95,6 +99,7 @@ private:
 
         this->expd++;
         int nops = this->dom.nops(n);
+		bool oneGoal=false;
         for (int i = 0; i < nops; i++) {
             int op = this->dom.nthop(n, i);
             if (op == pop)
@@ -102,9 +107,18 @@ private:
 
             this->gend++;
             Edge<D> e = this->dom.apply(n, op);
-            dfs(n, e.cost + cost, e.pop);
+            bool goal = dfs(n, e.cost + cost, e.pop);
 			this->dom.undo(n, e);
+
+			if(goal){
+					path.path.push_back(n);
+					oneGoal=true;
+			}
         }
+
+		if(oneGoal){
+				return true;
+		}
 
         return false;
 	}

@@ -30,25 +30,41 @@ public:
         s.tiles[(int)s.blank] = tile;
         s.h += mdincr[tile][newb][(int)s.blank] * (1.0/(double)tile);
         s.blank = newb;
+		s.tiles[newb] = 0;
 
         return e;
     }
 
-	// unpack unpacks the packed state s into the state dst.
-	void unpack(State &dst, PackedState s) const {
-		dst.h = 0;
-		dst.blank = -1;
-		for (int i = Ntiles - 1; i >= 0; i--) {
-			int t = s.word & 0xF;
-			s.word >>= 4;
-			dst.tiles[i] = t;
-			if (t == 0)
-				dst.blank = i;
-			else
-				dst.h += md[t][i]*(1.0/(double)t);
-		}
-		assert (dst.blank >= 0);
-	}
+    void undo(State& s, const Edge<Tiles>& e) const {
+        s.h = e.undo.h;
+        s.tiles[(int)s.blank] = s.tiles[(int)e.undo.blank];
+        s.blank = e.undo.blank;
+        s.tiles[(int)e.undo.blank] = 0;
+    }
+
+    // unpack unpacks the packed state s into the state dst.
+    void unpack(State& dst, PackedState s) const {
+        dst.h = 0;
+        dst.blank = -1;
+        for (int i = Ntiles - 1; i >= 0; i--) {
+            int t = s.word & 0xF;
+            s.word >>= 4;
+            dst.tiles[i] = t;
+            if (t == 0)
+                dst.blank = i;
+            else
+                dst.h += md[t][i] * (1.0 / (double)t);
+        }
+        assert(dst.blank >= 0);
+    }
+
+    void printState(const State& s) const {
+        for (int i = 0; i < Ntiles; i++) {
+            std::cout << s.tiles[i] << " ";
+        }
+        std::cout << s.blank;
+        std::cout << "\n";
+    }
 
 protected:
     // mdist returns the Manhattan distance of the given tile array.

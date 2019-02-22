@@ -46,7 +46,13 @@ int main(int argc, const char *argv[]) {
         dfpair(stdout, "total nodes expanded", "%lu", search->expd);
         dfpair(stdout, "total nodes generated", "%lu", search->gend);
         dfpair(stdout, "solution length", "%f", path.cost);
+        dfpair(stdout, "solution real l", "%d", path.path.size());
         dffooter(stdout);
+
+        for (auto s : path.path) {
+            tiles->printState(s);
+		}
+
 	} catch (const Fatal &f) {
 		fputs(f.msg, stderr);
 		fputc('\n', stderr);
