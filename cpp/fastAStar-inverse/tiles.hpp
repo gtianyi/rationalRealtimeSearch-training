@@ -53,7 +53,7 @@ struct Tiles {
 
     double h(const State& s) const { return s.h; }
 
-    bool isgoal(const State& s) const { return s.h == 0.0; }
+    bool isgoal(const State& s) const { return s.h <= 0.05; }
 
     void printState(const State& s) const {
         for (int i = 0; i < Ntiles; i++) {

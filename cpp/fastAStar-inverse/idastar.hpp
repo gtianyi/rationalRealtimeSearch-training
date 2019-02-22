@@ -10,17 +10,16 @@ template <class D>
 class Idastar : public SearchAlg<D> {
     SolPath<D> path;
     double bound;
-	static constexpr int bucketSize = 20;
+	static constexpr int bucketSize = 50;
     unsigned long outboundHist[bucketSize];
-    double bucketInterval = 0.05;
+    double bucketInterval = 0.04;
     double incumbentCost = 1000;
 
 public:
     Idastar(D& d) : SearchAlg<D>(d) {}
 
     virtual SolPath<D> search(typename D::State& root) {
-        //bound = this->dom.h(root);
-		bound = 12.752679;
+		bound = this->dom.h(root);
         resetHistAndIncumbentCost();
 		path.cost = 1000;
 
@@ -82,7 +81,7 @@ private:
 
         if (f <= bound && this->dom.isgoal(n)) {
 			incumbentCost = f;
-			std::cout << "incumbentCost " << f << "\n";
+			//std::cout << "incumbentCost " << f << "\n";
             path.cost =f;
 			path.path.clear();
 			path.path.push_back(n);
