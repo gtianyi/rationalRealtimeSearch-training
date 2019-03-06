@@ -144,7 +144,7 @@ public:
 	Collection() : fileCount(0){};
 
 private:
-    static constexpr double histInterval = 0.05;
+    static constexpr double histInterval = 1;
     static constexpr double histMax = 80.0;
     static constexpr int htableSize = (int)histMax / histInterval;
 
