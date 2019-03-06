@@ -14,31 +14,29 @@ int main(int argc, const char *argv[]) {
         if (argc != 3)
             throw Fatal("Usage: tiles <algorithm> <tiletype>");
 
-		shared_ptr<Tiles> tiles;
+		shared_ptr<InverseTiles> tiles;
 
         if (strcmp(argv[2], "inverse") == 0) {
             tiles = make_shared<InverseTiles>(stdin);
-        } else if (strcmp(argv[2], "uniform") == 0) {
-            tiles = make_shared<Tiles>(stdin);
         }
 		else{
-            throw Fatal("Wrong tile type: inverse, uniform");
+            throw Fatal("Wrong tile type: inverse");
 		}
 
-        SearchAlg<Tiles>* search = NULL;
+        SearchAlg<InverseTiles>* search = NULL;
         if (strcmp(argv[1], "idastar") == 0)
-            search = new Idastar<Tiles>(*tiles);
-        else if (strcmp(argv[1], "astar") == 0)
-            search = new Astar<Tiles>(*tiles);
+            search = new Idastar<InverseTiles>(*tiles);
+        //else if (strcmp(argv[1], "astar") == 0)
+            //search = new Astar<InverseTiles>(*tiles);
         else
             throw Fatal("Unknown algorithm: %s", argv[1]);
 
-        Tiles::State init = tiles->initial();
+        auto init = tiles->initial();
         dfheader(stdout);
         dfpair(stdout, "initial heuristic", "%f", tiles->h(init));
         double wall0 = walltime(), cpu0 = cputime();
 
-        SolPath<Tiles> path = search->search(init);
+        SolPath<InverseTiles> path = search->search(init);
 
         double wtime = walltime() - wall0, ctime = cputime() - cpu0;
         dfpair(stdout, "total wall time", "%g", wtime);

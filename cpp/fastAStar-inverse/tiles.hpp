@@ -37,7 +37,7 @@ struct Tiles {
     // format.
     Tiles(FILE*);
 
-    virtual State initial() const {
+    State initial() const {
         State s;
         s.blank = -1;
         for (int i = 0; i < Ntiles; i++) {
