@@ -17,7 +17,7 @@ public:
 	State initial() const {
         State s;
         s.blank = -1;
-        int curHeight = -1, curWidth = -1;
+        int curHeight = -1;
 
         for (int i = 0; i < Ntiles; i++) {
             if (init[i] == 0)
@@ -26,8 +26,6 @@ public:
 
             if (i % Height == 0)
                 curHeight++;
-            if (i % Width == 0)
-                curWidth++;
 
             s.rows[curHeight][i % Width] = init[i];
         }
@@ -115,27 +113,28 @@ protected:
         for (int t1 = 0; t1 < Ntiles; t1++) {
             for (int t2 = 0; t2 < Ntiles; t2++) {
                 for (int t3 = 0; t3 < Ntiles; t3++) {
-                    for (int t4 = 0; t1 < Ntiles; t4++) {
+                    for (int t4 = 0; t4 < Ntiles; t4++) {
                         set<int> dupSet;
                         dupSet.insert(t1);
                         dupSet.insert(t2);
                         dupSet.insert(t3);
                         dupSet.insert(t4);
 
-                        if (dupSet.size() != 4)
-                            break;
+                        if (dupSet.size() == 4) {
+                            std::vector<int> tiles;
+                            tiles.push_back(t1);
+                            tiles.push_back(t2);
+                            tiles.push_back(t3);
+                            tiles.push_back(t4);
 
-                        std::vector<int> tiles;
-						tiles.push_back(t1);
-						tiles.push_back(t2);
-						tiles.push_back(t3);
-						tiles.push_back(t4);
-
-						allRow.push_back(tiles);
+                            allRow.push_back(tiles);
+                        }
                     }
                 }
             }
         }
+
+        assert(allRow.size() == 43680);
 
         for (int rc = 0; rc < Height; rc++) {
             int rowValueTable[Ntiles] = {0};
@@ -145,6 +144,9 @@ protected:
                 rowValueTable[face] = 1;
             }
 
+            rowValueTable[0] = 0;
+
+            int counttest = 0;
             for (auto& row : allRow) {
                 std::vector<int> goalRowFaces;
                 for (auto face : row) {
@@ -153,12 +155,16 @@ protected:
                     }
                 }
 
-                if (goalRowFaces.size() > 1) {
+                if (goalRowFaces.size() > 2) {
+                    counttest++;
                     double conflict = solver.solve(goalRowFaces);
                     int v = getCompactIntByArray(&row[0], Width);
                     rowlinearConflict[rc][v] = conflict;
                 }
             }
+
+            if (rc > 0)
+                assert(rowlinearConflict[rc].size() == 1104);
         }
     }
 
@@ -185,7 +191,7 @@ protected:
     double getLinearConflictByState(State& s) const {
         double ret = 0.0;
 
-        for (int i = 0; i < Width; i++) {
+        for (int i = 0; i < Height; i++) {
             ret += getLinearConflictByArray(s.rows[i], i);
         }
 
@@ -220,9 +226,9 @@ protected:
         }
 
         // update rows and cols in tile
-        s.rows[row2][col2] = s.rows[row1][col1];
+        s.rows[row1][col1] = s.rows[row2][col2];
 
-        s.rows[row1][col1] = 0;
+        s.rows[row2][col2] = 0;
 
         if (row1 != row2) {
             new_rowLC += getLinearConflictByArray(s.rows[row1], row1);

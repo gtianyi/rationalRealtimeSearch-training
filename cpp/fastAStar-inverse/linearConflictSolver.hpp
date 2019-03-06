@@ -12,7 +12,7 @@
         int ret = 0;
 
         for (int i = 0; i < size; i++) {
-            ret += (int)pow(10, size - 1 - i) * v[i];
+            ret += (int)pow(100, size - 1 - i) * v[i];
         }
 
         return ret;
