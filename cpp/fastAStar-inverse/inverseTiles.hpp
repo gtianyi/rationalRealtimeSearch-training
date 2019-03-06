@@ -146,7 +146,6 @@ protected:
 
             rowValueTable[0] = 0;
 
-            int counttest = 0;
             for (auto& row : allRow) {
                 std::vector<int> goalRowFaces;
                 for (auto face : row) {
@@ -155,8 +154,7 @@ protected:
                     }
                 }
 
-                if (goalRowFaces.size() > 2) {
-                    counttest++;
+                if (goalRowFaces.size() > 1) {
                     double conflict = solver.solve(goalRowFaces);
                     int v = getCompactIntByArray(&row[0], Width);
                     rowlinearConflict[rc][v] = conflict;
@@ -164,7 +162,7 @@ protected:
             }
 
             if (rc > 0)
-                assert(rowlinearConflict[rc].size() == 1104);
+                assert(rowlinearConflict[rc].size() == 10680);
         }
     }
 
