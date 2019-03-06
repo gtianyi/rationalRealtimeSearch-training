@@ -26,8 +26,8 @@ int main(int argc, const char *argv[]) {
         SearchAlg<InverseTiles>* search = NULL;
         if (strcmp(argv[1], "idastar") == 0)
             search = new Idastar<InverseTiles>(*tiles);
-        //else if (strcmp(argv[1], "astar") == 0)
-            //search = new Astar<InverseTiles>(*tiles);
+		else if (strcmp(argv[1], "astar") == 0)
+			search = new Astar<InverseTiles>(*tiles);
         else
             throw Fatal("Unknown algorithm: %s", argv[1]);
 

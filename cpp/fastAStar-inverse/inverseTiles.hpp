@@ -45,7 +45,7 @@ public:
         e.undo.h = s.h;
         e.undo.blank = s.blank;
 
-        s.h += updateLinearConflict(s, newb);
+		s.h += updateLinearConflict(s, newb);
 
         s.tiles[(int)s.blank] = tile;
         s.h += mdincr[tile][newb][(int)s.blank] * (1.0/(double)tile);
@@ -67,7 +67,7 @@ public:
         dst.h = 0;
         dst.blank = -1;
 
-        int curHeight = Height - 1, curWidth = Width - 1;
+        int curHeight = Height - 1;
 
         for (int i = Ntiles - 1; i >= 0; i--) {
             int t = s.word & 0xF;
@@ -80,8 +80,6 @@ public:
 
 			if (i % Height == 0)
                 curHeight--;
-            if (i % Width == 0)
-                curWidth--;
 
             dst.rows[curHeight][i % Width] = t;
         }
@@ -166,26 +164,6 @@ protected:
         }
     }
 
-    double getConflict(std::vector<int>& v) {
-        std::vector<int> swapElement;
-        for (int i = 1; i < v.size(); i++) {
-            if (v[i - 1] > v[i] && v[i] != 0) {
-                swapElement.push_back(v[i - 1]);
-            }
-        }
-
-        double ret = 0.0;
-        for (auto e : swapElement) {
-            if (e != 0) {
-                ret += 1.0 / (double)e;
-            }
-        }
-
-        ret *= 2;
-
-        return ret;
-    }
-
     double getLinearConflictByState(State& s) const {
         double ret = 0.0;
 
@@ -216,7 +194,7 @@ protected:
         int col1 = s.blank % Width;
         int col2 = newb % Width;
 
-        double old_rowLC, new_rowLC;
+        double old_rowLC = 0.0, new_rowLC = 0.0;
 
         if (row1 != row2) {
             old_rowLC += getLinearConflictByArray(s.rows[row1], row1);
