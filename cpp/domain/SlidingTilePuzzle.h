@@ -9,6 +9,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <cassert>
 #include "../utility/SlidingWindow.h"
 
 #include <bitset>
@@ -83,7 +84,9 @@ public:
 
             for (int r = 0; r < board.size(); r++) {
                 for (int c = 0; c < board[r].size(); c++) {
-                   f << board[r][c] << "\n";
+                    //assert(board[r][c] >= 0);
+                    //assert(board[r][c] < 16);
+                    f << board[r][c] << "\n";
                 }
             }
 
