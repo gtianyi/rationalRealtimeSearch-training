@@ -56,6 +56,21 @@ public:
     }
 
     void undo(State& s, const Edge<InverseTiles>& e) const {
+        // undo rows
+
+        int row1 = s.blank / Height;
+        int row2 = e.undo.blank / Height;
+
+        int col1 = s.blank % Width;
+        int col2 = e.undo.blank % Width;
+
+        // update rows and cols in tile
+        s.rows[row1][col1] = s.rows[row2][col2];
+
+        s.rows[row2][col2] = 0;
+
+		//undo h and tile
+
         s.h = e.undo.h;
         s.tiles[(int)s.blank] = s.tiles[(int)e.undo.blank];
         s.blank = e.undo.blank;
@@ -152,15 +167,15 @@ protected:
                     }
                 }
 
+                int v = getCompactIntByArray(&row[0], Width);
                 if (goalRowFaces.size() > 1) {
                     double conflict = solver.solve(goalRowFaces);
-                    int v = getCompactIntByArray(&row[0], Width);
                     rowlinearConflict[rc][v] = conflict;
                 }
+				else{
+                    rowlinearConflict[rc][v] = 0;
+                }
             }
-
-            if (rc > 0)
-                assert(rowlinearConflict[rc].size() == 10680);
         }
     }
 
@@ -174,20 +189,17 @@ protected:
         return ret;
     }
 
-    double getLinearConflictByArray(int* v, int rcindex) const {
+    inline double getLinearConflictByArray(int* v, int rcindex) const {
         double ret = 0;
 
         int value = getCompactIntByArray(v, Width);
 
-        if (rowlinearConflict.at(rcindex).find(value) !=
-                rowlinearConflict.at(rcindex).end()) {
-            ret = rowlinearConflict.at(rcindex).at(value);
-        }
+        ret = rowlinearConflict[rcindex][value];
 
         return ret;
     }
 
-    double updateLinearConflict(State& s, int newb) const {
+    inline double updateLinearConflict(State& s, int newb) const {
         int row1 = s.blank / Height;
         int row2 = newb / Height;
 
@@ -216,5 +228,5 @@ protected:
         return ret;
     }
 
-    std::unordered_map<int, std::unordered_map<int, double>> rowlinearConflict;
+    double rowlinearConflict[4][15141312];
 };

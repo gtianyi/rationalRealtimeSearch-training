@@ -8,7 +8,7 @@
 #include <vector>
 #include <algorithm>
 
- int getCompactIntByArray(int* v, int size) {
+inline int getCompactIntByArray(int* v, int size) {
         int ret = 0;
 
         for (int i = 0; i < size; i++) {
