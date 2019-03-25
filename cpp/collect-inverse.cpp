@@ -43,11 +43,11 @@ public:
 
     struct Node {
         Cost h;
-        int d;
+        double d;
         State state;
         int hGroup;
 
-        Node(Cost _h, int _d, State _s) : h(_h), d(_d), state(_s) {
+        Node(Cost _h, double _d, State _s) : h(_h), d(_d), state(_s) {
             hGroup = (int)floor(h / histInterval);
         }
     };
@@ -61,6 +61,7 @@ public:
         cout << "file #: " << fileCount << " ";
         cout << "file info: " << line << endl;
 
+		string prevline;
         while (!f.eof()) {
             std::vector<int> rows(4, 0);
             std::vector<std::vector<int>> board(4, rows);
@@ -70,21 +71,31 @@ public:
                 for (int c = 0; c < 4; c++) {
                     int tile;
                     ss >> tile;
-					board[r][c] = tile;
+                    board[r][c] = tile;
+                    if (tile >= 16) {
+                        cout << "wrong tile " << tile <<" "<< r << " " << c << endl;
+                        cout << "wrong line " << line << endl;
+                        cout << "wrong prev line " << prevline << endl;
+                    }
+                    assert(tile < 16);
+                    assert(tile >= 0);
                 }
             }
             getline(f, line);
             stringstream ss2(line);
 
+            prevline = line;
+
             Cost h;
-            int d;
-            unsigned long long key;
+            double d;
+            string key;
             ss2 >> h;
             ss2 >> d;
             ss2 >> key;
 
             State s(board, 's');
             shared_ptr<Node> n = make_shared<Node>(h, d, s);
+
             auto& bucket = hCollection[n->hGroup];
 
 			if (n->hGroup >= htableSize){
@@ -132,6 +143,8 @@ public:
                         tileType + "/" + to_string(id) + ".st";
 
                 ofstream f(fileName);
+
+                //std::cout << (*it)->state << "\n";
 
                 (*it)->state.dumpToProblemFile(f);
                 f.close();
