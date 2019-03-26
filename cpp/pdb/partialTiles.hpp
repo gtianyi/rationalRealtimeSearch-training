@@ -19,11 +19,11 @@ public:
             }
 
             for (int i = 8; i <= 15; i++) {
-                init[i] = 16;
+                init[i] = 15;
             }
         } else if (patternSize == 8) {
             for (int i = 1; i <= 7; i++) {
-                init[i] = 16;
+                init[i] = 15;
             }
 
             for (int i = 8; i <= 15; i++) {
@@ -43,6 +43,7 @@ public:
             if (init[i] == 0)
                 s.blank = i;
             s.tiles[i] = init[i];
+            cout << s.tiles[i] << endl;
         }
         return s;
     }
@@ -52,7 +53,7 @@ public:
 
         float cost = 0;
 
-        if (tile != 16)
+        if (tile != 15)
             cost = 1.0 / (float)tile;
 
         Edge<Tiles> e(cost, newb, s.blank);
@@ -65,4 +66,26 @@ public:
 
         return e;
     }
+
+    /*void pack(PackedState& dst, State& s) const {*/
+        //dst.word = 0; 
+		//dst.blank = s.blank;
+		//s.tiles[(int)s.blank] = 0;
+		////s.tiles[(int)s.blank] = 15;
+        //for (int i = 0; i < Ntiles; i++)
+            //dst.word = (dst.word << 4) | s.tiles[i];
+		////s.tiles[(int)s.blank] = 0;
+    //}
+
+    //void unpack(State& dst, PackedState s) const {
+        //dst.blank = -1;
+        //for (int i = Ntiles - 1; i >= 0; i--) {
+            //int t = s.word & 0xF;
+            //s.word >>= 4;
+            //dst.tiles[i] = t;
+        //}
+        //dst.blank = s.blank;
+		//dst.tiles[dst.blank]=0;
+		//assert(dst.blank >= 0);
+    /*}*/
 };

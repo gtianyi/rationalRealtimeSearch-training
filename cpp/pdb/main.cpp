@@ -10,12 +10,12 @@
 using namespace std;
 
 int main(int argc, const char* argv[]) {
-    if (argc != 1) {
-        cout << "Usage: ./pdb\n";
+    if (argc != 2) {
+        cout << "Usage: ./pdb <pattern>\n";
+        cout << "pattern: 7 or 8\n";
 		exit(1);
     }
 
-    vector<int> pattern{7, 8};
 	PDB pdb;
-	pdb.generateDisjointPDB(pattern);
+	pdb.generateDisjointPDB(argv[1]);
 }

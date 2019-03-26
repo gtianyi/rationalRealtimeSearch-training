@@ -29,6 +29,8 @@ struct Tiles {
         unsigned long hash() const { return word; }
 
         bool eq(const PackedState& h) const { return word == h.word; }
+
+		//int blank;
     };
 
     // Tiles constructs a new instance by reading
@@ -94,10 +96,12 @@ struct Tiles {
 		s.h = e.undo.h;
 		s.tiles[(int) s.blank] = s.tiles[(int) e.undo.blank];
 		s.blank = e.undo.blank;
-	}
+        s.tiles[(int)e.undo.blank] = 0;
+    }
 
 	// pack packes state s into the packed state dst.
-	void pack(PackedState &dst, State &s) const {
+	virtual void pack(PackedState &dst, State &s) const {
+
 		dst.word = 0;	// to make g++ shut up about uninitialized usage.
 		s.tiles[(int) s.blank] = 0;
 		for (int i = 0; i < Ntiles; i++)

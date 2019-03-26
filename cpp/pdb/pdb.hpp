@@ -28,6 +28,12 @@ class PDB {
             PartialTiles dom(7);
             dom.pack(packed, s);
             pop = -1;
+
+			dom.printState(s);
+			PartialTiles::State state;
+			dom.unpack(state,packed);
+			dom.printState(state);
+			
         }
 
         Node(PartialTiles::State& s, Node* p, float c,int _pop) {
@@ -62,6 +68,7 @@ class PDB {
 
             if (closed.find(n->packed)) {
                 continue;
+				delete n;
             }
 
             PartialTiles::State state;
@@ -70,24 +77,26 @@ class PDB {
             closed.add(n);
             f << n->packed.word << " " << n->g << endl;
 
+			//dom.printState(state);
             for (int i = 0; i < dom.nops(state); i++) {
                 int op = dom.nthop(state, i);
                 if (op == n->pop)
                     continue;
+				//dom.printState(state);
                 Edge<Tiles> e = dom.apply(state, op);
                 Node* child = new Node(state, n, e.cost, e.pop);
+				//dom.printState(state);
                 open.push(child);
                 dom.undo(state, e);
             }
         }
 
-        cout << closed.getSize() << endl;
+        cout << filename << " " << closed.getSize() << endl;
+        f.close();
     }
 
 public:
-    void generateDisjointPDB(vector<int>& patternSizes) {
-        for (auto s : patternSizes) {
-            generatePartialPDB(s,to_string(s));
-        }
+    void generateDisjointPDB(string patternSize) {
+        generatePartialPDB(stoi(patternSize), patternSize);
     }
 };
