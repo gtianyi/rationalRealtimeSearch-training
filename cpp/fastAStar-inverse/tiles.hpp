@@ -37,6 +37,9 @@ struct Tiles {
     // format.
     Tiles(FILE*);
 
+	//constructor for partial tile
+	Tiles();
+
     virtual State initial() const {
         State s;
         s.blank = -1;

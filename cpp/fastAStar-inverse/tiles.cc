@@ -39,6 +39,8 @@ Tiles::Tiles(FILE *in) {
 	initoptab();
 }
 
+Tiles::Tiles() {}
+
 void Tiles::initmd() {
 	for (int t = 1; t < Ntiles; t++) {
 		int grow = t / Width, gcol = t % Width;

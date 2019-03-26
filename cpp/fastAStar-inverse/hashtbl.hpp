@@ -16,6 +16,7 @@ template <class Node> struct HashEntry {
 template <class Key, class Node> class HashTable {
 
 	std::vector<Node*> buckets;
+	unsigned long long size;
 
 public:
 
@@ -40,7 +41,10 @@ public:
 		n->hashentry().hash = hash;
 		n->hashentry().next = buckets[ind];
 		buckets[ind] = n;
+		size++;
 	}
+
+	unsigned long long getSize(){return size;};
 
 };
 
