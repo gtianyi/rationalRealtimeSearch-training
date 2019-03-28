@@ -14,11 +14,11 @@ public:
         init[0] = 0;
 
         if (patternSize == 7) {
-            for (int i = 1; i <= 7; i++) {
+            for (int i = 1; i <= 6; i++) {
                 init[i] = i;
             }
 
-            for (int i = 8; i <= 15; i++) {
+            for (int i = 7; i <= 15; i++) {
                 init[i] = 15;
             }
         } else if (patternSize == 8) {

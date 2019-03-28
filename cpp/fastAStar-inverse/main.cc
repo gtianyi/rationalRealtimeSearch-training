@@ -1,7 +1,7 @@
 // Copyright 2012 Ethan Burns. All rights reserved.
 // Use of this source code is governed by an MIT-style
 // license that can be found in the LICENSE file.
-#include "inverseTiles.hpp"
+#include "inverseTiles-pdb.hpp"
 #include "idastar.hpp"
 #include "astar.hpp"
 #include <cstring>
@@ -17,7 +17,7 @@ int main(int argc, const char *argv[]) {
 		shared_ptr<Tiles> tiles;
 
         if (strcmp(argv[2], "inverse") == 0) {
-            tiles = make_shared<InverseTiles>(stdin);
+            tiles = make_shared<InverseTilesPDB>(stdin);
         } else if (strcmp(argv[2], "uniform") == 0) {
             tiles = make_shared<Tiles>(stdin);
         }
@@ -35,7 +35,7 @@ int main(int argc, const char *argv[]) {
 
         Tiles::State init = tiles->initial();
         dfheader(stdout);
-        dfpair(stdout, "initial heuristic", "%f", tiles->h(init));
+        dfpair(stdout, "initial heuristic", "%f", tiles->hManhattan(init));
         double wall0 = walltime(), cpu0 = cputime();
 
         SolPath<Tiles> path = search->search(init);

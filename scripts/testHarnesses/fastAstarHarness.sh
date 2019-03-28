@@ -42,7 +42,7 @@ mkdir -p ../../../results/SlidingTilePuzzle/sampleData/${tileType}
 	  then 
 	    let instance++
 	  else
-	    ../../../build_release/tiles-${tileType} ${searchalg} ${tileType} < ${file} > ../../../results/SlidingTilePuzzle/sampleData/${tileType}/${instance}.txt &
+	    timeout 600 ../../../build_release/tiles-${tileType} ${searchalg} ${tileType} < ${file} > ../../../results/SlidingTilePuzzle/sampleData/${tileType}/${instance}.txt &
 	    let instance++
         let numProcs++
 	  fi
