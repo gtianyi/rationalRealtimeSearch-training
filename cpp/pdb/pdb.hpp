@@ -25,7 +25,7 @@ class PDB {
 
         Node(PartialTiles::State& s) {
             g = 0;
-            PartialTiles dom(7);
+            PartialTiles dom;
             dom.pack(packed, s);
             pop = -1;
 
@@ -38,7 +38,7 @@ class PDB {
 
         Node(PartialTiles::State& s, Node* p, float c,int _pop) {
             g = p->g + c;
-            PartialTiles dom(7);
+            PartialTiles dom;
 			dom.pack(packed, s);
 			pop = _pop;
         }

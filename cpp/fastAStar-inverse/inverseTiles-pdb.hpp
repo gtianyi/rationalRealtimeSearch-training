@@ -4,6 +4,7 @@
 #include <vector>
 #include <unordered_map>
 #include <sstream>
+#include <unordered_set>
 
 class InverseTilesPDB : public Tiles {
 public:
@@ -69,26 +70,58 @@ protected:
     }
 
     void initialPDB() {
-        std::ifstream f("/home/aifs1/gu/phd/research/workingPaper/realtime-nancy/results/SlidingTilePuzzle/pdb/6.txt");
+	   readPDB("61.txt") ;
+	   readPDB("62.txt") ;
+    }
+
+    void readPDB(const std::string& pdbID) {
+        std::ifstream f("/home/aifs1/gu/phd/research/workingPaper/"
+                        "realtime-nancy/results/SlidingTilePuzzle/pdb/" +
+                pdbID);
         std::string line;
 
-		if(!f.good())
-            std::cout << "PDB file not found!\n";
+        if (!f.good()) {
+            std::cout << pdbID + ": PDB file not found!\n";
+            return;
+        }
+
+		auto& htable = pdbID == "61.txt" ? htable1 : htable2;
 
         while (std::getline(f, line)) {
             std::stringstream ss(line);
-			uint64_t tileid;
-			float h;
-			ss>>tileid;
-			ss>>h;
-			htable[tileid] = h;
+            uint64_t tileid;
+            float h;
+            ss >> tileid;
+            ss >> h;
+            htable[tileid] = h;
         }
+
+		//initialize tileSet
+		auto& tiles = pdbID == "61.txt" ? sixTiles1 : sixTiles2;
+		auto& tileSets = pdbID == "61.txt" ? sixTilesSet1 : sixTilesSet2;
+
+        for (auto i : tiles) {
+            tileSets[i] = 1;
+		}
     }
 
     double h(State& s) const {
+		double db1h = getPartialPDBValue(s, 1);
+		double db2h = getPartialPDBValue(s, 0);
+
+		s.patternh = db1h + db2h;
+
+        s.currenth = std::max(s.patternh, s.h);
+
+        return s.currenth;
+    }
+
+    double getPartialPDBValue(State& s, bool isDB1) const {
+        auto& sixTiles = isDB1 ? sixTilesSet1 : sixTilesSet2;
+
         State partialState;
         for (int i = 0; i < Ntiles; i++) {
-            if (s.tiles[i] <= 6)
+            if (sixTiles[s.tiles[i]])
                 partialState.tiles[i] = s.tiles[i];
             else
                 partialState.tiles[i] = 15;
@@ -96,21 +129,26 @@ protected:
 
 		partialState.blank = s.blank;
 
-
         PackedState ps;
         pack(ps,partialState);
+
+        auto& htable = isDB1 ? htable1 : htable2;
 
         if (htable.find(ps.word) == htable.end()) {
             std::cout << "no pdb value found!!!\n";
             printState(partialState);
-            s.patternh = 999.0;
+            s.patternh = -1.0;
         }
 
-        s.patternh = htable.at(ps.word);
-        s.currenth = std::max(s.patternh, s.h);
+		return htable.at(ps.word);
+	}
 
-        return s.currenth;
-    }
-
-    std::unordered_map<uint64_t, float> htable;
+    std::unordered_map<uint64_t, float> htable1;
+    std::unordered_map<uint64_t, float> htable2;
+    //int sixTiles1[7] = {0, 2, 3, 6, 7, 10, 11};
+    int sixTiles1[7] = {0, 1, 2, 3, 4, 5, 6};
+    //int sixTiles2[7] = {0, 8, 9, 12, 13, 14, 15};
+    int sixTiles2[7] = {0, 7, 8, 9, 10, 11, 12};
+    int sixTilesSet1[16] = {0};
+    int sixTilesSet2[16] = {0};
 };
