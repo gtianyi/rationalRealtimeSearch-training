@@ -1,6 +1,7 @@
 #include "tiles.hpp"
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <vector>
 #include <unordered_map>
 #include <sstream>
@@ -8,7 +9,51 @@
 
 class InverseTilesPDB : public Tiles {
 public:
-    InverseTilesPDB(FILE* f) : Tiles(f) {}
+    //InverseTilesPDB(FILE* f) : Tiles(f) {}
+    InverseTilesPDB(std::ifstream& input,
+            std::unordered_map<uint64_t, float>& htable1,
+            std::unordered_map<uint64_t, float>& htable2)
+            : Tiles(), htable1(htable1), htable2(htable2) {
+        // Get the dimensions of the puzzle
+        std::string line;
+        getline(input, line);
+        std::stringstream ss(line);
+        // Get the first dimension...
+        int w, h;
+        ss >> w;
+        ss >> h;
+
+        if (w != Width && h != Height)
+            throw Fatal("Width and height instance/compiler option mismatch");
+
+        // Skip the next line
+        getline(input, line);
+
+        for (int i = 0; i < w * h; i++) {
+            getline(input, line);
+            int tile;
+            std::stringstream ss2(line);
+            ss2 >> tile;
+
+            init[i] = tile;
+        }
+
+        // Skip the next line
+        getline(input, line);
+
+        for (int i = 0; i < w * h; i++) {
+            getline(input, line);
+            int tile;
+            std::stringstream ss2(line);
+            ss2 >> tile;
+
+            if (i != tile)
+                throw Fatal("Non-canonical goal positions");
+        }
+
+		initmd();
+		initoptab();
+    }
 
     State initial() {
         State s;
@@ -70,32 +115,12 @@ protected:
     }
 
     void initialPDB() {
-	   readPDB("61.txt") ;
-	   readPDB("62.txt") ;
+	   initializeTileSet("61.txt") ;
+	   initializeTileSet("62.txt") ;
     }
 
-    void readPDB(const std::string& pdbID) {
-        std::ifstream f("/home/aifs1/gu/phd/research/workingPaper/"
-                        "realtime-nancy/results/SlidingTilePuzzle/pdb/" +
-                pdbID);
-        std::string line;
-
-        if (!f.good()) {
-            std::cout << pdbID + ": PDB file not found!\n";
-            return;
-        }
-
-		auto& htable = pdbID == "61.txt" ? htable1 : htable2;
-
-        while (std::getline(f, line)) {
-            std::stringstream ss(line);
-            uint64_t tileid;
-            float h;
-            ss >> tileid;
-            ss >> h;
-            htable[tileid] = h;
-        }
-
+    void initializeTileSet(const std::string& pdbID) {
+        
 		//initialize tileSet
 		auto& tiles = pdbID == "61.txt" ? sixTiles1 : sixTiles2;
 		auto& tileSets = pdbID == "61.txt" ? sixTilesSet1 : sixTilesSet2;
@@ -143,12 +168,10 @@ protected:
 		return htable.at(ps.word);
 	}
 
-    std::unordered_map<uint64_t, float> htable1;
-    std::unordered_map<uint64_t, float> htable2;
-    //int sixTiles1[7] = {0, 2, 3, 6, 7, 10, 11};
-    int sixTiles1[7] = {0, 1, 2, 3, 4, 5, 6};
-    //int sixTiles2[7] = {0, 8, 9, 12, 13, 14, 15};
-    int sixTiles2[7] = {0, 7, 8, 9, 10, 11, 12};
+    std::unordered_map<uint64_t, float>& htable1;
+    std::unordered_map<uint64_t, float>& htable2;
+    const int sixTiles1[7] = {0, 1, 2, 3, 4, 5, 6};
+    const int sixTiles2[7] = {0, 7, 8, 9, 10, 11, 12};
     int sixTilesSet1[16] = {0};
     int sixTilesSet2[16] = {0};
 };
