@@ -120,6 +120,8 @@ int main(int argc, const char* argv[]) {
         ifstream input(inputFile);
 
         // cout << "start " << instanceID << endl;
+        if (!input.good())
+            continue;
 
         computeTile(argv, input, output, htable1, htable2);
     }
