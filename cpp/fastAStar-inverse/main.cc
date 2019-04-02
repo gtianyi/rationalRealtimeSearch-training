@@ -73,7 +73,7 @@ void computeTile(const char* argv[],
         output << "total cpu time " << ctime << endl;
         output << "total nodes expanded " << search->expd << endl;
         output << "total nodes generated " << search->gend << endl;
-        output << "solution lenght " << path.cost << endl;
+        output << "solution length " << path.cost << endl;
         output << "end" << endl;
 
         output.close();
@@ -82,6 +82,33 @@ void computeTile(const char* argv[],
         fputc('\n', stderr);
         return;
     }
+}
+
+bool checkisGoodPuzzle(ifstream& input){
+// Get the dimensions of the puzzle
+        std::string line;
+        getline(input, line);
+        std::stringstream ss(line);
+        // Get the first dimension...
+        int w, h;
+        ss >> w;
+        ss >> h;
+
+        // Skip the next line
+        getline(input, line);
+
+		int zeroCount = 0;
+        for (int i = 0; i < w * h; i++) {
+            getline(input, line);
+            int tile;
+            std::stringstream ss2(line);
+            ss2 >> tile;
+
+            if (tile == 0)
+                zeroCount++;
+        }
+
+		return zeroCount == 1;
 }
 
 int main(int argc, const char* argv[]) {
@@ -118,6 +145,10 @@ int main(int argc, const char* argv[]) {
                 string(argv[2]) + "/" + to_string(instanceID) + ".st";
 
         ifstream input(inputFile);
+        ifstream inputcheck(inputFile);
+
+        if (!checkisGoodPuzzle(inputcheck))
+            continue;
 
         // cout << "start " << instanceID << endl;
         if (!input.good())
