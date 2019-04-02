@@ -90,6 +90,7 @@ public:
             double d;
             string key;
             ss2 >> h;
+            h = h / 15.0; // the h dumped out was weighted h, the weight was 15
             ss2 >> d;
             ss2 >> key;
 
@@ -99,7 +100,7 @@ public:
             auto& bucket = hCollection[n->hGroup];
 
 			if (n->hGroup >= htableSize){
-                //std::cout << "high h: " << h << "\n";
+				std::cout << "high h: " << h << "\n";
 				continue;
 			}
 
@@ -157,8 +158,8 @@ public:
 	Collection() : fileCount(0){};
 
 private:
-    static constexpr double histInterval = 0.05;
-    static constexpr double histMax = 80.0;
+    static constexpr double histInterval = 0.1;
+    static constexpr double histMax = 20.0;
     static constexpr int htableSize = (int)histMax / histInterval;
 
     std::unordered_set<shared_ptr<Node>,
