@@ -4,8 +4,10 @@ import pandas as pd
 import json
 import seaborn as sns
 import numpy as np
+import re
 from os import listdir
 from collections import defaultdict
+from collections import OrderedDict
 
 def makeHistrogram(h, hs, fileDir):
     sns.set(rc={'figure.figsize': (11, 8), 'font.size': 26, 'text.color': 'black'})
@@ -13,10 +15,10 @@ def makeHistrogram(h, hs, fileDir):
     #ax.tick_params(colors='black', labelsize=12, rotation=90)
     # ax.xaxis.set_major_locator(ticker.MultipleLocator(5))
     # ax.set_xscale('log')
-    ylable = '%.1f' % h  
+    ylable = '%.2f' % h  
     plt.ylabel("h="+ylable, color='black', fontsize=18)
     plt.xlabel("h*", color='black', fontsize=18)
-    plt.savefig(fileDir+"h"+str(h).zfill(4)+".eps", bbox_inches="tight", pad_inches=0)
+    plt.savefig(fileDir+"h"+str(h).zfill(5)+".eps", bbox_inches="tight", pad_inches=0)
     plt.close()
     plt.clf()
     plt.cla()
@@ -24,7 +26,7 @@ def makeHistrogram(h, hs, fileDir):
 
 def dump2file(h, hs, outFile):
     #save to 0.1 to make histogramo
-    hs = [round(v,1) for v in hs]
+    hs = [round(v,2) for v in hs] # this is dangrous, but otherwise we have each data point a bin
     hsSet = set(hs)
     outFile.write(str(h)+' '+str(len(hs))+' ')
     for hsvalue in hsSet:
@@ -33,12 +35,13 @@ def dump2file(h, hs, outFile):
     outFile.write("\n")
 
 def getHgroup(h):
-    return round(h,1)
+    return round(h,2)
 
 def makeScatterPlot(h, hs,fileDir):
     df = pd.DataFrame({"h":h,"h*":hs})
     sns.set(rc={'figure.figsize': (11, 8), 'font.size': 26, 'text.color': 'black'})
-    ax = sns.scatterplot(x="h",y="h*",data=df, alpha=0.5)
+    # ax = sns.jointplot(x="h",y="h*",data=df, kind = "hex")
+    ax = sns.scatterplot(x="h",y="h*",data=df, alpha = 0.01)
     plt.ylabel("h*", color='black', fontsize=18)
     plt.xlabel("h", color='black', fontsize=18)
     plt.savefig(fileDir+"scatter-inverse.pdf", bbox_inches="tight", pad_inches=0)
@@ -46,6 +49,10 @@ def makeScatterPlot(h, hs,fileDir):
     plt.clf()
     plt.cla()
     return
+
+def dumphhat(h, hs, outFile):
+    outFile.write(str(h)+' '+str(sum(hs)/len(hs)))
+    outFile.write("\n")
 
 # Hard coded result directories
 resultDirs = {"inverse"}
@@ -73,8 +80,12 @@ for dir in resultDirs:
 
             # if "solution length" in line:
             if "solution lenght" in line:
+                line = line.split("lenght",1)[1] #this is to avoid error when mixed line for multi-process
                 for s in line.split():
+                    # print(file)
                     if any(c.isdigit() for c in s):
+                        g = re.search(r"\d+(\.\d+)?", s) # to avoid number mmixed with end
+                        s = g.group(0)
                         hs = float(s)
 
         if h!=999.0 and hs!=999.0:
@@ -88,11 +99,15 @@ print("plotting...")
 
 
 # f = open("../../../results/SlidingTilePuzzle/sampleData/"+min(resultDirs)+"-statSummary.txt","w")
+f_hhat = open("../../../results/SlidingTilePuzzle/sampleData/"+min(resultDirs)+"-hhat.txt","w")
 plotDir ="../../../plots/hist/"+min(resultDirs)+"/"
 
-# for h, hslist in h_collection.items():
+od = OrderedDict(sorted(h_collection.items()))
+
+for h, hslist in od.items():
     # dump2file(h,hslist,f)
+    dumphhat(h,hslist,f_hhat)
     # if len(hslist) > 0:
         # makeHistrogram(h,hslist,plotDir)
 
-makeScatterPlot(all_h, all_hs, plotDir)
+# makeScatterPlot(all_h, all_hs, plotDir)
