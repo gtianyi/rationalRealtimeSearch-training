@@ -35,7 +35,7 @@ def dump2file(h, hs, outFile):
     outFile.write("\n")
 
 def getHgroup(h):
-    return round(h,2)
+    return round(h,1)
 
 def makeScatterPlot(h, hs,fileDir):
     df = pd.DataFrame({"h":h,"h*":hs})
@@ -54,10 +54,20 @@ def dumphhat(h, hs, outFile):
     outFile.write(str(h)+' '+str(sum(hs)/len(hs)))
     outFile.write("\n")
 
+def dump2file_sample_states(h, samples, outFile):
+    #save to 0.1 to make histogramo
+    outFile.write(str(h)+' '+str(len(samples))+' ')
+    for sample in samples:
+        outFile.write(sample+' ')
+    outFile.write("\n")
+
+
+
 # Hard coded result directories
-resultDirs = {"inverse"}
+resultDirs = {"inverse_20_0.1_200"}
 
 h_collection = defaultdict(list)
+h_collection_sampleStates = defaultdict(list)
 all_h = []
 all_hs = []
 
@@ -90,6 +100,7 @@ for dir in resultDirs:
 
         if h!=999.0 and hs!=999.0:
             h_collection[getHgroup(h)].append(hs)
+            h_collection_sampleStates[getHgroup(h)].append(file.split(".")[0]+".st")
             all_h.append(h)
             all_hs.append(hs)
 
@@ -99,15 +110,24 @@ print("plotting...")
 
 
 # f = open("../../../results/SlidingTilePuzzle/sampleData/"+min(resultDirs)+"-statSummary.txt","w")
-f_hhat = open("../../../results/SlidingTilePuzzle/sampleData/"+min(resultDirs)+"-hhat.txt","w")
-plotDir ="../../../plots/hist/"+min(resultDirs)+"/"
+# f_hhat = open("../../../results/SlidingTilePuzzle/sampleData/"+min(resultDirs)+"-hhat.txt","w")
+# plotDir ="../../../plots/hist/"+min(resultDirs)+"/"
 
-od = OrderedDict(sorted(h_collection.items()))
+# od = OrderedDict(sorted(h_collection.items()))
 
-for h, hslist in od.items():
+# for h, hslist in od.items():
     # dump2file(h,hslist,f)
-    dumphhat(h,hslist,f_hhat)
+    # dumphhat(h,hslist,f_hhat)
     # if len(hslist) > 0:
         # makeHistrogram(h,hslist,plotDir)
+
+
+od2 = OrderedDict(sorted(h_collection_sampleStates.items()))
+
+f_samples = open("../../../results/SlidingTilePuzzle/sampleData/"+min(resultDirs)+"-samples.txt","w")
+
+for h, samples in od2.items():
+    dump2file_sample_states(h,samples,f_samples)
+ 
 
 # makeScatterPlot(all_h, all_hs, plotDir)
