@@ -50,6 +50,11 @@ def makeScatterPlot(h, hs,fileDir):
     plt.cla()
     return
 
+def dumpPoints2csv(h, hs,fileDir):
+    df = pd.DataFrame({"h":h,"h*":hs})
+    df.to_csv(fileDir+"h-h*.csv",index=None, header=True)
+    return
+
 def dumphhat(h, hs, outFile):
     outFile.write(str(h)+' '+str(sum(hs)/len(hs)))
     outFile.write("\n")
@@ -60,8 +65,6 @@ def dump2file_sample_states(h, samples, outFile):
     for sample in samples:
         outFile.write(sample+' ')
     outFile.write("\n")
-
-
 
 # Hard coded result directories
 resultDirs = {"inverse_20_0.1_200"}
@@ -111,7 +114,6 @@ print("plotting...")
 
 # f = open("../../../results/SlidingTilePuzzle/sampleData/"+min(resultDirs)+"-statSummary.txt","w")
 # f_hhat = open("../../../results/SlidingTilePuzzle/sampleData/"+min(resultDirs)+"-hhat.txt","w")
-# plotDir ="../../../plots/hist/"+min(resultDirs)+"/"
 
 # od = OrderedDict(sorted(h_collection.items()))
 
@@ -122,12 +124,17 @@ print("plotting...")
         # makeHistrogram(h,hslist,plotDir)
 
 
-od2 = OrderedDict(sorted(h_collection_sampleStates.items()))
+# od2 = OrderedDict(sorted(h_collection_sampleStates.items()))
 
-f_samples = open("../../../results/SlidingTilePuzzle/sampleData/"+min(resultDirs)+"-samples.txt","w")
+# f_samples = open("../../../results/SlidingTilePuzzle/sampleData/"+min(resultDirs)+"-samples.txt","w")
 
-for h, samples in od2.items():
-    dump2file_sample_states(h,samples,f_samples)
+# for h, samples in od2.items():
+    # dump2file_sample_states(h,samples,f_samples)
  
 
+# plotDir ="../../../plots/hist/"+min(resultDirs)+"/"
 # makeScatterPlot(all_h, all_hs, plotDir)
+
+
+csvDir ="../../../results/SlidingTilePuzzle/sampleData/" + min(resultDirs)+"/"
+dumpPoints2csv(all_h, all_hs, csvDir)
