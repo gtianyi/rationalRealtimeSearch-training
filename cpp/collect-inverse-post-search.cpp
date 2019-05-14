@@ -7,9 +7,8 @@
 #include <unordered_set>
 #include <memory>
 #include <random>
-#include "domain/SlidingTilePuzzle.h"
+#include "domain/InverseTilePuzzle.h"
 #include <boost/functional/hash.hpp>
-
 
 using namespace std;
 
@@ -35,163 +34,261 @@ struct cmp_func
   }  
 };
 
-template<class Domain>
-class Collection{
+string double2string(double c, int precision) {
+        stringstream stream;
+        stream << fixed << setprecision(precision) << c;
+        return stream.str();
+}
+
+constexpr int hPrecision = 1;
+
+template<class Domain, class hValueType>
+class PostSearchCollection{
 public:
     typedef typename Domain::State State;
     typedef typename Domain::Cost Cost;
 
-    struct Node {
-        Cost h;
-        double d;
-        State state;
-        int hGroup;
+    using HStateMap =
+            std::unordered_map<std::string, std::vector<State>>;
 
-        Node(Cost _h, double _d, State _s) : h(_h), d(_d), state(_s) {
-            hGroup = (int)floor(h / histInterval);
+    struct Hist {
+        struct Bin {
+            Bin(hValueType hs, int count) : value(hs), count(count) {}
+
+            void setValue(hValueType v) {
+                value = v;
+                valueString = double2string(v, hPrecision);
+            }
+
+            hValueType getValue() const { return value; }
+            string getValueString() const { return valueString; }
+
+            void setCount(int c) { count = c; }
+            int getCount() const { return count; }
+            void addCount(int c) { count += c; }
+
+            void print(ofstream& f) const { f << valueString << " " << count << " "; }
+
+        private:
+            hValueType value;
+            string valueString;
+            int count;
+
+        };
+
+        vector<Bin> bins;
+        double mean;
+        int totalCount;
+
+        void push(Bin&& bin) {
+            mean = (mean * totalCount + bin.getValue() * bin.getCount()) /
+                    (double)(totalCount + bin.getCount());
+            totalCount += bin.getCount();
+            bins.push_back(std::move(bin));
+        }
+
+        void updateBin(int binIndex, int addcount) {
+            auto& bin = bins[binIndex];
+            mean = (mean * totalCount + bin.getValue() * addcount) /
+                    (double)(totalCount + addcount);
+
+            bin.addCount(addcount);
+            totalCount += addcount;
+        }
+
+        Hist shift(Cost c) {
+            Hist retHist;
+
+            retHist.mean = mean + c;
+            retHist.totalCount = totalCount;
+
+            for (auto bin : bins) {
+                Bin newBin(bin.getValue() + c,bin.getCount());
+                retHist.bins.push_back(newBin);
+            }
+
+            return retHist;
+        }
+
+        void print(ofstream& f) const {
+            f << totalCount << " ";
+            for (const auto& bin : bins) {
+                bin.print(f);
+            }
+            f << "\n";
         }
     };
 
-    void parsingDumpFile(ifstream& f, int sampleCount) {
-        fileCount++;
-        string line;
+    typedef typename Hist::Bin Bin;
 
-        getline(f, line);
-
-        cout << "file #: " << fileCount << " ";
-        cout << "file info: " << line << endl;
-
-		string prevline;
-        while (!f.eof()) {
-            std::vector<int> rows(4, 0);
-            std::vector<std::vector<int>> board(4, rows);
-            for (int r = 0; r < 4; r++) {
-                getline(f, line);
-                stringstream ss(line);
-                for (int c = 0; c < 4; c++) {
-                    int tile;
-                    ss >> tile;
-                    board[r][c] = tile;
-                    if (tile >= 16) {
-                        cout << "wrong tile " << tile <<" "<< r << " " << c << endl;
-                        cout << "wrong line " << line << endl;
-                        cout << "wrong prev line " << prevline << endl;
-                    }
-                    assert(tile < 16);
-                    assert(tile >= 0);
-                }
-            }
-            getline(f, line);
-            stringstream ss2(line);
-
-            prevline = line;
-
-            Cost h;
-            double d;
-            string key;
-            ss2 >> h;
-            h = h / 15.0; // the h dumped out was weighted h, the weight was 15
-            ss2 >> d;
-            ss2 >> key;
-
-            State s(board, 's');
-            shared_ptr<Node> n = make_shared<Node>(h, d, s);
-
-            auto& bucket = hCollection[n->hGroup];
-
-			if (n->hGroup >= htableSize){
-				std::cout << "high h: " << h << "\n";
-				continue;
-			}
-
-            assert(n->hGroup < htableSize);
-
-            bucket.insert(n);
-
-            if (bucket.size() > sampleCount)
-			{
-                // obtain a random number from hardware
-                std::random_device rd;
-
-                // seed the generator
-                std::mt19937 eng(rd());
-
-                // define the range
-                std::uniform_int_distribution<> distr(0, bucket.size() - 1);
-
-                int randPos = distr(eng);
-
-                bucket.erase(std::next(bucket.begin(), randPos));
-            }
-        }
-    };
-
-    void dumpSampleSet(string tileType) {
-        int id = 0;
-        int hcount = 0;
-        for (int i = 0; i < htableSize; i++) {
-            auto& bucket = hCollection[i];
-
-            if (bucket.size() == 0)
-                continue;
-
-			hcount++;
-			
-            for (auto it = bucket.begin(); it!=bucket.end();++it) {
-                id++;
-                string fileName =
-                        "../results/SlidingTilePuzzle/sampleProblem/" +
-                        tileType + "/" + to_string(id) + ".st";
-
-                ofstream f(fileName);
-
-                //std::cout << (*it)->state << "\n";
-
-                (*it)->state.dumpToProblemFile(f);
-                f.close();
-            }
-		}
-        cout << "h count " << hcount << endl;
-        cout << "dump count " << id << endl;
-    }
-
-	Collection() : fileCount(0){};
-
-private:
-    static constexpr double histInterval = 0.01;
-    static constexpr double histMax = 12.0;
-    static constexpr int htableSize = (int)histMax / histInterval;
-
-    std::unordered_set<shared_ptr<Node>,
-            hash_func<Collection<Domain>>,
-            cmp_func<Collection<Domain>>>
-            hCollection[htableSize];
-
-    int fileCount;
-
-};
-
-int main(int argc, char** argv) {
-    if (argc != 6) {
-        cout << "Wrong number of arguments: ./collect <weight> <first instance> <last instance> <tile type> <sample count>"
-             << endl;
-        exit(1);
-    }
-
-
-    vector<string> samples;
-
-	Collection<SlidingTilePuzzle> collection;
-
-    for (const auto& f:samples) {
-        string fileName = "../results/SlidingTilePuzzle/sampleProblem/" + f;
-
+    State getStateByInstanceName(const string& instance) {
+        string fileName = "../results/SlidingTilePuzzle/sampleProblem/" + instance;
         std::ifstream f(fileName);
+		Domain d(f);
+		return d.getStartState();
+	}
 
-        collection.parsingDumpFile(f, sampleCount);
+    void parsingSamples(ifstream& f) {
+        string line, h, instanceName;
+
+        while (getline(f, line)) {
+            stringstream ss(line);
+
+            ss >> h;
+            int valueCount;
+            ss >> valueCount;
+
+            vector<State> statesList;
+
+            while (!ss.eof()) {
+                ss >> instanceName;
+				statesList.push_back(getStateByInstanceName(instanceName));
+            }
+
+            assert(valueCount == statesList.size());
+
+            hStatesCollection[h] = statesList;
+        }
 
         f.close();
     }
 
-    collection.dumpSampleSet(tileType);
+    void parseHistData(ifstream& f) {
+        string line;
+
+		string h;
+		hValueType hs;
+		int valueCount, hsCount;
+
+        while (getline(f, line)) {
+            stringstream ss(line);
+
+            ss >> h;
+            ss >> valueCount;
+
+			Hist hist;
+            while (!ss.eof()) {
+                ss >> hs;
+                ss >> hsCount;
+				hist.push(Bin(hs, hsCount));
+            }
+
+            assert(hist.bins.size() == valueCount);
+			originalhHist[h]=hist;
+        }
+
+		f.close();
+    }
+
+    Hist lookahead(const State& s) {
+        Cost backuphhat = std::numeric_limits<double>::infinity();
+
+        vector<State> children = domain.successors(s);
+        Hist bestShiftedHist;
+
+        for (auto& c : children) {
+            Cost h = domain.heuristic(c);
+            auto hString = double2string(h, hPrecision);
+            Cost hhat = originalhHist[hString].mean;
+            Cost edgeCost = domain.getEdgeCost(c);
+            hhat += edgeCost;
+            if (hhat < backuphhat) {
+                backuphhat = hhat;
+                bestShiftedHist = originalhHist[hString].shift(edgeCost);
+            }
+        }
+
+        return bestShiftedHist;
+    }
+
+    Hist mergeHists(const vector<Hist>& hists) {
+        Hist newHist;
+        unordered_map<string, int> newHistKey;
+
+        for (auto hist : hists) {
+            for (auto bin : hist.bins) {
+                if (newHistKey.find(bin.getValueString()) != newHistKey.end()) {
+                    int binIndex = newHistKey[bin.getValueString()];
+                    newHist.updateBin(binIndex, bin.getCount());
+                }
+				else{
+                    newHist.push(std::move(bin));
+                    newHistKey[bin.getValueString()] = newHist.bins.size() - 1;
+                }
+            }
+        }
+	}
+
+    void computePostSearchHist(ifstream& f) {
+        parseHistData(f);
+
+        for (auto it = hStatesCollection.begin(); it != hStatesCollection.end();
+                it++) {
+            std::vector<Hist> histListAfterBackup;
+
+            for (auto s : it->second) {
+                auto hist = lookahead(s);
+				histListAfterBackup.push_back(hist);
+            }
+
+            auto newHist = mergeHists(histListAfterBackup);
+
+            postSearchhHist[it->first] = newHist;
+        }
+    }
+
+    void dumpPostSearchHist(ofstream& f) {
+        for (auto it = postSearchhHist.begin(); it != postSearchhHist.end();
+                it++) {
+            auto& h = it->first;
+            auto& hist = it->second;
+
+            f << h << " ";
+            hist.print(f);
+        }
+
+		f.close();
+	}
+    
+private:
+    Domain domain;
+    HStateMap hStatesCollection;
+    std::unordered_map<std::string, Hist> originalhHist;
+    std::unordered_map<std::string, Hist> postSearchhHist;
+};
+
+int main(int argc, char** argv) {
+    if (argc != 3) {
+        cout << "Wrong number of arguments: ./collect-post-search <samples file> <distribution file>"
+             << endl;
+        exit(1);
+    }
+
+    string sampleFile = "../results/SlidingTilePuzzle/sampleProblem/" +
+            std::string(argv[1]);
+    string distributionFile = "../results/SlidingTilePuzzle/sampleProblem/" +
+            std::string(argv[2]);
+    string postSearchFile =
+            "../results/SlidingTilePuzzle/sampleProblem/postSearch" +
+            std::string(argv[2]);
+
+    std::ifstream f_sample(sampleFile);
+    std::ifstream f_distribution(distributionFile);
+    std::ofstream f_out(postSearchFile);
+
+    PostSearchCollection<InverseTilePuzzle,float> post_search_collection;
+
+    // read each line get all 200-ish samples
+	post_search_collection.parsingSamples(f_sample);
+
+    // for each sample problem, expand it find its succssors and their h-values
+    // query the h* distributions by the h-values
+    // do nancy backup (eg, get the one with min f-hat), to get the post-search
+    // belief
+	// for all 200-ish post-search beliefs, merge them by doing numerical
+    // intergation
+    // now we have the mapping that map h to post-search h*
+	post_search_collection.computePostSearchHist(f_distribution);
+
+	post_search_collection.dumpPostSearchHist(f_out);
 }

@@ -140,6 +140,8 @@ public:
         }
     };
 
+    SlidingTilePuzzle() {}
+
     SlidingTilePuzzle(std::istream& input) {
         // Get the dimensions of the puzzle
         string line;
