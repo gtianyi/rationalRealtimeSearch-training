@@ -11,14 +11,19 @@ from collections import OrderedDict
 
 def makeHistrogram(h, hslistpair, fileDir):
     sns.set(rc={'figure.figsize': (11, 8), 'font.size': 26, 'text.color': 'black'})
-    sns.distplot(np.array(hslistpair[1]), label="Post Search Belief", kde=False, norm_hist=True, hist_kws={"histtype": "step", "linewidth": 1,"alpha": 1, "color": "b"})
-    sns.distplot(np.array(hslistpair[0]), label="Original Belief", kde=False, norm_hist=True, hist_kws={"histtype": "step", "linewidth": 1,"alpha": 1, "color": "r"})
+
+    ax_ps = sns.distplot(np.array(hslistpair[1]), label="Post Search Belief", kde=False, norm_hist=True, hist_kws={"histtype": "step", "linewidth": 1,"alpha": 1, "color": "b"})
+    ax_ps.axvline(np.array(hslistpair[1]).mean(), color='b', linewidth=4, ymin = 0.45, ymax=0.55)
+
+    ax_or = sns.distplot(np.array(hslistpair[0]), label="Original Belief", kde=False, norm_hist=True, hist_kws={"histtype": "step", "linewidth": 1,"alpha": 1, "color": "r"})
+    ax_or.axvline(np.array(hslistpair[0]).mean(), color='r', linewidth=4, ymin = 0.45, ymax=0.55)
+
     #ax.tick_params(colors='black', labelsize=12, rotation=90)
     # ax.xaxis.set_major_locator(ticker.MultipleLocator(5))
     # ax.set_xscale('log')
-    ylable = h  
-    plt.ylabel("h="+ylable, color='black', fontsize=18)
+    # plt.ylabel("density", color='black', fontsize=18)
     plt.xlabel("h*", color='black', fontsize=18)
+    plt.title("h="+ h )
     plt.legend()
     plt.savefig(fileDir+"h"+h.zfill(5)+".eps", bbox_inches="tight", pad_inches=0)
     plt.close()
