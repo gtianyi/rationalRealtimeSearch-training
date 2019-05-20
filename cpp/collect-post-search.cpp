@@ -43,40 +43,102 @@ string double2string(double c, int precision) {
 constexpr int hPrecision = 1;
 constexpr int hsPrecision = 1;
 
-template<class Domain, class hValueType>
-class PostSearchCollection{
+struct CollectionBase{
+    virtual void parsingSamples(ifstream& f, const string& instanceDir)=0; 
+    virtual void computePostSearchHist(ifstream& f)=0;
+    virtual void dumpPostSearchHist(ofstream& f) const = 0;
+};
+
+template <class Domain>
+class PostSearchCollection : public CollectionBase {
 public:
+  virtual void parsingSamples(ifstream& f,
+            const string& instanceDir) override {
+        string line, h, instanceName;
+
+        while (getline(f, line)) {
+            stringstream ss(line);
+
+            ss >> h;
+            int valueCount;
+            ss >> valueCount;
+
+            vector<State> statesList;
+
+            while (ss >> instanceName) {
+                statesList.push_back(getStateByInstanceName(instanceName, instanceDir));
+            }
+
+            assert(valueCount == statesList.size());
+
+            hStatesCollection[h] = statesList;
+        }
+
+        f.close();
+    }
+
+    virtual void computePostSearchHist(ifstream& f) override {
+        parseHistData(f);
+
+        for (auto it = hStatesCollection.begin(); it != hStatesCollection.end();
+                it++) {
+            std::vector<Hist> histListAfterBackup;
+
+            for (auto s : it->second) {
+				histListAfterBackup.push_back(lookahead(s));
+            }
+
+            postSearchhHist[it->first] =
+                    mergeHists(std::move(histListAfterBackup));
+        }
+    }
+
+    virtual void dumpPostSearchHist(ofstream& f) const override{
+        for (auto it = postSearchhHist.begin(); it != postSearchhHist.end();
+                it++) {
+            auto& h = it->first;
+            auto& hist = it->second;
+
+            f << h << " ";
+            hist.print(f);
+        }
+
+		f.close();
+	}
+
+private:
+
     typedef typename Domain::State State;
     typedef typename Domain::Cost Cost;
 
-    using HStateMap =
-            std::unordered_map<std::string, std::vector<State>>;
+    using HStateMap = std::unordered_map<std::string, std::vector<State>>;
 
     struct Hist {
         struct Bin {
-            Bin(hValueType hs, int count) : value(hs), count(count) {
+            Bin(Cost hs, int count) : value(hs), count(count) {
                 valueString = double2string(hs, hsPrecision);
             }
 
-            void setValue(hValueType v) {
+            void setValue(Cost v) {
                 value = v;
                 valueString = double2string(v, hsPrecision);
             }
 
-            hValueType getValue() const { return value; }
+            Cost getValue() const { return value; }
             string getValueString() const { return valueString; }
 
             void setCount(int c) { count = c; }
             int getCount() const { return count; }
             void addCount(int c) { count += c; }
 
-            void print(ofstream& f) const { f << valueString << " " << count << " "; }
+            void print(ofstream& f) const {
+                f << valueString << " " << count << " ";
+            }
 
         private:
-            hValueType value;
+            Cost value;
             string valueString;
             int count;
-
         };
 
         Hist() : mean(0), totalCount(0) {}
@@ -104,7 +166,7 @@ public:
             retHist.totalCount = totalCount;
 
             for (auto bin : bins) {
-                Bin newBin(bin.getValue() + c,bin.getCount());
+                Bin newBin(bin.getValue() + c, bin.getCount());
                 retHist.bins.push_back(newBin);
             }
 
@@ -133,42 +195,20 @@ public:
 
     typedef typename Hist::Bin Bin;
 
-    State getStateByInstanceName(const string& instance) const {
-        string fileName = "../results/SlidingTilePuzzle/sampleProblem/inverse-20-0.1-200/" + instance;
+    State getStateByInstanceName(const string& instance,
+            const string& dir) const {
+        string fileName = "../results/SlidingTilePuzzle/sampleProblem/" + dir +
+                "/" + instance;
         std::ifstream f(fileName);
-		Domain d(f);
-		return d.getStartState();
-	}
-
-    void parsingSamples(ifstream& f) {
-        string line, h, instanceName;
-
-        while (getline(f, line)) {
-            stringstream ss(line);
-
-            ss >> h;
-            int valueCount;
-            ss >> valueCount;
-
-            vector<State> statesList;
-
-            while (ss >> instanceName) {
-                statesList.push_back(getStateByInstanceName(instanceName));
-            }
-
-            assert(valueCount == statesList.size());
-
-            hStatesCollection[h] = statesList;
-        }
-
-        f.close();
+        Domain d(f);
+        return d.getStartState();
     }
-
+  
     void parseHistData(ifstream& f) {
         string line;
 
 		string hstring;
-		hValueType hs, hvalue;
+		Cost hs, hvalue;
 		int valueCount, hsCount;
 
         while (getline(f, line)) {
@@ -207,11 +247,12 @@ public:
         else if (h < originalhValues[1])
 		    // 0 is goal, we want to return the smallest h value for a non-goal state
             closesth = originalhValues[1];
-		else {
-				//perform binary search to find closest data point, 
-				// or find 2, and merge the histgram
-				// implement later, now it should cause segfault
-				return "no found";
+        else {
+            // perform binary search to find closest data point,
+            // or find 2, and merge the histgram
+            // implement later, now it should cause segfault
+            return "no found";
+			exit(1);
 		}
 
 		return double2string(closesth, hPrecision);
@@ -259,72 +300,89 @@ public:
         }
 
 		return newHist;
-	}
-
-    void computePostSearchHist(ifstream& f) {
-        parseHistData(f);
-
-        for (auto it = hStatesCollection.begin(); it != hStatesCollection.end();
-                it++) {
-            std::vector<Hist> histListAfterBackup;
-
-            for (auto s : it->second) {
-				histListAfterBackup.push_back(lookahead(s));
-            }
-
-            postSearchhHist[it->first] =
-                    mergeHists(std::move(histListAfterBackup));
-        }
     }
 
-    void dumpPostSearchHist(ofstream& f) const {
-        for (auto it = postSearchhHist.begin(); it != postSearchhHist.end();
-                it++) {
-            auto& h = it->first;
-            auto& hist = it->second;
-
-            f << h << " ";
-            hist.print(f);
-        }
-
-		f.close();
-	}
-    
-private:
     HStateMap hStatesCollection;
     std::unordered_map<std::string, Hist> originalhHist;
-    std::vector<hValueType> originalhValues;
+    std::vector<Cost> originalhValues;
     std::unordered_map<std::string, Hist> postSearchhHist;
 };
 
+class IOFiles {
+public:
+    IOFiles(string tileType) {
+        if (tileType == "uniform") {
+            sampleFile = "../results/SlidingTilePuzzle/sampleData/"
+                         "uniform-samples.txt";
+            distributionFile = "../results/SlidingTilePuzzle/sampleData/"
+                               "uniform-statSummary.txt";
+            postSearchFile = "../results/SlidingTilePuzzle/sampleData/"
+                             "uniform-statSummary-postSearch.txt";
+
+            instanceDir = "uniform";
+
+            post_search_collection =
+                    make_shared<PostSearchCollection<SlidingTilePuzzle>>();
+        } else if (tileType == "inverse") {
+            sampleFile = "../results/SlidingTilePuzzle/sampleData/"
+                         "inverse_20_0.1_200-samples.txt";
+            distributionFile = "../results/SlidingTilePuzzle/sampleData/"
+                               "inverse-statSummary-20-0.1-200-backup.txt";
+            postSearchFile = "../results/SlidingTilePuzzle/sampleData/"
+                             "inverse-statSummary-20-0.1-200-postSearch.txt";
+
+            instanceDir = "inverse-20-0.1-200";
+
+            post_search_collection =
+                    make_shared<PostSearchCollection<InverseTilePuzzle>>();
+        } else {
+            cout << "not support tile type" << tileType << endl;
+            exit(1);
+        }
+        std::ifstream f_sample(sampleFile);
+        std::ifstream f_distribution(distributionFile);
+        std::ofstream f_out(postSearchFile);
+    }
+
+    void run() {
+        // read each line get all 200-ish samples
+        post_search_collection->parsingSamples(f_sample, instanceDir);
+
+        // for each sample problem, expand it find its succssors and their
+        // h-values
+        // query the h* distributions by the h-values
+        // do nancy backup (eg, get the one with min f-hat), to get the
+        // post-search
+        // belief
+        // for all 200-ish post-search beliefs, merge them by doing numerical
+        // intergation
+        // now we have the mapping that map h to post-search h*
+        post_search_collection->computePostSearchHist(f_distribution);
+
+        post_search_collection->dumpPostSearchHist(f_out);
+    }
+
+private:
+    std::ifstream f_sample;
+    std::ifstream f_distribution;
+    std::ofstream f_out;
+
+    shared_ptr<CollectionBase> post_search_collection;
+
+    string sampleFile;
+    string distributionFile;
+    string postSearchFile;
+    string instanceDir;
+};
+
 int main(int argc, char** argv) {
-    if (argc != 1) {
-        cout << "Wrong number of arguments: ./collect-post-search"
+    if (argc != 2) {
+        cout << "Wrong number of arguments: ./collect-post-search <tile type>"
+             << "\ntile type: uniform, inverse"
              << endl;
         exit(1);
     }
 
-    string sampleFile = "../results/SlidingTilePuzzle/sampleData/inverse_20_0.1_200-samples.txt";
-    string distributionFile = "../results/SlidingTilePuzzle/sampleData/inverse-statSummary-20-0.1-200-backup.txt";
-    string postSearchFile =
-            "../results/SlidingTilePuzzle/sampleData/inverse-statSummary-20-0.1-200-postSearch.txt";
-    std::ifstream f_sample(sampleFile);
-    std::ifstream f_distribution(distributionFile);
-    std::ofstream f_out(postSearchFile);
-
-    PostSearchCollection<InverseTilePuzzle,float> post_search_collection;
-
-    // read each line get all 200-ish samples
-	post_search_collection.parsingSamples(f_sample);
-
-    // for each sample problem, expand it find its succssors and their h-values
-    // query the h* distributions by the h-values
-    // do nancy backup (eg, get the one with min f-hat), to get the post-search
-    // belief
-	// for all 200-ish post-search beliefs, merge them by doing numerical
-    // intergation
-    // now we have the mapping that map h to post-search h*
-	post_search_collection.computePostSearchHist(f_distribution);
-
-	post_search_collection.dumpPostSearchHist(f_out);
+    IOFiles ioFiles(argv[1]);
+    ioFiles.run();
 }
