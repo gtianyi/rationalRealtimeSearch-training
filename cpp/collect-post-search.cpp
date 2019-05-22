@@ -339,9 +339,10 @@ public:
             cout << "not support tile type" << tileType << endl;
             exit(1);
         }
-        std::ifstream f_sample(sampleFile);
-        std::ifstream f_distribution(distributionFile);
-        std::ofstream f_out(postSearchFile);
+
+        f_sample = std::ifstream(sampleFile);
+        f_distribution = std::ifstream(distributionFile);
+        f_out = std::ofstream(postSearchFile);
     }
 
     void run() {
