@@ -9,62 +9,10 @@ from os import listdir
 from collections import defaultdict
 from collections import OrderedDict
 
-def makeHistrogram(h, hs, fileDir):
-    sns.set(rc={'figure.figsize': (11, 8), 'font.size': 26, 'text.color': 'black'})
-    ax = sns.distplot(np.array(hs), kde=False)
-    #ax.tick_params(colors='black', labelsize=12, rotation=90)
-    # ax.xaxis.set_major_locator(ticker.MultipleLocator(5))
-    # ax.set_xscale('log')
-    ylable = '%.2f' % h  
-    plt.ylabel("h="+ylable, color='black', fontsize=18)
-    plt.xlabel("h*", color='black', fontsize=18)
-    plt.savefig(fileDir+"h"+str(h).zfill(5)+".eps", bbox_inches="tight", pad_inches=0)
-    plt.close()
-    plt.clf()
-    plt.cla()
-    return
-
-def dump2file(h, hs, outFile):
-    #save to 0.1 to make histogramo
-    hs = [round(v,2) for v in hs] # this is dangrous, but otherwise we have each data point a bin
-    hsSet = set(hs)
-    outFile.write(str(h)+' '+str(len(hs))+' ')
-    for hsvalue in hsSet:
-        valueCount = hs.count(hsvalue)
-        outFile.write(str(hsvalue)+' '+str(valueCount)+' ')
-    outFile.write("\n")
+from dumpAndPlot import *
 
 def getHgroup(h):
     return round(h,1)
-
-def makeScatterPlot(h, hs,fileDir):
-    df = pd.DataFrame({"h":h,"h*":hs})
-    sns.set(rc={'figure.figsize': (11, 8), 'font.size': 26, 'text.color': 'black'})
-    # ax = sns.jointplot(x="h",y="h*",data=df, kind = "hex")
-    ax = sns.scatterplot(x="h",y="h*",data=df, alpha = 0.01)
-    plt.ylabel("h*", color='black', fontsize=18)
-    plt.xlabel("h", color='black', fontsize=18)
-    plt.savefig(fileDir+"scatter-inverse.pdf", bbox_inches="tight", pad_inches=0)
-    plt.close()
-    plt.clf()
-    plt.cla()
-    return
-
-def dumpPoints2csv(h, hs,fileDir):
-    df = pd.DataFrame({"h":h,"h*":hs})
-    df.to_csv(fileDir+"h-h*.csv",index=None, header=True)
-    return
-
-def dumphhat(h, hs, outFile):
-    outFile.write(str(h)+' '+str(sum(hs)/len(hs)))
-    outFile.write("\n")
-
-def dump2file_sample_states(h, samples, outFile):
-    #save to 0.1 to make histogramo
-    outFile.write(str(h)+' '+str(len(samples))+' ')
-    for sample in samples:
-        outFile.write(sample+' ')
-    outFile.write("\n")
 
 # Hard coded result directories
 resultDirs = {"inverse_20_0.1_200"}
@@ -107,34 +55,15 @@ for dir in resultDirs:
             all_h.append(h)
             all_hs.append(hs)
 
-print("h count "+str(len(h_collection))) 
+# dumphhstart(h_collection, min(resultDirs), True) 
 
-print("plotting...")
+# dumphhat(h_collection, min(resultDirs)) 
 
+# dumphSamples(h_collection_sampleStates, min(resultDirs)) 
 
-# f = open("../../../results/SlidingTilePuzzle/sampleData/"+min(resultDirs)+"-statSummary.txt","w")
-# f_hhat = open("../../../results/SlidingTilePuzzle/sampleData/"+min(resultDirs)+"-hhat.txt","w")
+# plotHist(h_collection, min(resultDirs)) 
 
-# od = OrderedDict(sorted(h_collection.items()))
+# plotScatter(all_h, all_hs, min(resultDirs)) 
 
-# for h, hslist in od.items():
-    # dump2file(h,hslist,f)
-    # dumphhat(h,hslist,f_hhat)
-    # if len(hslist) > 0:
-        # makeHistrogram(h,hslist,plotDir)
+# dump2csv(all_h, all_hs, min(resultDirs)) 
 
-
-# od2 = OrderedDict(sorted(h_collection_sampleStates.items()))
-
-# f_samples = open("../../../results/SlidingTilePuzzle/sampleData/"+min(resultDirs)+"-samples.txt","w")
-
-# for h, samples in od2.items():
-    # dump2file_sample_states(h,samples,f_samples)
- 
-
-# plotDir ="../../../plots/hist/"+min(resultDirs)+"/"
-# makeScatterPlot(all_h, all_hs, plotDir)
-
-
-csvDir ="../../../results/SlidingTilePuzzle/sampleData/" + min(resultDirs)+"/"
-dumpPoints2csv(all_h, all_hs, csvDir)

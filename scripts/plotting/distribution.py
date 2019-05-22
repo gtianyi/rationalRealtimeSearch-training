@@ -7,32 +7,13 @@ import numpy as np
 from os import listdir
 from collections import defaultdict
 
-def makeHistrogram(h, hs, fileDir):
-    sns.set(rc={'figure.figsize': (11, 8), 'font.size': 26, 'text.color': 'black'})
-    ax = sns.distplot(np.array(hs), kde=False)
-    #ax.tick_params(colors='black', labelsize=12, rotation=90)
-    # ax.xaxis.set_major_locator(ticker.MultipleLocator(5))
-    # ax.set_xscale('log')
-    plt.ylabel("h="+str(h), color='black', fontsize=18)
-    plt.xlabel("h*", color='black', fontsize=18)
-    plt.savefig(fileDir+"h"+str(h).zfill(2)+".eps", bbox_inches="tight", pad_inches=0)
-    plt.close()
-    plt.clf()
-    plt.cla()
-    return
-
-def dump2file(h, hs, outFile):
-    hsSet = set(hs)
-    outFile.write(str(h)+' '+str(len(hs))+' ')
-    for hsvalue in hsSet:
-        valueCount = hs.count(hsvalue)
-        outFile.write(str(hsvalue)+' '+str(valueCount)+' ')
-    outFile.write("\n")
+from dumpAndPlot import *
 
 # Hard coded result directories
 resultDirs = {"uniform"}
 
 h_collection = defaultdict(list)
+h_collection_sampleStates = defaultdict(list)
 
 print("reading in data...")
 
@@ -58,16 +39,10 @@ for dir in resultDirs:
 
         if h!=999 and hs!=999:
             h_collection[h].append(hs)
+            h_collection_sampleStates[h].append(file.split(".")[0]+".st")
 
-print("h count "+str(len(h_collection))) 
+# dumphhstart(h_collection, min(resultDirs)) 
 
-print("plotting...")
+dumphSamples(h_collection_sampleStates,min(resultDirs)) 
 
-
-f = open("../../../results/SlidingTilePuzzle/sampleData/"+min(resultDirs)+"-statSummary.txt","w")
-plotDir ="../../../plots/hist/"+min(resultDirs)+"/"
-
-for h, hslist in h_collection.items():
-    dump2file(h,hslist,f)
-    if len(hslist) > 0:
-        makeHistrogram(h,hslist,plotDir)
+# plotHist(h_collection, min(resultDirs)) 
