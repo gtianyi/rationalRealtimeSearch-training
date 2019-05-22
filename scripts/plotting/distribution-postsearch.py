@@ -63,9 +63,10 @@ def merge2map(m1, m2):
 
 
 # Hard coded data file
-beliefFile="../../../results/SlidingTilePuzzle/sampleData/inverse-statSummary-20-0.1-200-backup.txt"
-postsearchbeliefFile="../../../results/SlidingTilePuzzle/sampleData/inverse-statSummary-20-0.1-200-postSearch.txt"
-
+# beliefFile="../../../results/SlidingTilePuzzle/sampleData/inverse-statSummary-20-0.1-200-backup.txt"
+# postsearchbeliefFile="../../../results/SlidingTilePuzzle/sampleData/inverse-statSummary-20-0.1-200-postSearch.txt"
+beliefFile="../../../results/SlidingTilePuzzle/sampleData/uniform-statSummary.txt"
+postsearchbeliefFile="../../../results/SlidingTilePuzzle/sampleData/uniform-statSummary-postSearch.txt"
 
 print("reading in data...")
 belief_origin = parseDataFile(beliefFile)
@@ -76,7 +77,8 @@ belief_together=merge2map(belief_origin, belief_ps)
 print("plotting...")
 
 od = OrderedDict(sorted(belief_together.items()))
-plotDir ="../../../plots/hist/inverse/20-0.1-200/"
+# plotDir ="../../../plots/hist/inverse/20-0.1-200/"
+plotDir ="../../../plots/hist/uniform/postSearch/"
 
 for h, pair in od.items():
     if len(pair[0])>1 :
