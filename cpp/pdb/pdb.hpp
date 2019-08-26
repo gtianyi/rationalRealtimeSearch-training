@@ -2,6 +2,10 @@
  * file: pdb.cpp
  * description: patthern database for fifteen puzzle
  * date: March-25-2019
+ *
+ * update By: Tianyi Gu
+ * update date: Aug-25-2019
+ * update : enable heavy tile and inverse tile
  */
 
 #include "partialTiles.hpp"
@@ -12,50 +16,51 @@
 
 using namespace std;
 
+template<class TileType>
 class PDB {
     struct Node {
         float g;
         int pop;
-        typename PartialTiles::PackedState packed;
+        typename TileType::PackedState packed;
 		HashEntry<Node> hentry;
 
-        const typename PartialTiles::PackedState& key() { return packed; }
+        const typename TileType::PackedState& key() { return packed; }
 
         HashEntry<Node>& hashentry() { return hentry; }
 
-        Node(PartialTiles::State& s) {
+        Node(typename TileType::State& s) {
             g = 0;
-            PartialTiles dom;
+            TileType dom;
             dom.pack(packed, s);
             pop = -1;
 
 			dom.printState(s);
-			PartialTiles::State state;
+			typename TileType::State state;
 			dom.unpack(state,packed);
 			dom.printState(state);
-			
         }
 
-        Node(PartialTiles::State& s, Node* p, float c,int _pop) {
+        Node(typename TileType::State& s, Node* p, float c,int _pop) {
             g = p->g + c;
-            PartialTiles dom;
+            TileType dom;
 			dom.pack(packed, s);
 			pop = _pop;
         }
     };
 
     void generatePartialPDB(int patternSize, string filename) {
-        string fname = "../results/SlidingTilePuzzle/pdb/" + filename + ".txt";
+        TileType dom(patternSize);
 
-		std::ofstream f(fname);
-		
-        PartialTiles dom(patternSize);
+        string fname = "../results/SlidingTilePuzzle/pdb/" + filename + "-" +
+                dom.getType() + ".txt";
 
-        HashTable<typename PartialTiles::PackedState, Node> closed(512927357);
+        std::ofstream f(fname);
+
+        HashTable<typename TileType::PackedState, Node> closed(512927357);
 
         queue<Node*> open;
 
-        PartialTiles::State initState = dom.initial();
+        typename TileType::State initState = dom.initial();
 
         Node* initNode = new Node(initState);
 
@@ -71,7 +76,7 @@ class PDB {
 				delete n;
             }
 
-            PartialTiles::State state;
+            typename TileType::State state;
             dom.unpack(state, n->packed);
 
             closed.add(n);

@@ -5,17 +5,29 @@
  */
 
 #include "pdb.hpp"
+#include "heavyPartialTiles.hpp"
+#include "inversePartialTiles.hpp"
+#include <string>
 #include <vector>
 
 using namespace std;
 
 int main(int argc, const char* argv[]) {
-    if (argc != 2) {
-        cout << "Usage: ./pdb <pattern>\n";
-        cout << "pattern: 7 or 8\n";
+    if (argc != 3) {
+        cout << "Usage: ./pdb <pattern> <tileType>\n";
+        cout << "pattern: 61 or 62\n";
+        cout << "tile type: heavy or inverse\n";
 		exit(1);
     }
 
-	PDB pdb;
-	pdb.generateDisjointPDB(argv[1]);
+    string subDomain = argv[2];
+
+    if (subDomain == "heavy") {
+        PDB<HeavyPartialTiles> pdb;
+        pdb.generateDisjointPDB(argv[1]);
+
+    } else if (subDomain == "inverse") {
+        PDB<InversePartialTiles> pdb;
+        pdb.generateDisjointPDB(argv[1]);
+    }
 }
