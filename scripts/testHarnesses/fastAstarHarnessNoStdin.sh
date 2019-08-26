@@ -30,7 +30,7 @@ numProcs=0
 mkdir -p ../../../results/SlidingTilePuzzle/sampleData/${tileType}
 while ((numProcs < ${maxProcs}))
 do
-	../../../build_release/tiles-${tileType} ${searchalg} ${tileType} $firstInstance $maxInstances &
+	timeout 1800 ../../../build_release/tiles-pdb ${searchalg} ${tileType} $firstInstance $maxInstances &
     let numProcs++
 done
 

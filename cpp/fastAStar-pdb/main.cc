@@ -2,6 +2,7 @@
 // Use of this source code is governed by an MIT-style
 // license that can be found in the LICENSE file.
 #include "inverseTiles-pdb.hpp"
+#include "heavyTiles-pdb.hpp"
 #include "idastar.hpp"
 #include "astar.hpp"
 #include <cstring>
@@ -32,10 +33,10 @@ void readPDB(const std::string& pdbID,
 }
 
 void initializePDB(std::unordered_map<uint64_t, float>& htable1,
-				std::unordered_map<uint64_t, float>& htable2){
-		readPDB("61.txt",htable1);
-		readPDB("62.txt",htable2);
-		
+        std::unordered_map<uint64_t, float>& htable2,
+        std::string& tileType) {
+    readPDB("61-" + tileType + ".txt", htable1);
+    readPDB("62-" + tileType + ".txt", htable2);
 }
 
 void computeTile(const char* argv[],
@@ -44,12 +45,15 @@ void computeTile(const char* argv[],
         std::unordered_map<uint64_t, float>& htable1,
         std::unordered_map<uint64_t, float>& htable2) {
     try {
-        shared_ptr<Tiles> tiles;
+        shared_ptr<TilesPDB> tiles;
 
         if (strcmp(argv[2], "inverse") == 0) {
             tiles = make_shared<InverseTilesPDB>(input, htable1, htable2);
+        } else if (strcmp(argv[2], "heavy") == 0) {
+            tiles = make_shared<HeavyTilesPDB>(input, htable1, htable2);
         } else {
-            throw Fatal("Wrong tile type: inverse");
+            std::cout << argv[2] << "tile type not found!\n";
+            throw Fatal("avaible tile types: inverse or heavy");
         }
 
         SearchAlg<Tiles>* search = NULL;
@@ -84,31 +88,31 @@ void computeTile(const char* argv[],
     }
 }
 
-bool checkisGoodPuzzle(ifstream& input){
-// Get the dimensions of the puzzle
-        std::string line;
+bool checkisGoodPuzzle(ifstream& input) {
+    // Get the dimensions of the puzzle
+    std::string line;
+    getline(input, line);
+    std::stringstream ss(line);
+    // Get the first dimension...
+    int w, h;
+    ss >> w;
+    ss >> h;
+
+    // Skip the next line
+    getline(input, line);
+
+    int zeroCount = 0;
+    for (int i = 0; i < w * h; i++) {
         getline(input, line);
-        std::stringstream ss(line);
-        // Get the first dimension...
-        int w, h;
-        ss >> w;
-        ss >> h;
+        int tile;
+        std::stringstream ss2(line);
+        ss2 >> tile;
 
-        // Skip the next line
-        getline(input, line);
+        if (tile == 0)
+            zeroCount++;
+    }
 
-		int zeroCount = 0;
-        for (int i = 0; i < w * h; i++) {
-            getline(input, line);
-            int tile;
-            std::stringstream ss2(line);
-            ss2 >> tile;
-
-            if (tile == 0)
-                zeroCount++;
-        }
-
-		return zeroCount == 1;
+    return zeroCount == 1;
 }
 
 int main(int argc, const char* argv[]) {
@@ -120,7 +124,8 @@ int main(int argc, const char* argv[]) {
     std::unordered_map<uint64_t, float> htable2;
 
 	//cout<<"initial table\n";
-    initializePDB(htable1, htable2);
+	std::string tileType = argv[2];
+	initializePDB(htable1, htable2, tileType);
 	//cout<<"initial finished\n";
 
     int startInstance = stoi(argv[3]);
@@ -133,28 +138,47 @@ int main(int argc, const char* argv[]) {
                             "sampleData/" +
                 string(argv[2]) + "/" + to_string(instanceID) + ".txt";
         ifstream checkRetExist(resultFile);
-        if (checkRetExist.good()) {
+        ifstream checkProcessExist(resultFile+".temp");
+        if (checkRetExist.good() || checkProcessExist.good()) {
             continue;
         }
 
+		//create a place holder for the process
+		ofstream processPlaceHolder(resultFile+".temp");
+        processPlaceHolder << "place holder ";
+		processPlaceHolder.close();
+
         ofstream output(resultFile);
 
+       /* string inputFile = "/home/aifs1/gu/phd/research/workingPaper/"*/
+                           //"realtime-nancy/results/SlidingTilePuzzle/"
+                           //"sampleProblem/" +
+                //string(argv[2]) + "/" + to_string(instanceID) + ".st";
+
         string inputFile = "/home/aifs1/gu/phd/research/workingPaper/"
-                           "realtime-nancy/results/SlidingTilePuzzle/"
-                           "sampleProblem/" +
-                string(argv[2]) + "/" + to_string(instanceID) + ".st";
+                           "realtime-nancy/worlds/slidingTile/" +
+                to_string(instanceID) + "-4x4.st";
 
         ifstream input(inputFile);
         ifstream inputcheck(inputFile);
 
-        if (!checkisGoodPuzzle(inputcheck))
+        if (!input.good()) {
+            cout << "no input file exists!" << inputFile << endl;
             continue;
+        }
+
+		if (!checkisGoodPuzzle(inputcheck)){
+            cout << "not good puzzle!" << inputFile << endl;
+            continue;
+		}
 
         // cout << "start " << instanceID << endl;
-        if (!input.good())
-            continue;
+        
 
         computeTile(argv, input, output, htable1, htable2);
+
+        string rmScript = "exec rm -rf " + resultFile + ".temp";
+        std::system(rmScript.c_str());
     }
 
     return 0;
