@@ -6,7 +6,7 @@
  */
 
 
-#include "../fastAStar-inverse/tiles.hpp"
+#include "../fastAStar-pdb/tiles.hpp"
 
 using namespace std;
 
