@@ -14,8 +14,10 @@ public:
     //InverseTilesPDB(FILE* f) : Tiles(f) {}
     HeavyTilesPDB(std::ifstream& input,
             std::unordered_map<uint64_t, float>& htable1,
-            std::unordered_map<uint64_t, float>& htable2)
-            : TilesPDB(input, htable1, htable2) {}
+            std::unordered_map<uint64_t, float>& htable2,
+            const std::vector<int>& pattern1,
+            const std::vector<int>& pattern2)
+            : TilesPDB(input, htable1, htable2, pattern1, pattern2) {}
 
     Edge<Tiles> apply(State& s, int newb) const {
         int tile = s.tiles[newb];

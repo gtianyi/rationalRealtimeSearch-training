@@ -15,8 +15,14 @@ public:
     //InverseTilesPDB(FILE* f) : Tiles(f) {}
     TilesPDB(std::ifstream& input,
             std::unordered_map<uint64_t, float>& htable1,
-            std::unordered_map<uint64_t, float>& htable2)
-            : Tiles(), htable1(htable1), htable2(htable2) {
+            std::unordered_map<uint64_t, float>& htable2,
+            const std::vector<int>& pattern1,
+            const std::vector<int>& pattern2)
+            : Tiles(),
+              htable1(htable1),
+              htable2(htable2),
+              sixTiles1(pattern1),
+              sixTiles2(pattern2) {
         // Get the dimensions of the puzzle
         std::string line;
         getline(input, line);
@@ -123,8 +129,6 @@ protected:
 		}
     }
 
-    
-
     double getPartialPDBValue(State& s, bool isDB1) const {
         auto& sixTiles = isDB1 ? sixTilesSet1 : sixTilesSet2;
 
@@ -154,8 +158,8 @@ protected:
 
     std::unordered_map<uint64_t, float>& htable1;
     std::unordered_map<uint64_t, float>& htable2;
-    const int sixTiles1[7] = {0, 1, 2, 3, 4, 5, 6};
-    const int sixTiles2[7] = {0, 7, 8, 9, 10, 11, 12};
+    const std::vector<int> sixTiles1;
+    const std::vector<int> sixTiles2;
     int sixTilesSet1[16] = {0};
     int sixTilesSet2[16] = {0};
 };

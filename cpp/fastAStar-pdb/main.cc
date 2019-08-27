@@ -34,16 +34,27 @@ void readPDB(const std::string& pdbID,
 
 void initializePDB(std::unordered_map<uint64_t, float>& htable1,
         std::unordered_map<uint64_t, float>& htable2,
-        std::string& tileType) {
+        std::string& tileType,
+        std::vector<int>& pattern1,
+        std::vector<int>& pattern2) {
     readPDB("61-" + tileType + ".txt", htable1);
     readPDB("62-" + tileType + ".txt", htable2);
+
+    std::unordered_map<string, std::vector<std::vector<int>>> pdbPatterns = {
+            {"heavy", {{0, 1, 2, 3, 4, 5, 6}, {0, 7, 8, 9, 10, 11, 12}}},
+            {"inverse", {{0, 1, 2, 3, 4, 5, 6}, {0, 7, 8, 9, 10, 11, 12}}}};
+
+	pattern1 = pdbPatterns[tileType][0];
+	pattern2 = pdbPatterns[tileType][1];
 }
 
 void computeTile(const char* argv[],
         ifstream& input,
         ofstream& output,
         std::unordered_map<uint64_t, float>& htable1,
-        std::unordered_map<uint64_t, float>& htable2) {
+        std::unordered_map<uint64_t, float>& htable2,
+		const std::vector<int>& pattern1,
+        const std::vector<int>& pattern2) {
     try {
         shared_ptr<TilesPDB> tiles;
 
@@ -123,10 +134,13 @@ int main(int argc, const char* argv[]) {
     std::unordered_map<uint64_t, float> htable1;
     std::unordered_map<uint64_t, float> htable2;
 
+    std::vector<int> sixTiles1;
+    std::vector<int> sixTiles2;
+
 	//cout<<"initial table\n";
-	std::string tileType = argv[2];
-	initializePDB(htable1, htable2, tileType);
-	//cout<<"initial finished\n";
+    std::string tileType = argv[2];
+    initializePDB(htable1, htable2, tileType, sixTiles1, sixTiles2);
+    // cout<<"initial finished\n";
 
     int startInstance = stoi(argv[3]);
     int numberOfInstance = stoi(argv[4]);
@@ -167,15 +181,15 @@ int main(int argc, const char* argv[]) {
             continue;
         }
 
-		if (!checkisGoodPuzzle(inputcheck)){
+        if (!checkisGoodPuzzle(inputcheck)) {
             cout << "not good puzzle!" << inputFile << endl;
             continue;
-		}
+        }
 
         // cout << "start " << instanceID << endl;
-        
 
-        computeTile(argv, input, output, htable1, htable2);
+        computeTile(
+                argv, input, output, htable1, htable2, sixTiles1, sixTiles2);
 
         string rmScript = "exec rm -rf " + resultFile + ".temp";
         std::system(rmScript.c_str());
