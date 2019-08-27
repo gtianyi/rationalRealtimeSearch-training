@@ -85,6 +85,10 @@ public:
 
     virtual bool isgoal(const State& s) const = 0;
 
+    virtual CostType hugeCost() const = 0;
+
+    virtual CostType idastarHistInterval() const = 0;
+
 protected:
     // mdist returns the Manhattan distance of the given tile array.
     // this only work for initialization

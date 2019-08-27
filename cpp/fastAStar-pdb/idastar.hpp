@@ -3,96 +3,67 @@
 // license that can be found in the LICENSE file.
 #include "search.hpp"
 #include "utils.hpp"
-#include <iostream>
-#include <cmath>
 
-template <class D>
-class Idastar : public SearchAlg<D> {
-    typedef typename D::CostType CostType;
-    SolPath<D> path;
-    CostType incumbentCost;
+template<class D> class Idastar : public SearchAlg<D> {
+	SolPath<D> path;
+	int bound, minoob;
 
 public:
-    Idastar(D& d) : SearchAlg<D>(d) {
-        incumbentCost = d.idastartools.hugetCost();
-    }
 
-    virtual SolPath<D> search(typename D::State& root) {
-		this->dom.idastartools.updateBound(this->dom.h(root));
-        this->dom.idastartools.resetHistAndIncumbentCost(incumbentCost);
-        path.cost = this->dom.idastartools.hugetCost();
+	Idastar(D &d) : SearchAlg<D>(d) { }
 
-        dfrowhdr(stdout,
-                "iteration",
-                4,
-                "number",
-                "bound",
-                "nodes expanded",
-                "nodes generated");
-        unsigned int n = 0;
-        do {
-            dfs(root, 0, -1);
-            n++;
-            dfrow(stdout,
-                    "iteration",
-                    "ufuu",
-                    (unsigned long)n,
-                    this->dom.idastartools.getBound(),
-                    this->expd,
-                    this->gend);
+	virtual SolPath<D> search(typename D::State &root) {
+		bound = this->dom.h(root);
 
-            this->dom.idastartools.setBound((int)std::pow(4, n));
-            this->dom.idastartools.resetHistAndIncumbentCost(incumbentCost);
-        } while (path.cost == this->dom.idastartools.hugetCost());
+		dfrowhdr(stdout, "iteration", 4, "number", "bound",
+			"nodes expanded", "nodes generated");
+		unsigned int n = 0;
+		do {
+			minoob = -1;
+			dfs(root, 0, -1);
+			n++;
+			dfrow(stdout, "iteration", "uduu", (unsigned long) n, (long) bound,
+				this->expd, this->gend);
+			bound = minoob;
+		} while (path.path.size() == 0);
 
-        return path;
-    }
+		return path;
+	}
 
 private:
-    bool dfs(typename D::State& n, CostType cost, int pop) {
-        CostType f = cost + this->dom.h(n);
 
-        if (f > incumbentCost) {
-            return false;
-		}
+	bool dfs(typename D::State &n,  int cost, int pop) {
+		int f = cost + this->dom.h(n);
 
-        if (f <= this->dom.idastartools.getBound() && this->dom.isgoal(n)) {
-			incumbentCost = f;
-			//std::cout << "incumbentCost " << f << "\n";
-            path.cost =f;
-			path.path.clear();
+		if (f <= bound && this->dom.isgoal(n)) {
+		    path.cost =f;
 			path.path.push_back(n);
 			return true;
-        }
-
-        if (f > this->dom.getBound()) {
-            this->dom.idastartools.updateHist(f);
-            return false;
-        }
-
-        this->expd++;
-        int nops = this->dom.nops(n);
-		bool oneGoal=false;
-        for (int i = 0; i < nops; i++) {
-            int op = this->dom.nthop(n, i);
-            if (op == pop)
-                continue;
-
-            this->gend++;
-            Edge<D> e = this->dom.apply(n, op);
-            bool goal = dfs(n, e.cost + cost, e.pop);
-			this->dom.undo(n, e);
-
-			if(goal){
-					path.path.push_back(n);
-					oneGoal=true;
-			}
-        }
-
-		if(oneGoal){
-				return true;
 		}
 
-        return false;
+		if (f > bound) {
+			if (minoob < 0 || f < minoob)
+				minoob = f;
+			return false;
+		}
+
+		this->expd++;
+		int nops = this->dom.nops(n);
+		for (int i = 0; i < nops; i++) {
+			int op = this->dom.nthop(n, i);
+			if (op == pop)
+				continue;
+
+			this->gend++;
+			Edge<D> e = this->dom.apply(n, op);
+			bool goal = dfs(n, e.cost + cost, e.pop);
+			this->dom.undo(n, e);
+			if (goal) {
+				path.path.push_back(n);
+				return true;
+			}
+		}
+
+		return false;
 	}
 };

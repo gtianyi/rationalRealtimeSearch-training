@@ -11,6 +11,8 @@
 #include <iostream>
 
 struct Tiles {
+    typedef double CostType;
+
     enum {
         Width = 4,
         Height = 4,
@@ -128,19 +130,22 @@ struct Tiles {
 		assert (dst.blank >= 0);
 	}
 
-protected:
+    virtual CostType hugeCost() const = 0;
 
-	// mdist returns the Manhattan distance of the given tile array.
-	virtual double mdist(int blank, int tiles[]) const {
-		int sum = 0;
-		for (int i = 0; i < Ntiles; i++) {
-			if (i == blank)
-				continue;
-			int row = i / Width, col = i % Width;
-			int grow = tiles[i] / Width, gcol = tiles[i] % Width;
-			sum += abs(gcol - col) + abs(grow - row);
-		}
-		return sum;
+    virtual CostType idastarHistInterval() const = 0;
+
+protected:
+    // mdist returns the Manhattan distance of the given tile array.
+    virtual double mdist(int blank, int tiles[]) const {
+        int sum = 0;
+        for (int i = 0; i < Ntiles; i++) {
+            if (i == blank)
+                continue;
+            int row = i / Width, col = i % Width;
+            int grow = tiles[i] / Width, gcol = tiles[i] % Width;
+            sum += abs(gcol - col) + abs(grow - row);
+        }
+        return sum;
 	}
 
 	// initmd initializes the md and mdincr tables.
