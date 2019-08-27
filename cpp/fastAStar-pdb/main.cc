@@ -59,9 +59,11 @@ void computeTile(const char* argv[],
         shared_ptr<TilesPDB> tiles;
 
         if (strcmp(argv[2], "inverse") == 0) {
-            tiles = make_shared<InverseTilesPDB>(input, htable1, htable2);
+            tiles = make_shared<InverseTilesPDB>(
+                    input, htable1, htable2, pattern1, pattern2);
         } else if (strcmp(argv[2], "heavy") == 0) {
-            tiles = make_shared<HeavyTilesPDB>(input, htable1, htable2);
+            tiles = make_shared<HeavyTilesPDB>(
+                    input, htable1, htable2, pattern1, pattern2);
         } else {
             std::cout << argv[2] << "tile type not found!\n";
             throw Fatal("avaible tile types: inverse or heavy");
