@@ -21,7 +21,7 @@ public:
 
         float cost = 0;
 
-        if (tile != 15)
+        if (tile != 1)
             cost = (float)tile;
 
         Edge<Tiles> e(cost, newb, s.blank);
@@ -40,26 +40,26 @@ public:
     void generatePattern(int patternSizewithID) {
         init[0] = 0;
         if (patternSizewithID == 61) {
-            int sixTiles[6] = {1, 2, 3, 4, 5, 6};
-            int converedTiles[9] = {7, 8, 9, 10, 11, 12, 13, 14, 15};
+            int sixTiles[6] = {10, 11, 12, 13, 14, 15};
+            int converedTiles[9] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
 
             for (int i = 0; i <= 5; i++) {
                 init[sixTiles[i]] = sixTiles[i];
             }
 
             for (int i = 0; i <= 8; i++) {
-                init[converedTiles[i]] = 15;
+                init[converedTiles[i]] = 1;
             }
         } else if (patternSizewithID == 62) {
-            int sixTiles[6] = {7, 8, 9, 10, 11, 12};
-            int converedTiles[9] = {1, 2, 3, 4, 5, 6, 13, 14, 15};
+            int sixTiles[6] = {4, 5, 6, 7, 8, 9};
+            int converedTiles[9] = {1, 2, 3, 10, 11, 12, 13, 14, 15};
 
             for (int i = 0; i <= 5; i++) {
                 init[sixTiles[i]] = sixTiles[i];
             }
 
             for (int i = 0; i <= 8; i++) {
-                init[converedTiles[i]] = 15;
+                init[converedTiles[i]] = 1;
             }
         } else {
             cout << "wrong pattern size\n";

@@ -41,7 +41,7 @@ void initializePDB(std::unordered_map<uint64_t, float>& htable1,
     readPDB("62-" + tileType + ".txt", htable2);
 
     std::unordered_map<string, std::vector<std::vector<int>>> pdbPatterns = {
-            {"heavy", {{0, 1, 2, 3, 4, 5, 6}, {0, 7, 8, 9, 10, 11, 12}}},
+            {"heavy", {{0, 10, 11, 12, 13, 14, 15}, {0, 4, 5, 6, 7, 8, 9}}},
             {"inverse", {{0, 1, 2, 3, 4, 5, 6}, {0, 7, 8, 9, 10, 11, 12}}}};
 
 	pattern1 = pdbPatterns[tileType][0];

@@ -91,16 +91,7 @@ public:
         s.tiles[(int)e.undo.blank] = 0;
     }
 
-    double h(State& s) const {
-        double db1h = getPartialPDBValue(s, 1);
-        double db2h = getPartialPDBValue(s, 0);
-
-        s.patternh = db1h + db2h;
-
-        s.currenth = std::max(s.patternh, s.h);
-
-        return s.currenth;
-    }
+    virtual double h(State& s) const = 0;
 
     virtual bool isgoal(const State& s) const = 0;
 
@@ -125,36 +116,13 @@ protected:
 		auto& tileSets = pdbID == "61.txt" ? sixTilesSet1 : sixTilesSet2;
 
         for (auto i : tiles) {
+            // if is a tile, then
+            // mark indicateor as one in partial tile set
             tileSets[i] = 1;
 		}
     }
 
-    double getPartialPDBValue(State& s, bool isDB1) const {
-        auto& sixTiles = isDB1 ? sixTilesSet1 : sixTilesSet2;
-
-        State partialState;
-        for (int i = 0; i < Ntiles; i++) {
-            if (sixTiles[s.tiles[i]])
-                partialState.tiles[i] = s.tiles[i];
-            else
-                partialState.tiles[i] = 15;
-        }
-
-		partialState.blank = s.blank;
-
-        PackedState ps;
-        pack(ps,partialState);
-
-        auto& htable = isDB1 ? htable1 : htable2;
-
-        if (htable.find(ps.word) == htable.end()) {
-            std::cout << "no pdb value found!!!\n";
-            printState(partialState);
-            s.patternh = -1.0;
-        }
-
-		return htable.at(ps.word);
-	}
+    virtual double getPartialPDBValue(State& s, bool isDB1) const = 0;
 
     std::unordered_map<uint64_t, float>& htable1;
     std::unordered_map<uint64_t, float>& htable2;
