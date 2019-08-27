@@ -11,8 +11,6 @@
 #include <iostream>
 
 struct Tiles {
-    typedef double CostType;
-
     enum {
         Width = 4,
         Height = 4,
@@ -129,10 +127,6 @@ struct Tiles {
 		}
 		assert (dst.blank >= 0);
 	}
-
-    virtual CostType hugeCost() const = 0;
-
-    virtual CostType idastarHistInterval() const = 0;
 
 protected:
     // mdist returns the Manhattan distance of the given tile array.

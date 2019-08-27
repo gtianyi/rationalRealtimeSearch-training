@@ -10,6 +10,8 @@
 
 class TilesPDB : public Tiles {
 public:
+    typedef double CostType;
+
     //InverseTilesPDB(FILE* f) : Tiles(f) {}
     TilesPDB(std::ifstream& input,
             std::unordered_map<uint64_t, float>& htable1,
@@ -83,6 +85,17 @@ public:
         s.tiles[(int)e.undo.blank] = 0;
     }
 
+    double h(State& s) const {
+        double db1h = getPartialPDBValue(s, 1);
+        double db2h = getPartialPDBValue(s, 0);
+
+        s.patternh = db1h + db2h;
+
+        s.currenth = std::max(s.patternh, s.h);
+
+        return s.currenth;
+    }
+
     virtual bool isgoal(const State& s) const = 0;
 
     virtual CostType hugeCost() const = 0;
@@ -110,16 +123,7 @@ protected:
 		}
     }
 
-    double h(State& s) const {
-		double db1h = getPartialPDBValue(s, 1);
-		double db2h = getPartialPDBValue(s, 0);
-
-		s.patternh = db1h + db2h;
-
-        s.currenth = std::max(s.patternh, s.h);
-
-        return s.currenth;
-    }
+    
 
     double getPartialPDBValue(State& s, bool isDB1) const {
         auto& sixTiles = isDB1 ? sixTilesSet1 : sixTilesSet2;
