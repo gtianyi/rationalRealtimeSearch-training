@@ -8,20 +8,19 @@
 
 template <class D>
 class Idastar : public SearchAlg<D> {
+    typedef typename D::CostType CostType;
     SolPath<D> path;
-    double bound;
-	static constexpr int bucketSize = 50;
-    unsigned long outboundHist[bucketSize];
-    double bucketInterval = 0.01;
-    double incumbentCost = 1000;
+    CostType incumbentCost;
 
 public:
-    Idastar(D& d) : SearchAlg<D>(d) {}
+    Idastar(D& d) : SearchAlg<D>(d) {
+        incumbentCost = d.idastartools.hugetCost();
+    }
 
     virtual SolPath<D> search(typename D::State& root) {
-		bound = this->dom.h(root);
-        resetHistAndIncumbentCost();
-        path.cost = 1000;
+		this->dom.idastartools.updateBound(this->dom.h(root));
+        this->dom.idastartools.resetHistAndIncumbentCost(incumbentCost);
+        path.cost = this->dom.idastartools.hugetCost();
 
         dfrowhdr(stdout,
                 "iteration",
@@ -38,52 +37,26 @@ public:
                     "iteration",
                     "ufuu",
                     (unsigned long)n,
-                    bound,
+                    this->dom.idastartools.getBound(),
                     this->expd,
                     this->gend);
 
-            setBound((int)std::pow(4, n));
-            resetHistAndIncumbentCost();
-        } while (path.cost == 1000);
+            this->dom.idastartools.setBound((int)std::pow(4, n));
+            this->dom.idastartools.resetHistAndIncumbentCost(incumbentCost);
+        } while (path.cost == this->dom.idastartools.hugetCost());
 
         return path;
     }
 
 private:
-    void resetHistAndIncumbentCost() {
-        for (int i = 0; i < bucketSize; ++i) {
-            outboundHist[i] = 0;
-        }
-        incumbentCost = 1000;
-    }
-
-    void setBound(unsigned long prevExpd) {
-        unsigned long accumulate = 0;
-
-        int i = 0;
-
-        //std::cout << "bucket accu: ";
-        while (i < bucketSize) {
-            accumulate += outboundHist[i];
-            if (accumulate >= prevExpd) {
-                break;
-            }
-            //std::cout << "i: " << i << " accu: " << outboundHist[i] << " ";
-            i++;
-        }
-        //std::cout << "\n";
-
-        bound += (double)i * bucketInterval;
-    }
-
-    bool dfs(typename D::State& n, double cost, int pop) {
-        double f = cost + this->dom.h(n);
+    bool dfs(typename D::State& n, CostType cost, int pop) {
+        CostType f = cost + this->dom.h(n);
 
         if (f > incumbentCost) {
             return false;
 		}
 
-        if (f <= bound && this->dom.isgoal(n)) {
+        if (f <= this->dom.idastartools.getBound() && this->dom.isgoal(n)) {
 			incumbentCost = f;
 			//std::cout << "incumbentCost " << f << "\n";
             path.cost =f;
@@ -92,11 +65,8 @@ private:
 			return true;
         }
 
-        if (f > bound) {
-            double outdiff = f - bound;
-            int bucket = (int)std::floor(outdiff / bucketInterval);
-            if (bucket < bucketSize)
-                outboundHist[bucket]++;
+        if (f > this->dom.getBound()) {
+            this->dom.idastartools.updateHist(f);
             return false;
         }
 
@@ -126,6 +96,3 @@ private:
         return false;
 	}
 };
-
-template <typename D>
-constexpr int Idastar<D>::bucketSize;

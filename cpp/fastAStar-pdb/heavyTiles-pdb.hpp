@@ -6,9 +6,11 @@
 #include <unordered_map>
 #include <sstream>
 #include <unordered_set>
+#include <cmath>
 
 class HeavyTilesPDB : public TilesPDB {
 public:
+    typedef int CostType;
     //InverseTilesPDB(FILE* f) : Tiles(f) {}
     HeavyTilesPDB(std::ifstream& input,
             std::unordered_map<uint64_t, float>& htable1,
@@ -32,6 +34,54 @@ public:
     }
 
     bool isgoal(const State& s) const { return s.currenth == 0.0; }
+
+    struct IDAStarTools {
+        CostType bound;
+        static constexpr int bucketSize = 50;
+        unsigned long outboundHist[bucketSize];
+        double bucketInterval = 10;
+
+        void updateBound(CostType b) { bound = b; }
+        double getBound() const { return bound; }
+
+        void resetHistAndIncumbentCost(CostType& incumbentCost) {
+            for (int i = 0; i < bucketSize; ++i) {
+                outboundHist[i] = 0;
+            }
+            incumbentCost = hugeCost();
+        }
+
+        void setBound(unsigned long prevExpd) {
+            unsigned long accumulate = 0;
+
+            int i = 0;
+
+            // std::cout << "bucket accu: ";
+            while (i < bucketSize) {
+                accumulate += outboundHist[i];
+                if (accumulate >= prevExpd) {
+                    break;
+                }
+                // std::cout << "i: " << i << " accu: " << outboundHist[i] << "
+                // ";
+                i++;
+            }
+            // std::cout << "\n";
+
+            bound += (CostType)i * bucketInterval;
+        }
+
+        CostType hugeCost() { return 1000000; }
+
+        void updateHist(CostType f) {
+            CostType outdiff = f - bound;
+            int bucket = (int)std::floor(outdiff / bucketInterval);
+            if (bucket < bucketSize)
+                outboundHist[bucket]++;
+        }
+    };
+
+    IDAStarTools idastartools;
 
 protected:
     // mdist returns the Manhattan distance of the given tile array.
