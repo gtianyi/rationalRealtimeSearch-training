@@ -30,24 +30,24 @@ public:
 		resetHistAndIncumbentCost();
         path.cost = hugeCost;
 
-        dfrowhdr(stdout,
-                "iteration",
-                4,
-                "number",
-                "bound",
-                "nodes expanded",
-                "nodes generated");
+/*        dfrowhdr(stdout,*/
+                //"iteration",
+                //4,
+                //"number",
+                //"bound",
+                //"nodes expanded",
+                /*"nodes generated");*/
         unsigned int n = 0;
         do {
             dfs(root, 0, -1);
             n++;
-            dfrow(stdout,
-                    "iteration",
-                    "ufuu",
-                    (unsigned long)n,
-                    bound,
-                    this->expd,
-                    this->gend);
+  /*          dfrow(stdout,*/
+                    //"iteration",
+                    //"ufuu",
+                    //(unsigned long)n,
+                    //bound,
+                    //this->expd,
+                    //this->gend);
 
             setBound((int)std::pow(2, n));
             resetHistAndIncumbentCost();
