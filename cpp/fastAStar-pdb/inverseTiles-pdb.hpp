@@ -38,10 +38,6 @@ public:
 
     bool isgoal(const State& s) const { return s.currenth <= 0.05; }
 
-    CostType hugeCost() const { return 1000; }
-
-    CostType idastarHistInterval() const { return 0.01; }
-
     double h(State& s) const {
         double db1h = getPartialPDBValue(s, 1);
         double db2h = getPartialPDBValue(s, 0);

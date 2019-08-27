@@ -166,14 +166,14 @@ int main(int argc, const char* argv[]) {
 
         ofstream output(resultFile);
 
-       /* string inputFile = "/home/aifs1/gu/phd/research/workingPaper/"*/
-                           //"realtime-nancy/results/SlidingTilePuzzle/"
-                           //"sampleProblem/" +
-                //string(argv[2]) + "/" + to_string(instanceID) + ".st";
+		string inputFile = "/home/aifs1/gu/phd/research/workingPaper/"
+						   "realtime-nancy/results/SlidingTilePuzzle/"
+						   "sampleProblem/" +
+				string(argv[2]) + "/" + to_string(instanceID) + ".st";
 
-        string inputFile = "/home/aifs1/gu/phd/research/workingPaper/"
-                           "realtime-nancy/worlds/slidingTile/" +
-                to_string(instanceID) + "-4x4.st";
+       /* string inputFile = "/home/aifs1/gu/phd/research/workingPaper/"*/
+                           //"realtime-nancy/worlds/slidingTile/" +
+                //to_string(instanceID) + "-4x4.st";
 
         ifstream input(inputFile);
         ifstream inputcheck(inputFile);
