@@ -1,31 +1,37 @@
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
-import pandas as pd
-import json
-import seaborn as sns
-import numpy as np
-from os import listdir
+#!/usr/bin/python
+'''
+This file includes some helper functions for collecting the training results
+
+Author: Tianyi Gu
+Date: 05/22/2019
+'''
+
 from collections import defaultdict
+import os
+import dumpAndPlot
 
-from dumpAndPlot import *
 
-# Hard coded result directories
-resultDirs = {"uniform"}
+def main():
 
-h_collection = defaultdict(list)
-h_collection_sampleStates = defaultdict(list)
+    # Hard coded result directories
+    tileType = "heavy"
 
-print("reading in data...")
+    h_collection = defaultdict(list)
+    h_collection_sampleStates = defaultdict(list)
 
-for dir in resultDirs:
-    for file in listdir("../../../results/SlidingTilePuzzle/sampleData/" + dir):
-        f = open("../../../results/SlidingTilePuzzle/sampleData/" + dir + "/" + file, "r")
+    print("reading in data...")
 
-        h = 999
-        hs = 999
+    for oneFile in os.listdir(
+            "../../../results/SlidingTilePuzzle/sampleData/" + tileType):
+        f = open(
+            "../../../results/SlidingTilePuzzle/sampleData/" + tileType + "/" +
+            oneFile, "r")
+
+        h = 999999
+        hs = 999999
 
         for line in f:
-            line = line.replace('"','')
+            line = line.replace('"', '')
 
             if "initial heuristic" in line:
                 for s in line.split():
@@ -37,12 +43,16 @@ for dir in resultDirs:
                     if s.isdigit():
                         hs = int(s)
 
-        if h!=999 and hs!=999:
+        if h != 999999 and hs != 999999:
             h_collection[h].append(hs)
-            h_collection_sampleStates[h].append(file.split(".")[0]+".st")
+            h_collection_sampleStates[h].append(oneFile.split(".")[0] + ".st")
 
-# dumphhstart(h_collection, min(resultDirs)) 
+    # dumpAndPlot.dumphhstar(h_collection, tileType)
 
-dumphSamples(h_collection_sampleStates,min(resultDirs)) 
+    dumpAndPlot.dumphSamples(h_collection_sampleStates, tileType)
 
-# plotHist(h_collection, min(resultDirs)) 
+    # dumpAndPlot.plotHist(h_collection, min(resultDirs))
+
+
+if __name__ == "__main__":
+    main()

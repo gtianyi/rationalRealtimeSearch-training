@@ -8,6 +8,7 @@
 #include <memory>
 #include <random>
 #include "domain/InverseTilePuzzle.h"
+#include "domain/HeavyTilePuzzle.h"
 #include <boost/functional/hash.hpp>
 
 using namespace std;
@@ -42,6 +43,7 @@ string double2string(double c, int precision) {
 
 constexpr int hPrecision = 1;
 constexpr int hsPrecision = 1;
+constexpr double hSearchDownStep = 1;
 
 struct CollectionBase{
     virtual void parsingSamples(ifstream& f, const string& instanceDir)=0; 
@@ -234,28 +236,40 @@ private:
 		f.close();
     }
 
-    string findClosest(const Cost h) const{
+    Hist findorShiftFromClosestHist(const Cost h) const{
         auto hString = double2string(h, hPrecision);
 
-        if (originalhHist.find(hString) != originalhHist.end())
-            return hString;
+        int steps = 0;
 
-		Cost closesth;
+        if (originalhHist.find(hString) != originalhHist.end()) {
+            return originalhHist.at(hString);
+        } else {
+            Cost closesth;
 
-        if (h > originalhValues[originalhValues.size() - 1])
-            closesth =  originalhValues[originalhValues.size() - 1];
-        else if (h < originalhValues[1])
-		    // 0 is goal, we want to return the smallest h value for a non-goal state
-            closesth = originalhValues[1];
-        else {
-            // perform binary search to find closest data point,
-            // or find 2, and merge the histgram
-            // implement later, now it should cause segfault
-            return "no found";
-			exit(1);
-		}
+            if (h > originalhValues[originalhValues.size() - 1]) {
+                closesth = originalhValues[originalhValues.size() - 1];
+                hString = double2string(closesth, hPrecision);
+            } else if (h < originalhValues[1]) {
+                // 0 is goal, we want to return the smallest h value for
+                // a
+                // non-goal state
+                closesth = originalhValues[1];
+                hString = double2string(closesth, hPrecision);
+            } else {
+                // if it is in the middle, we go down until reach one.
+                auto curH = h;
+                while (curH > originalhValues[1]) {
+                    curH = curH - hSearchDownStep;
+                    hString = double2string(curH, hPrecision);
+                    steps++;
+                    if (originalhHist.find(hString) != originalhHist.end()) {
+                        break;
+                    }
+                }
+            }
+        }
 
-		return double2string(closesth, hPrecision);
+        return originalhHist.at(hString).shift((Cost)steps * hSearchDownStep);
     }
 
     Hist lookahead(const State& s) const {
@@ -269,13 +283,13 @@ private:
 
         for (auto& c : children) {
             Cost h = d.heuristic(c);
-            auto hString = findClosest(h);
-            Cost hhat = originalhHist.at(hString).getMean();
+            auto chist = findorShiftFromClosestHist(h);
+            Cost hhat = chist.getMean();
             Cost edgeCost = d.getEdgeCost(c);
             hhat += edgeCost;
             if (hhat < backuphhat) {
                 backuphhat = hhat;
-                bestShiftedHist = originalhHist.at(hString).shift(edgeCost);
+                bestShiftedHist = chist.shift(edgeCost);
             }
         }
 
@@ -335,6 +349,18 @@ public:
 
             post_search_collection =
                     make_shared<PostSearchCollection<InverseTilePuzzle>>();
+        }  else if (tileType == "heavy") {
+            sampleFile = "../results/SlidingTilePuzzle/sampleData/"
+                         "heavy-samples.txt";
+            distributionFile = "../results/SlidingTilePuzzle/sampleData/"
+                               "heavy-statSummary.txt";
+            postSearchFile = "../results/SlidingTilePuzzle/sampleData/"
+                             "heavy-statSummary-postSearch.txt";
+
+            instanceDir = "heavy";
+
+            post_search_collection =
+                    make_shared<PostSearchCollection<HeavyTilePuzzle>>();
         } else {
             cout << "not support tile type" << tileType << endl;
             exit(1);
@@ -379,7 +405,7 @@ private:
 int main(int argc, char** argv) {
     if (argc != 2) {
         cout << "Wrong number of arguments: ./collect-post-search <tile type>"
-             << "\ntile type: uniform, inverse"
+             << "\ntile type: uniform, inverse, heavy"
              << endl;
         exit(1);
     }
