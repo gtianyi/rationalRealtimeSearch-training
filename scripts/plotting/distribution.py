@@ -1,9 +1,9 @@
 #!/usr/bin/python
 '''
-This file includes some helper functions for collecting the training results
+This file read the data and generate the distribution file for DDNancy
 
 Author: Tianyi Gu
-Date: 05/22/2019
+Date: 08/27/2019
 '''
 
 from collections import defaultdict
@@ -51,7 +51,7 @@ def main():
 
     dumpAndPlot.dumphSamples(h_collection_sampleStates, tileType)
 
-    # dumpAndPlot.plotHist(h_collection, min(resultDirs))
+    # dumpAndPlot.plotHist(h_collection, tileType)
 
 
 if __name__ == "__main__":

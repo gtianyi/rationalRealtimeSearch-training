@@ -1,8 +1,24 @@
-from collections import OrderedDict
-from collections import defaultdict
+#!/usr/bin/python
+'''
+This file read the two distribution files and generate the plot
+
+Author: Tianyi Gu
+Date: 08/29/2019
+'''
+
+from collections import OrderedDict, defaultdict
+
+import sys
+from datetime import datetime
+import os
 import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
+import seaborn as sns
+
+
+def printUsage():
+    print "usage: python distribution-plot-2dist.py <tile type>"
+    print "tile type: uniform heavy inverse"
 
 
 def make_histrogram(h_value, hslistpair, file_dir):
@@ -22,8 +38,8 @@ def make_histrogram(h_value, hslistpair, file_dir):
     iqr1 = np.subtract(*np.percentile(np.array(hslistpair[0]), [75, 25]))
     sample_number = len(hslistpair[0])
     bin_width = 2 * iqr1 / (sample_number**(1 / 3.0))
-    bin_num = None if bin_width == 0.0 else int(
-        (max(hslistpair[0]) - min(hslistpair[0])) / bin_width)
+    bin_num = None if bin_width == 0.0 else max(
+        1, int((max(hslistpair[0]) - min(hslistpair[0])) / bin_width))
     print("bin_width:", bin_width)
     print("bin_num:", bin_num)
 
@@ -108,8 +124,10 @@ def parse_data_file(fname):
 
 def merge2map(map_1, map_2):
     '''merge two h->hs maps into one map h->[hs,hs]
-
+       first is hs
+       second is hs_ps
     '''
+
     ret_map = defaultdict(list)
     for h_value, hs_value in map_1.iteritems():
         assert h_value in map_2
@@ -120,24 +138,38 @@ def merge2map(map_1, map_2):
     return ret_map
 
 
-# Hard coded data file
-FILE_BELIEF="../../../results/SlidingTilePuzzle/sampleData/inverse-statSummary-20-0.1-200-backup.txt"
-FILE_PS_BELIEF="../../../results/SlidingTilePuzzle/sampleData/inverse-statSummary-20-0.1-200-postSearch.txt"
-# FILE_BELIEF = "../../../results/SlidingTilePuzzle/sampleData/uniform-statSummary.txt"
-# FILE_PS_BELIEF = "../../../results/SlidingTilePuzzle/sampleData/uniform-statSummary-postSearch.txt"
+def main():
 
-print "reading in data..."
-H_TO_HS = parse_data_file(FILE_BELIEF)
-H_TO_PSHS = parse_data_file(FILE_PS_BELIEF)
+    if len(sys.argv) != 2:
+        printUsage()
+        return
 
-H_TO_HSS_MAP = merge2map(H_TO_HS, H_TO_PSHS)
+    FILE_BELIEF = "../../../results/SlidingTilePuzzle/sampleData/" + sys.argv[
+        1] + "-statSummary.txt"
+    FILE_PS_BELIEF = "../../../results/SlidingTilePuzzle/sampleData/" + sys.argv[
+        1] + "-statSummary-postSearch.txt"
 
-print "plotting..."
+    print "reading in data..."
+    H_TO_HS = parse_data_file(FILE_BELIEF)
+    H_TO_PSHS = parse_data_file(FILE_PS_BELIEF)
 
-OD = OrderedDict(sorted(H_TO_HSS_MAP.items()))
-PLOT_DIR ="../../../plots/hist/inverse/20-0.1-200/"
-# PLOT_DIR = "../../../plots/hist/uniform/postSearch/"
+    H_TO_HSS_MAP = merge2map(H_TO_HS, H_TO_PSHS)
 
-for h, pair in OD.items():
-    if len(pair[0]) > 1:
-        make_histrogram(h, pair, PLOT_DIR)
+    print "plotting..."
+
+    OD = OrderedDict(sorted(H_TO_HSS_MAP.items()))
+
+    dtString = datetime.now().strftime("%d%m%Y-%H%M")
+
+    PLOT_DIR = "../../../plots/hist/" + sys.argv[1] + "/" + dtString + "/"
+
+    if not os.path.exists(PLOT_DIR):
+        os.makedirs(PLOT_DIR)
+
+    for h, pair in OD.items():
+        if len(pair[0]) > 1:
+            make_histrogram(h, pair, PLOT_DIR)
+
+
+if __name__ == "__main__":
+    main()
