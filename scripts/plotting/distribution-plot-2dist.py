@@ -98,6 +98,8 @@ def make_histrogram(h_value, hslistpair, file_dir):
 
 def parse_data_file(fname):
     ''' parse data from a file
+    format in each line:
+    <h> <# of data points> <data_1> <count_1> <data_2> <count_2> ...
 
     keyworkd arguments:
     fname -- input file
