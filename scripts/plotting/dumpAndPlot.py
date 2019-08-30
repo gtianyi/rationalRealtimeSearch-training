@@ -3,8 +3,7 @@
 This file includes some helper functions for collecting the training results
 
 Author: Tianyi Gu
-Date: 05/22/2019
-update: 08/27/2019, fix some bug
+Create Date: 05/22/2019
 '''
 
 from collections import OrderedDict
@@ -14,7 +13,7 @@ import seaborn as sns
 import numpy as np
 
 
-__author__ = 'tianyigu'
+__author__ = 'Tianyi Gu'
 
 #---------- Dump out h-hstar ---------------------------
 
@@ -65,7 +64,7 @@ def dumphhat2file(hhatCollection, dirName):
     od = OrderedDict(sorted(hhatCollection.items()))
 
     for h, hslist in od.items():
-        dump2file(h, hslist, f_hhat)
+        dumphhat(h, hslist, f_hhat)
 
 
 #---------- Dump out h and samples ---------------------------

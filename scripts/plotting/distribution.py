@@ -14,7 +14,7 @@ import dumpAndPlot
 def main():
 
     # Hard coded result directories
-    tileType = "heavy"
+    tileType = "uniform"
 
     h_collection = defaultdict(list)
     h_collection_sampleStates = defaultdict(list)
@@ -49,7 +49,9 @@ def main():
 
     # dumpAndPlot.dumphhstar(h_collection, tileType)
 
-    dumpAndPlot.dumphSamples(h_collection_sampleStates, tileType)
+    dumpAndPlot.dumphhat2file(h_collection, tileType)
+
+    # dumpAndPlot.dumphSamples(h_collection_sampleStates, tileType)
 
     # dumpAndPlot.plotHist(h_collection, tileType)
 
