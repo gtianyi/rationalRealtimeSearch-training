@@ -22,7 +22,8 @@ def dump2file(h, hs, outFile):
     hsSet = set(hs)
     outFile.write(str(h) + ' ' + str(len(hs)) + ' ')
     for hsvalue in hsSet:
-        valueCount = hs.count(hsvalue)
+        valueCount = hs.count(hsvalue) need to add another frequency counter value
+        this is not going to be human readable, we should change it to json fomat
         outFile.write(str(hsvalue) + ' ' + str(valueCount) + ' ')
     outFile.write("\n")
 

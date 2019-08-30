@@ -21,6 +21,11 @@ def main():
 
     print("reading in data...")
 
+    # ready the frequency counter file, this file is generated when
+    # we collect 200 unique states for each h bucket
+    frequencyCounter = defaultdict(int)
+    read frequencycounter file
+
     for oneFile in os.listdir(
             "../../../results/SlidingTilePuzzle/sampleData/" + tileType):
         f = open(
@@ -44,12 +49,12 @@ def main():
                         hs = int(s)
 
         if h != 999999 and hs != 999999:
-            h_collection[h].append(hs)
+            h_collection[h].append(hs) append hs along with the frequency counter
             h_collection_sampleStates[h].append(oneFile.split(".")[0] + ".st")
 
-    # dumpAndPlot.dumphhstar(h_collection, tileType)
+    dumpAndPlot.dumphhstar(h_collection, tileType)
 
-    dumpAndPlot.dumphhat2file(h_collection, tileType)
+    # dumpAndPlot.dumphhat2file(h_collection, tileType)
 
     # dumpAndPlot.dumphSamples(h_collection_sampleStates, tileType)
 

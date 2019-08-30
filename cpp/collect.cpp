@@ -130,7 +130,7 @@ public:
     Collection() : fileCount(0){};
 
 private:
-    unordered_map<unsigned long long, shared_ptr<Node>> nodeCollection;
+    unordered_map<unsigned long long, shared_ptr<Node>> nodeCollection; need to add frequency counter here
     unordered_map<int, std::vector<shared_ptr<Node>>> hCollection;
 	vector<shared_ptr<Node>> sampleSet;
 
