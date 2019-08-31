@@ -6,6 +6,7 @@ Author: Tianyi Gu
 Create Date: 05/22/2019
 '''
 
+import random
 from collections import OrderedDict
 
 import matplotlib.pyplot as plt
@@ -17,9 +18,10 @@ __author__ = 'Tianyi Gu'
 
 #---------- Dump out h-hstar ---------------------------
 
+
 def dump2file(h, hs, outFile):
-    hsSet = set([x["hstar"] for x in hs])
-    outFile.write(str(h) + ' ' + str(len(hs)) + ' ') # how many unique states
+    hsSet = sorted(set([x["hstar"] for x in hs]))
+    outFile.write(str(h) + ' ' + str(len(hs)) + ' ')  # how many unique states
     for hsvalue in hsSet:
         hsCounters = [x["counter"] for x in hs if x["hstar"] == hsvalue]
         valueCount = sum(hsCounters)
@@ -28,7 +30,7 @@ def dump2file(h, hs, outFile):
 
 
 def dumphhstar(hhsCollection, dirName, roundHS=False):
-    print("dumping out h-hstar collection...")
+    print("fix missing and dumping out h-hstar collection...")
     print("h count " + str(len(hhsCollection)))
 
     f = open(
@@ -36,14 +38,81 @@ def dumphhstar(hhsCollection, dirName, roundHS=False):
         "-statSummary.txt", "w")
     od = OrderedDict(sorted(hhsCollection.items()))
 
-    for h, hslist in od.items():
-        if roundHS:
-            #save to 0.1 to make histogramo
-            hslist = [
-                x.update("hstar", round(x["hstar"], 2)) for x in hslist
-            ]  # this is dangrous, but otherwise we have each data point a bin
+    hStep = 1
+    if roundHS:
+        hStep = 0.01
+        for h, hslist in od.items():
+            #save to 0.1 to make histogram
+            for x in hslist:
+                x.update("hstar", round(x["hstar"], 2))
 
-        dump2file(h, hslist, f)
+    # fix missing data and dump
+    prevH = -hStep
+
+    for h, hslist in od.items():
+
+        hCur = prevH + hStep
+
+        lowH = None if prevH < 0 else prevH
+        highH = None if od.keys().index(h) == len(
+            od.keys()) - 1 else od.keys()[od.keys().index(h) + 1]
+
+        while (hCur <= h):
+
+            highHCur = highH if hCur == h else h
+
+            nomissingHS = getNoMissingHSOfH(hCur, lowH, highHCur, od)
+
+            print("hcur ", hCur, "lowH ", lowH, "hghH ", highHCur,
+                  "data size ", len(nomissingHS))
+            # print(nomissingHS)
+
+            dump2file(hCur, nomissingHS, f)
+
+            hCur = hCur + hStep
+
+        prevH = h
+
+
+def getNoMissingHSOfH(h, lowH, highH, od):
+    nomissingHS = od[h][:] if h in od else []
+
+    #go down and pull up
+    if len(nomissingHS) < 200 and lowH != None:
+
+        smallHHSCollection = OrderedDict(
+            sorted(od.items()[:od.keys().index(lowH)], reverse=True))
+        grabDataFromOrderedCollection(smallHHSCollection, nomissingHS, h)
+
+    #go up and pull down
+    if len(nomissingHS) < 200 and highH != None:
+
+        largeHHSCollection = OrderedDict(od.items()[od.keys().index(highH):])
+        grabDataFromOrderedCollection(largeHHSCollection, nomissingHS, h)
+
+    return nomissingHS
+
+
+def grabDataFromOrderedCollection(orderdCollection, nomissingHS, nomissingh):
+    for h in orderdCollection:
+        random.shuffle(orderdCollection[h])
+        hs_list = orderdCollection[h]
+
+        for instance in hs_list:
+            if len(nomissingHS) >= 200:
+                return
+
+            deltah = nomissingh - h
+            if instance["hstar"] + deltah < nomissingh:
+                print "h to fix ", nomissingh, "pull down from ", h, "instance", instance
+            shifted = shiftInstance(instance, deltah)
+            nomissingHS.append(shifted)
+
+
+def shiftInstance(instance, v):
+    newinstance = instance.copy()
+    newinstance.update({"hstar": instance["hstar"] + v})
+    return newinstance
 
 
 #---------- Dump out h-hat ---------------------------
