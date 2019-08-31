@@ -7,23 +7,22 @@ Create Date: 05/22/2019
 '''
 
 from collections import OrderedDict
+
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import seaborn as sns
-import numpy as np
-
 
 __author__ = 'Tianyi Gu'
 
 #---------- Dump out h-hstar ---------------------------
 
-
 def dump2file(h, hs, outFile):
-    hsSet = set(hs)
-    outFile.write(str(h) + ' ' + str(len(hs)) + ' ')
+    hsSet = set([x["hstar"] for x in hs])
+    outFile.write(str(h) + ' ' + str(len(hs)) + ' ') # how many unique states
     for hsvalue in hsSet:
-        valueCount = hs.count(hsvalue) need to add another frequency counter value
-        this is not going to be human readable, we should change it to json fomat
+        hsCounters = [x["counter"] for x in hs if x["hstar"] == hsvalue]
+        valueCount = sum(hsCounters)
         outFile.write(str(hsvalue) + ' ' + str(valueCount) + ' ')
     outFile.write("\n")
 
@@ -41,7 +40,7 @@ def dumphhstar(hhsCollection, dirName, roundHS=False):
         if roundHS:
             #save to 0.1 to make histogramo
             hslist = [
-                round(v, 2) for v in hslist
+                x.update("hstar", round(x["hstar"], 2)) for x in hslist
             ]  # this is dangrous, but otherwise we have each data point a bin
 
         dump2file(h, hslist, f)
@@ -74,7 +73,7 @@ def dumphhat2file(hhatCollection, dirName):
 def dump2file_sample_states(h, samples, outFile):
     outFile.write(str(h) + ' ' + str(len(samples)) + ' ')
     for sample in samples:
-        outFile.write(sample + ' ')
+        outFile.write(sample["instance"] + ' ')
     outFile.write("\n")
 
 

@@ -22,8 +22,11 @@ public:
         int h;
         int d;
         State state;
+        int frequencyCounter;
 
-        Node(int _h, int _d, State _s) : h(_h), d(_d), state(_s) {}
+        Node() = delete;
+        Node(int _h, int _d, State _s)
+                : h(_h), d(_d), state(_s), frequencyCounter(1) {}
     };
 
     void parsingDumpFile(ifstream& f) {
@@ -60,6 +63,8 @@ public:
                 State s(board, 's');
                 shared_ptr<Node> n = make_shared<Node>(h, d, s);
                 nodeCollection[key] = n;
+            } else {
+                nodeCollection[key]->frequencyCounter++;
             }
         }
     };
@@ -114,6 +119,13 @@ public:
 
     void dumpSampleSet(string tileType) {
         int id = 0;
+
+        string fileFrequencyRecord =
+                "../results/SlidingTilePuzzle/sampleProblem/" + tileType + "/" +
+                "0FrequencyCounter.txt";
+
+        ofstream counterFile(fileFrequencyRecord);
+
         for (auto n : sampleSet) {
             id++;
             string fileName = "../results/SlidingTilePuzzle/sampleProblem/" +
@@ -123,14 +135,17 @@ public:
 
             n->state.dumpToProblemFile(f);
             f.close();
+
+            counterFile << to_string(id) << " " << n->frequencyCounter << "\n";
         }
+        counterFile.close();
         cout << "dump count " << id << endl;
     }
 
     Collection() : fileCount(0){};
 
 private:
-    unordered_map<unsigned long long, shared_ptr<Node>> nodeCollection; need to add frequency counter here
+    unordered_map<unsigned long long, shared_ptr<Node>> nodeCollection;
     unordered_map<int, std::vector<shared_ptr<Node>>> hCollection;
 	vector<shared_ptr<Node>> sampleSet;
 

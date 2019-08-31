@@ -6,57 +6,72 @@ Author: Tianyi Gu
 Date: 08/27/2019
 '''
 
-from collections import defaultdict
 import os
+from collections import defaultdict
+
 import dumpAndPlot
 
 
 def main():
 
     # Hard coded result directories
-    tileType = "uniform"
+    tileType = "heavy"
 
     h_collection = defaultdict(list)
-    h_collection_sampleStates = defaultdict(list)
 
-    print("reading in data...")
+    print("reading in data for " + tileType)
 
     # ready the frequency counter file, this file is generated when
     # we collect 200 unique states for each h bucket
     frequencyCounter = defaultdict(int)
-    read frequencycounter file
+    print("reading in frequency file...")
+    with open(
+            "../../../results/SlidingTilePuzzle/sampleProblem/" + tileType +
+            "/0FrequencyCounter.txt", "r") as frequencycounterFile:
+        #parse the frequency counter file
+        for line in frequencycounterFile:
+            line = line.split(" ")
+            frequencyCounter[line[0]] = int(line[1])
 
+    #parse the instance solution file
+    print("reading in solution files...")
     for oneFile in os.listdir(
             "../../../results/SlidingTilePuzzle/sampleData/" + tileType):
-        f = open(
-            "../../../results/SlidingTilePuzzle/sampleData/" + tileType + "/" +
-            oneFile, "r")
+        with open(
+                "../../../results/SlidingTilePuzzle/sampleData/" + tileType +
+                "/" + oneFile, "r") as f:
 
-        h = 999999
-        hs = 999999
+            h = 999999
+            hs = 999999
 
-        for line in f:
-            line = line.replace('"', '')
+            for line in f:
+                line = line.replace('"', '')
 
-            if "initial heuristic" in line:
-                for s in line.split():
-                    if s.isdigit():
-                        h = int(s)
+                if "initial heuristic" in line:
+                    for s in line.split():
+                        if s.isdigit():
+                            h = int(s)
 
-            if "solution length" in line:
-                for s in line.split():
-                    if s.isdigit():
-                        hs = int(s)
+                if "solution length" in line:
+                    for s in line.split():
+                        if s.isdigit():
+                            hs = int(s)
 
-        if h != 999999 and hs != 999999:
-            h_collection[h].append(hs) append hs along with the frequency counter
-            h_collection_sampleStates[h].append(oneFile.split(".")[0] + ".st")
+            if h != 999999 and hs != 999999:
+                h_collection[h].append({
+                    "hstar":
+                    hs,
+                    "counter":
+                    frequencyCounter[oneFile.split(".")[0]],
+                    "instance":
+                    oneFile.split(".")[0] + ".st"
+                })
 
     dumpAndPlot.dumphhstar(h_collection, tileType)
 
     # dumpAndPlot.dumphhat2file(h_collection, tileType)
 
-    # dumpAndPlot.dumphSamples(h_collection_sampleStates, tileType)
+    # dumpAndPlot.dumphSamples(h_collection, tileType)
 
     # dumpAndPlot.plotHist(h_collection, tileType)
 
