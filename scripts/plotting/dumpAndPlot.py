@@ -11,6 +11,7 @@ from collections import OrderedDict
 
 from datetime import datetime
 import os
+import json
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -170,12 +171,10 @@ def dumphSamples(sampleCollection, dirName, roundHS=False):
     nomissingHHSCollection = fixMissing(sampleCollection, roundHS)
     od = OrderedDict(sorted(nomissingHHSCollection.items()))
 
-    f_samples = open(
-        "../../../results/SlidingTilePuzzle/sampleData/" + dirName +
-        "-samples.txt", "w")
-
-    for h, samples in od.items():
-        dump2file_sample_states(h, samples, f_samples)
+    with open(
+            "../../../results/SlidingTilePuzzle/sampleData/" + dirName +
+            "-samples.json", "w") as json_file:
+        json.dump(od, json_file)
 
 
 #---------- plotting Hist---------------------------

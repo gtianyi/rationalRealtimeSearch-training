@@ -9,6 +9,7 @@
 #include <random>
 #include "domain/InverseTilePuzzle.h"
 #include "domain/HeavyTilePuzzle.h"
+#include "utility/rapidjson/document.h"
 #include <boost/functional/hash.hpp>
 
 using namespace std;
@@ -56,31 +57,30 @@ class PostSearchCollection : public CollectionBase {
 public:
   virtual void parsingSamples(ifstream& f,
             const string& instanceDir) override {
-        string line, h, instanceName;
+        string jsonStr;
+        getline(f, jsonStr);
+        f.close();
+        rapidjson::Document jsonDoc;
+        jsonDoc.Parse(jsonStr.c_str());
 
-        while (getline(f, line)) {
-            stringstream ss(line);
+        for (auto& m : jsonDoc.GetObject()) {
 
-            ss >> h;
-            int valueCount;
-            ss >> valueCount;
-
+            string h = m.name.GetString();
             vector<State> statesList;
 
-            while (ss >> instanceName) {
+            for (auto& instance : m.value.GetArray()) {
+                string instanceName = instance["instance"].GetString();
+                int counter = stoi(instance["counter"].GetString());
+                Cost hstar  = stod(instance["hstar"].GetString());
+                Cost deltaH  = stod(instance["deltaH"].GetString());
+
+
                 RawState s = getStateByInstanceName(instanceName, instanceDir);
-                Cost deltaH;
-                ss >> deltaH;
-
-                statesList.push_back(State(s,deltaH));
-            }
-
-            //assert(valueCount == statesList.size());
+				statesList.push_back(State(s,deltaH,counter,hstar));
+			}
 
             hStatesCollection[h] = statesList;
         }
-
-        f.close();
     }
 
     virtual void computePostSearchHist(ifstream& f) override {
@@ -131,9 +131,13 @@ private:
 		// eg: h = 3 have no data
 		//     borow one instance from h = 5
 		//     delta h = 3-5 = -2
-        Cost deltaH; 
+        Cost deltaH;
+        int freqCounter;
+        Cost hstar;
+
         State() = delete;
-        State(RawState& s, Cost deltaH) : rawS(s), deltaH(deltaH){};
+        State(RawState& s, Cost deltaH, int counter, Cost hs)
+                : rawS(s), deltaH(deltaH), freqCounter(counter), hstar(hs){};
     };
 
     using HStateMap = std::unordered_map<std::string, std::vector<State>>;

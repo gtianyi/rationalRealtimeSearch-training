@@ -46,7 +46,8 @@ def main():
             h = 999999
             hs = 999999
 
-            print "file processed", i * 100.0 / totalFiles, "%"
+            processed = i * 100.0 / totalFiles
+            print "file processed", "%.2f" % processed, "%"
 
             for line in f:
                 line = line.replace('"', '')
@@ -77,9 +78,9 @@ def main():
 
     # dumpAndPlot.dumphhat2file(h_collection, tileType)
 
-    # dumpAndPlot.dumphSamples(h_collection, tileType)
+    dumpAndPlot.dumphSamples(h_collection, tileType)
 
-    dumpAndPlot.plotHist(h_collection, tileType)
+    # dumpAndPlot.plotHist(h_collection, tileType)
 
 
 if __name__ == "__main__":
