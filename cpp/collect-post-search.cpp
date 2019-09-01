@@ -10,6 +10,8 @@
 #include "domain/InverseTilePuzzle.h"
 #include "domain/HeavyTilePuzzle.h"
 #include "utility/rapidjson/document.h"
+#include "utility/rapidjson/writer.h"
+#include "utility/rapidjson/stringbuffer.h"
 #include <boost/functional/hash.hpp>
 
 using namespace std;
@@ -42,14 +44,14 @@ string double2string(double c, int precision) {
         return stream.str();
 }
 
-constexpr int hPrecision = 1;
-constexpr int hsPrecision = 1;
+constexpr int hPrecision = 0;
+constexpr int hsPrecision = 0;
 constexpr double hSearchDownStep = 1;
 
 struct CollectionBase{
     virtual void parsingSamples(ifstream& f, const string& instanceDir)=0; 
     virtual void computePostSearchHist(ifstream& f)=0;
-    virtual void dumpPostSearchHist(ofstream& f) const = 0;
+    virtual void dumpPostSearchSamples(ofstream& f) const = 0;
 };
 
 template <class Domain>
@@ -58,6 +60,10 @@ public:
   virtual void parsingSamples(ifstream& f,
             const string& instanceDir) override {
         string jsonStr;
+        if (!f.good()) {
+            cout << "sample file does not exist!!!i\n";
+            exit(1);
+        }
         getline(f, jsonStr);
         f.close();
         rapidjson::Document jsonDoc;
@@ -66,66 +72,79 @@ public:
         for (auto& m : jsonDoc.GetObject()) {
 
             string h = m.name.GetString();
-            vector<State> statesList;
+            vector<Sample> sampleList;
 
             for (auto& instance : m.value.GetArray()) {
-                string instanceName = instance["instance"].GetString();
-                int counter = stoi(instance["counter"].GetString());
-                Cost hstar  = stod(instance["hstar"].GetString());
-                Cost deltaH  = stod(instance["deltaH"].GetString());
 
+				// TODO this does not work with invers now
+                string instanceName = instance["instance"].GetString();
+                int counter = instance["counter"].GetInt();
+                Cost hstar  = instance["hstar"].GetInt();
+                Cost deltaH  = instance["deltaH"].GetInt();
 
                 RawState s = getStateByInstanceName(instanceName, instanceDir);
-				statesList.push_back(State(s,deltaH,counter,hstar));
+				sampleList.push_back(Sample(s,deltaH,counter,hstar, instanceName));
 			}
 
-            hStatesCollection[h] = statesList;
+            hSampleCollection[h] = sampleList;
         }
     }
 
     virtual void computePostSearchHist(ifstream& f) override {
         parseHistData(f);
 
-        for (auto it = hStatesCollection.begin(); it != hStatesCollection.end();
+        for (auto it = hSampleCollection.begin(); it != hSampleCollection.end();
                 it++) {
-            std::vector<Hist> histListAfterBackup;
-
-            for (auto s : it->second) {
-				auto rawHist = lookahead(s.rawS);
-				histListAfterBackup.push_back(rawHist.shift(s.deltaH));
+            for (auto& s : it->second) {
+                 const auto& samples = lookahead(s.rawS);
+                 postSearchCollection[it->first].insert(
+                         postSearchCollection[it->first].end(),
+                         samples.begin(),
+                         samples.end());
             }
-
-            postSearchhHist[it->first] =
-                    mergeHists(std::move(histListAfterBackup));
         }
     }
 
-    virtual void dumpPostSearchHist(ofstream& f) const override{
-        // sort by h before dump
-        vector<string> keys;
+    virtual void dumpPostSearchSamples(ofstream& f) const override{
+        rapidjson::StringBuffer s;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(s);
 
-        for (auto& it : postSearchhHist) {
-            keys.push_back(it.first);
+        writer.StartObject(); 
+        for (auto& it : postSearchCollection) {
+            writer.Key(it.first.c_str()); 
+            writer.StartArray();
+
+            for (auto& s : it.second) {
+                writer.StartObject();
+
+				// TODO this does not work with invers now
+                writer.Key("instance");
+                writer.String(s.instanceName.c_str());
+                writer.Key("hstar");
+                writer.Uint(s.hstar);
+                writer.Key("counter");
+                writer.Uint(s.freqCounter);
+                writer.Key("deltaH");
+                writer.Uint(s.deltaH);
+
+                writer.EndObject();
+            }
+            writer.EndArray();
         }
 
-		sort(keys.begin(),keys.end());
+        writer.EndObject();
 
-        for (auto& h:keys) {
-            auto& hist = postSearchhHist.at(h);
-
-            f << h << " ";
-            hist.print(f);
-        }
+        f << s.GetString() << endl;
 
 		f.close();
-	}
+    }
 
 private:
 
     typedef typename Domain::State RawState;
     typedef typename Domain::Cost Cost;
 
-    struct State {
+    struct Sample {
         RawState rawS;
         // h of missing - h of the state
 		// eg: h = 3 have no data
@@ -134,13 +153,25 @@ private:
         Cost deltaH;
         int freqCounter;
         Cost hstar;
+		string instanceName;
 
-        State() = delete;
-        State(RawState& s, Cost deltaH, int counter, Cost hs)
-                : rawS(s), deltaH(deltaH), freqCounter(counter), hstar(hs){};
+        Sample() = delete;
+        Sample(RawState& s, Cost deltaH, int counter, Cost hs, string& name)
+                : rawS(s),
+                  deltaH(deltaH),
+                  freqCounter(counter),
+                  hstar(hs),
+                  instanceName(name){};
+
+		Sample(const Sample& rhs, Cost shift)
+                : rawS(rhs.rawS),
+                  deltaH(rhs.deltaH + shift),
+                  freqCounter(rhs.freqCounter),
+                  hstar(rhs.hstar),
+                  instanceName(rhs.instanceName){};
     };
 
-    using HStateMap = std::unordered_map<std::string, std::vector<State>>;
+    using HSampleMap = std::unordered_map<std::string, std::vector<Sample>>;
 
     struct Hist {
         struct Bin {
@@ -234,6 +265,11 @@ private:
     }
   
     void parseHistData(ifstream& f) {
+        if (!f.good()) {
+            cout << "Hist Data file does not exist!!!i\n";
+            exit(1);
+        }
+
         string line;
 
 		string hstring;
@@ -263,7 +299,41 @@ private:
 		f.close();
     }
 
-    Hist findorShiftFromClosestHist(const Cost h) const{
+    vector<Sample> lookahead(const RawState& s) const {
+        Cost backuphhat = std::numeric_limits<double>::infinity();
+
+        Domain d;
+
+        auto children = d.successors(s);
+
+		Cost bestChildH;
+		Cost bestChildEdgeCost;
+
+        for (auto& c : children) {
+            Cost h = d.heuristic(c);
+            auto chist = findorShiftFromClosestHist(h);
+            Cost hhat = chist.getMean();
+            Cost edgeCost = d.getEdgeCost(c);
+            hhat += edgeCost;
+            if (hhat < backuphhat) {
+                backuphhat = hhat;
+				bestChildH = h;
+				bestChildEdgeCost = edgeCost;
+            }
+        }
+
+        vector<Sample> ret;
+
+        for (const auto& s :
+                hSampleCollection.at(double2string(bestChildH, hsPrecision))) {
+            ret.push_back(Sample(s, bestChildEdgeCost));
+        }
+
+        return ret;
+    }
+	
+
+    Hist findorShiftFromClosestHist(const Cost h) const {
         auto hString = double2string(h, hPrecision);
 
         int steps = 0;
@@ -298,54 +368,10 @@ private:
         return originalhHist.at(hString).shift((Cost)steps * hSearchDownStep);
     }
 
-    Hist lookahead(const RawState& s) const {
-        Cost backuphhat = std::numeric_limits<double>::infinity();
-
-        Domain d;
-
-        auto children = d.successors(s);
-
-        Hist bestShiftedHist;
-
-        for (auto& c : children) {
-            Cost h = d.heuristic(c);
-            auto chist = findorShiftFromClosestHist(h);
-            Cost hhat = chist.getMean();
-            Cost edgeCost = d.getEdgeCost(c);
-            hhat += edgeCost;
-            if (hhat < backuphhat) {
-                backuphhat = hhat;
-                bestShiftedHist = chist.shift(edgeCost);
-            }
-        }
-
-        return bestShiftedHist;
-    }
-
-    Hist mergeHists(vector<Hist>&& hists) const {
-        Hist newHist;
-        unordered_map<string, int> newHistKey;
-
-        for (auto hist : hists) {
-            for (auto bin : hist.getBins()) {
-                if (newHistKey.find(bin.getValueString()) != newHistKey.end()) {
-                    int binIndex = newHistKey[bin.getValueString()];
-                    newHist.updateBin(binIndex, bin.getCount());
-                }
-				else{
-                    newHistKey[bin.getValueString()] = newHist.getBins().size();
-                    newHist.push(std::move(bin));
-                }
-            }
-        }
-
-		return newHist;
-    }
-
-    HStateMap hStatesCollection;
+    HSampleMap hSampleCollection;
     std::unordered_map<std::string, Hist> originalhHist;
     std::vector<Cost> originalhValues;
-    std::unordered_map<std::string, Hist> postSearchhHist;
+    HSampleMap postSearchCollection;
 };
 
 class IOFiles {
@@ -353,11 +379,11 @@ public:
     IOFiles(string tileType) {
         if (tileType == "uniform") {
             sampleFile = "../results/SlidingTilePuzzle/sampleData/"
-                         "uniform-samples.txt";
+                         "uniform-samples.json";
             distributionFile = "../results/SlidingTilePuzzle/sampleData/"
                                "uniform-statSummary.txt";
             postSearchFile = "../results/SlidingTilePuzzle/sampleData/"
-                             "uniform-statSummary-postSearch.txt";
+                             "uniform-samples-postSearch.json";
 
             instanceDir = "uniform";
 
@@ -365,11 +391,11 @@ public:
                     make_shared<PostSearchCollection<SlidingTilePuzzle>>();
         } else if (tileType == "inverse") {
             sampleFile = "../results/SlidingTilePuzzle/sampleData/"
-                         "inverse_20_0.1_200-samples.txt";
+                         "inverse_20_0.1_200-samples.json";
             distributionFile = "../results/SlidingTilePuzzle/sampleData/"
                                "inverse-statSummary-20-0.1-200-backup.txt";
             postSearchFile = "../results/SlidingTilePuzzle/sampleData/"
-                             "inverse-statSummary-20-0.1-200-postSearch.txt";
+                             "inverse-samples-20-0.1-200-postSearch.json";
 
             instanceDir = "inverse-20-0.1-200";
 
@@ -377,11 +403,11 @@ public:
                     make_shared<PostSearchCollection<InverseTilePuzzle>>();
         }  else if (tileType == "heavy") {
             sampleFile = "../results/SlidingTilePuzzle/sampleData/"
-                         "heavy-samples.txt";
+                         "heavy-samples.json";
             distributionFile = "../results/SlidingTilePuzzle/sampleData/"
                                "heavy-statSummary.txt";
             postSearchFile = "../results/SlidingTilePuzzle/sampleData/"
-                             "heavy-statSummary-postSearch.txt";
+                             "heavy-samples-postSearch.json";
 
             instanceDir = "heavy";
 
@@ -412,7 +438,7 @@ public:
         // now we have the mapping that map h to post-search h*
         post_search_collection->computePostSearchHist(f_distribution);
 
-        post_search_collection->dumpPostSearchHist(f_out);
+        post_search_collection->dumpPostSearchSamples(f_out);
     }
 
 private:
