@@ -40,7 +40,7 @@ def dumphhstar(hhsCollection, dirName, roundHS=False):
 
     hStep = 1
     if roundHS:
-        hStep = 0.01
+        hStep = 0.1
         for h, hslist in od.items():
             #save to 0.1 to make histogram
             for x in hslist:

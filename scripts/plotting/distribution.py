@@ -67,11 +67,11 @@ def main():
                     oneFile.split(".")[0] + ".st"
                 })
 
-    dumpAndPlot.dumphhstar(h_collection, tileType)
+    # dumpAndPlot.dumphhstar(h_collection, tileType)
 
     # dumpAndPlot.dumphhat2file(h_collection, tileType)
 
-    # dumpAndPlot.dumphSamples(h_collection, tileType)
+    dumpAndPlot.dumphSamples(h_collection, tileType)
 
     # dumpAndPlot.plotHist(h_collection, tileType)
 

@@ -68,10 +68,14 @@ public:
             vector<State> statesList;
 
             while (ss >> instanceName) {
-                statesList.push_back(getStateByInstanceName(instanceName, instanceDir));
+                RawState s = getStateByInstanceName(instanceName, instanceDir);
+                Cost deltaH;
+                ss >> deltaH;
+
+                statesList.push_back();
             }
 
-            assert(valueCount == statesList.size());
+            //assert(valueCount == statesList.size());
 
             hStatesCollection[h] = statesList;
         }
@@ -87,7 +91,8 @@ public:
             std::vector<Hist> histListAfterBackup;
 
             for (auto s : it->second) {
-				histListAfterBackup.push_back(lookahead(s));
+				auto rawHist = lookahead(s.rawS);
+				histListAfterBackup.push_back(rawHist.shift(s.deltaH));
             }
 
             postSearchhHist[it->first] =
@@ -110,8 +115,19 @@ public:
 
 private:
 
-    typedef typename Domain::State State;
+    typedef typename Domain::State RawState;
     typedef typename Domain::Cost Cost;
+
+    struct State {
+        RawState rawS;
+        // h of missing - h of the state
+		// eg: h = 3 have no data
+		//     borow one instance from h = 5
+		//     delta h = 3-5 = -2
+        Cost deltaH; 
+        State() = delete;
+        State(RawState& s, Cost deltaH) : rawS(s), deltaH(deltaH){};
+    };
 
     using HStateMap = std::unordered_map<std::string, std::vector<State>>;
 
@@ -251,8 +267,7 @@ private:
                 hString = double2string(closesth, hPrecision);
             } else if (h < originalhValues[1]) {
                 // 0 is goal, we want to return the smallest h value for
-                // a
-                // non-goal state
+                // a non-goal state
                 closesth = originalhValues[1];
                 hString = double2string(closesth, hPrecision);
             } else {
