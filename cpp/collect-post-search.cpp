@@ -72,7 +72,7 @@ public:
                 Cost deltaH;
                 ss >> deltaH;
 
-                statesList.push_back();
+                statesList.push_back(State(s,deltaH));
             }
 
             //assert(valueCount == statesList.size());
@@ -101,10 +101,17 @@ public:
     }
 
     virtual void dumpPostSearchHist(ofstream& f) const override{
-        for (auto it = postSearchhHist.begin(); it != postSearchhHist.end();
-                it++) {
-            auto& h = it->first;
-            auto& hist = it->second;
+        // sort by h before dump
+        vector<string> keys;
+
+        for (auto& it : postSearchhHist) {
+            keys.push_back(it.first);
+        }
+
+		sort(keys.begin(),keys.end());
+
+        for (auto& h:keys) {
+            auto& hist = postSearchhHist.at(h);
 
             f << h << " ";
             hist.print(f);
@@ -213,7 +220,7 @@ private:
 
     typedef typename Hist::Bin Bin;
 
-    State getStateByInstanceName(const string& instance,
+    RawState getStateByInstanceName(const string& instance,
             const string& dir) const {
         string fileName = "../results/SlidingTilePuzzle/sampleProblem/" + dir +
                 "/" + instance;
@@ -242,7 +249,7 @@ private:
 				hist.push(Bin(hs, hsCount));
             }
 
-            assert(hist.getTotalCount() == valueCount);
+            //assert(hist.getTotalCount() == valueCount);
 			originalhHist[hstring]=hist;
 			originalhValues.push_back(hvalue);
         }
@@ -287,7 +294,7 @@ private:
         return originalhHist.at(hString).shift((Cost)steps * hSearchDownStep);
     }
 
-    Hist lookahead(const State& s) const {
+    Hist lookahead(const RawState& s) const {
         Cost backuphhat = std::numeric_limits<double>::infinity();
 
         Domain d;

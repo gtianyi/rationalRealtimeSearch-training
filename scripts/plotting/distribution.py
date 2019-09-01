@@ -35,14 +35,18 @@ def main():
 
     #parse the instance solution file
     print("reading in solution files...")
-    for oneFile in os.listdir(
-            "../../../results/SlidingTilePuzzle/sampleData/" + tileType):
+    allFiles = os.listdir("../../../results/SlidingTilePuzzle/sampleData/" +
+                          tileType)
+    totalFiles = len(allFiles)
+    for i, oneFile in enumerate(allFiles):
         with open(
                 "../../../results/SlidingTilePuzzle/sampleData/" + tileType +
                 "/" + oneFile, "r") as f:
 
             h = 999999
             hs = 999999
+
+            print "file processed", i * 100.0 / totalFiles, "%"
 
             for line in f:
                 line = line.replace('"', '')
@@ -64,16 +68,18 @@ def main():
                     "counter":
                     frequencyCounter[oneFile.split(".")[0]],
                     "instance":
-                    oneFile.split(".")[0] + ".st"
+                    oneFile.split(".")[0] + ".st",
+                    "deltaH":
+                    0
                 })
 
     # dumpAndPlot.dumphhstar(h_collection, tileType)
 
     # dumpAndPlot.dumphhat2file(h_collection, tileType)
 
-    dumpAndPlot.dumphSamples(h_collection, tileType)
+    # dumpAndPlot.dumphSamples(h_collection, tileType)
 
-    # dumpAndPlot.plotHist(h_collection, tileType)
+    dumpAndPlot.plotHist(h_collection, tileType)
 
 
 if __name__ == "__main__":

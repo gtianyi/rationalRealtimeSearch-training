@@ -147,9 +147,9 @@ def main():
         return
 
     FILE_BELIEF = "../../../results/SlidingTilePuzzle/sampleData/" + sys.argv[
-        1] + "-statSummary.txt"
+        1] + "-statSummary.txt.freq.nomissing"
     FILE_PS_BELIEF = "../../../results/SlidingTilePuzzle/sampleData/" + sys.argv[
-        1] + "-statSummary-postSearch.txt"
+        1] + "-statSummary-postSearch.txt.freq.nomissing"
 
     print "reading in data..."
     H_TO_HS = parse_data_file(FILE_BELIEF)

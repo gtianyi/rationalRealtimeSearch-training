@@ -9,6 +9,8 @@ Create Date: 05/22/2019
 import random
 from collections import OrderedDict
 
+from datetime import datetime
+import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -21,7 +23,9 @@ __author__ = 'Tianyi Gu'
 
 def dump2file(h, hs, outFile):
     hsSet = sorted(set([x["hstar"] for x in hs]))
-    outFile.write(str(h) + ' ' + str(len(hs)) + ' ')  # how many unique states
+    # not how many unique states
+    # but total frequency counter
+    outFile.write(str(h) + ' ' + str(sum([x["counter"] for x in hs])) + ' ')
     for hsvalue in hsSet:
         hsCounters = [x["counter"] for x in hs if x["hstar"] == hsvalue]
         valueCount = sum(hsCounters)
@@ -36,6 +40,15 @@ def dumphhstar(hhsCollection, dirName, roundHS=False):
     f = open(
         "../../../results/SlidingTilePuzzle/sampleData/" + dirName +
         "-statSummary.txt", "w")
+
+    nomissingHHSCollection = fixMissing(hhsCollection, roundHS)
+    od = OrderedDict(sorted(nomissingHHSCollection.items()))
+
+    for h, hslist in od.items():
+        dump2file(h, hslist, f)
+
+
+def fixMissing(hhsCollection, roundHS):
     od = OrderedDict(sorted(hhsCollection.items()))
 
     hStep = 1
@@ -45,6 +58,8 @@ def dumphhstar(hhsCollection, dirName, roundHS=False):
             #save to 0.1 to make histogram
             for x in hslist:
                 x.update("hstar", round(x["hstar"], 2))
+
+    nomissingHHSCollection = {}
 
     # fix missing data and dump
     prevH = -hStep
@@ -65,13 +80,14 @@ def dumphhstar(hhsCollection, dirName, roundHS=False):
 
             print("hcur ", hCur, "lowH ", lowH, "hghH ", highHCur,
                   "data size ", len(nomissingHS))
-            # print(nomissingHS)
 
-            dump2file(hCur, nomissingHS, f)
+            nomissingHHSCollection[hCur] = nomissingHS
 
             hCur = hCur + hStep
 
         prevH = h
+
+    return nomissingHHSCollection
 
 
 def getNoMissingHSOfH(h, lowH, highH, od):
@@ -95,6 +111,7 @@ def getNoMissingHSOfH(h, lowH, highH, od):
 
 def grabDataFromOrderedCollection(orderdCollection, nomissingHS, nomissingh):
     for h in orderdCollection:
+        random.seed(19)
         random.shuffle(orderdCollection[h])
         hs_list = orderdCollection[h]
 
@@ -112,6 +129,7 @@ def grabDataFromOrderedCollection(orderdCollection, nomissingHS, nomissingh):
 def shiftInstance(instance, v):
     newinstance = instance.copy()
     newinstance.update({"hstar": instance["hstar"] + v})
+    newinstance.update({"deltaH": v})
     return newinstance
 
 
@@ -142,15 +160,15 @@ def dumphhat2file(hhatCollection, dirName):
 def dump2file_sample_states(h, samples, outFile):
     outFile.write(str(h) + ' ' + str(len(samples)) + ' ')
     for sample in samples:
-        outFile.write(sample["instance"] + ' ')
+        outFile.write(sample["instance"] + ' ' + str(sample["deltaH"]) + " ")
     outFile.write("\n")
 
 
-def dumphSamples(sampleCollection, dirName):
+def dumphSamples(sampleCollection, dirName, roundHS=False):
     print("dumping out h-samples collection...")
     print("h count " + str(len(sampleCollection)))
-
-    od = OrderedDict(sorted(sampleCollection.items()))
+    nomissingHHSCollection = fixMissing(sampleCollection, roundHS)
+    od = OrderedDict(sorted(nomissingHHSCollection.items()))
 
     f_samples = open(
         "../../../results/SlidingTilePuzzle/sampleData/" + dirName +
@@ -170,7 +188,7 @@ def makeHistrogram(h, hs, fileDir, roundHS=False):
         'text.color': 'black'
     })
     # ax = sns.distplot(np.array(hs), kde=False)
-    sns.distplot(np.array(hs), kde=False)
+    sns.distplot(np.array([x["hstar"] for x in hs]), kde=False)
     #ax.tick_params(colors='black', labelsize=12, rotation=90)
     # ax.xaxis.set_major_locator(ticker.MultipleLocator(5))
     # ax.set_xscale('log')
@@ -191,13 +209,18 @@ def makeHistrogram(h, hs, fileDir, roundHS=False):
     return
 
 
-def plotHist(hhsCollection, dirName, roundHS=False):
+def plotHist(hhsCollection, tileType, roundHS=False):
     print("plot hist...")
     print("h count " + str(len(hhsCollection)))
 
-    plotDir = "../../../plots/hist/" + dirName + "/"
+    dtString = datetime.now().strftime("%d%m%Y-%H%M")
+    plotDir = "../../../plots/hist/" + tileType + "/" + dtString + "/"
 
-    od = OrderedDict(sorted(hhsCollection.items()))
+    if not os.path.exists(plotDir):
+        os.makedirs(plotDir)
+
+    nomissingHHSCollection = fixMissing(hhsCollection, roundHS)
+    od = OrderedDict(sorted(nomissingHHSCollection.items()))
 
     for h, hslist in od.items():
         if hslist:
