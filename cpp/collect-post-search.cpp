@@ -300,33 +300,34 @@ private:
         auto children = d.successors(s);
 
 		Cost bestChildH;
+		Cost bestChildShift;
 		Cost bestChildEdgeCost;
 
         for (auto& c : children) {
             Cost h = d.heuristic(c);
-            auto chist = findorShiftFromClosestHist(h);
+            Cost closesth = h;
+            auto chist = findorShiftFromClosestHist(h, closesth);
             Cost hhat = chist.getMean();
             Cost edgeCost = d.getEdgeCost(c);
             hhat += edgeCost;
             if (hhat < backuphhat) {
                 backuphhat = hhat;
-				bestChildH = h;
-				bestChildEdgeCost = edgeCost;
+                bestChildH = closesth;
+                bestChildShift = h - closesth;
+                bestChildEdgeCost = edgeCost;
             }
         }
 
         vector<Sample> ret;
-
         for (const auto& s :
                 hSampleCollection.at(double2string(bestChildH, hsPrecision))) {
-            ret.push_back(Sample(s, bestChildEdgeCost));
+            ret.push_back(Sample(s, bestChildEdgeCost + bestChildShift));
         }
 
         return ret;
     }
-	
 
-    Hist findorShiftFromClosestHist(const Cost h) const {
+    Hist findorShiftFromClosestHist(const Cost h, Cost& closesth) const {
         auto hString = double2string(h, hPrecision);
 
         int steps = 0;
@@ -334,7 +335,6 @@ private:
         if (originalhHist.find(hString) != originalhHist.end()) {
             return originalhHist.at(hString);
         } else {
-            Cost closesth;
 
             if (h > originalhValues[originalhValues.size() - 1]) {
                 closesth = originalhValues[originalhValues.size() - 1];
@@ -352,6 +352,7 @@ private:
                     hString = double2string(curH, hPrecision);
                     steps++;
                     if (originalhHist.find(hString) != originalhHist.end()) {
+                        closesth = curH;
                         break;
                     }
                 }

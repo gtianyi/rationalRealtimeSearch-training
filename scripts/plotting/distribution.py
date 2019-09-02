@@ -28,10 +28,12 @@ def main():
     fileType = sys.argv[2]
 
     if fileType == "postd":
-        with open("../../../results/SlidingTilePuzzle/sampleData/" +
-                  tileType + "-samples-postSearch.json") as json_file:
+        with open("../../../results/SlidingTilePuzzle/sampleData/" + tileType +
+                  "-samples-postSearch.json") as json_file:
             data = json.load(json_file)
-            dumpAndPlot.createDistAndDump(data, tileType, fileType)
+            od = OrderedDict(
+                sorted(data.items(), key=lambda item: float(item[0])))
+            dumpAndPlot.createDistAndDump(od, tileType, fileType)
         return
 
     h_collection = defaultdict(list)

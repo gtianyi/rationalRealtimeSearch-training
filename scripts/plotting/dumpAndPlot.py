@@ -31,7 +31,7 @@ def createDistAndDump(hhsCollection, dirName, fileType):
 
     for h, hslist in hhsCollection.items():
         print "create distribution processing ", "%.2f" % (
-            len(dist) * 100.0 / len(hhsCollection)), "%"
+            len(dist) * 100.0 / len(hhsCollection)), "%", "h ", h
 
         hsSet = sorted(set([x["hstar"] for x in hslist]))
         # not how many unique states
