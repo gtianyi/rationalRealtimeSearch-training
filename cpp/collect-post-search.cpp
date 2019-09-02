@@ -279,7 +279,7 @@ private:
 
 				// TODO this does not work with invers now
 				Cost hstar  = instance["h*"].GetInt();
-				Cost prob  = instance["prob"].GetFloat();
+				Cost prob  = stod(instance["prob"].GetString());
 
 				hist.push(Bin(hstar, prob));
 			}
