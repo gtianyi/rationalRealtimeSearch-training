@@ -6,12 +6,13 @@ Author: Tianyi Gu
 Create Date: 05/22/2019
 '''
 
+import json
+import os
 import random
 from collections import OrderedDict
-
 from datetime import datetime
-import os
-import json
+from operator import itemgetter
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -22,34 +23,48 @@ __author__ = 'Tianyi Gu'
 #---------- Dump out h-hstar ---------------------------
 
 
-def dump2file(h, hs, outFile):
-    hsSet = sorted(set([x["hstar"] for x in hs]))
-    # not how many unique states
-    # but total frequency counter
-    outFile.write(str(h) + ' ' + str(sum([x["counter"] for x in hs])) + ' ')
-    for hsvalue in hsSet:
-        hsCounters = [x["counter"] for x in hs if x["hstar"] == hsvalue]
-        valueCount = sum(hsCounters)
-        outFile.write(str(hsvalue) + ' ' + str(valueCount) + ' ')
-    outFile.write("\n")
-
-
-def dumphhstar(hhsCollection, dirName, roundHS=False):
-    print("fix missing and dumping out h-hstar collection...")
+def createDistAndDump(hhsCollection, dirName, fileType):
+    print("creating distribution...")
     print("h count " + str(len(hhsCollection)))
 
-    f = open(
-        "../../../results/SlidingTilePuzzle/sampleData/" + dirName +
-        "-statSummary.txt", "w")
+    dist = []
 
-    nomissingHHSCollection = fixMissing(hhsCollection, roundHS)
-    od = OrderedDict(sorted(nomissingHHSCollection.items()))
+    for h, hslist in hhsCollection.items():
+        print "create distribution processing ", "%.2f" % (len(dist)*100.0 / len(
+            hhsCollection)), "%"
 
-    for h, hslist in od.items():
-        dump2file(h, hslist, f)
+        hsSet = sorted(set([x["hstar"] for x in hslist]))
+        # not how many unique states
+        # but total frequency counter
+        hist = {}
+        hist["number of bins"] = len(hsSet)
+        bins = []
+        total = sum([x["counter"] for x in hslist])
+        sumProb = 0
+        for hsvalue in hsSet:
+            onebin = {}
+            onebin["h*"] = hsvalue
+            hsCounters = [
+                x["counter"] for x in hslist if x["hstar"] == hsvalue
+            ]
+            onebin["prob"] = "%.6f" % (sum(hsCounters) * 1.0 / total)
+            sumProb = sumProb + sum(hsCounters) * 1.0 / total
+            bins.append(onebin)
+
+        print "sumprob", sumProb
+        # assert (sumProb == 1.0)
+
+        sortedBins = sorted(bins, key=itemgetter('prob'), reverse=True)
+        hist["bins"] = sortedBins
+        dist.append({h: hist})
+
+    with open(
+            "../../../results/SlidingTilePuzzle/sampleData/" + dirName +
+            "-statSummary-" + fileType + ".json", "w") as json_file:
+        json.dump(dist, json_file)
 
 
-def fixMissing(hhsCollection, roundHS):
+def fixMissing(hhsCollection, roundHS=False):
     od = OrderedDict(sorted(hhsCollection.items()))
 
     hStep = 1
@@ -158,23 +173,14 @@ def dumphhat2file(hhatCollection, dirName):
 #---------- Dump out h and samples ---------------------------
 
 
-def dump2file_sample_states(h, samples, outFile):
-    outFile.write(str(h) + ' ' + str(len(samples)) + ' ')
-    for sample in samples:
-        outFile.write(sample["instance"] + ' ' + str(sample["deltaH"]) + " ")
-    outFile.write("\n")
-
-
-def dumphSamples(sampleCollection, dirName, roundHS=False):
+def dumphSamples(sampleCollection, dirName):
     print("dumping out h-samples collection...")
     print("h count " + str(len(sampleCollection)))
-    nomissingHHSCollection = fixMissing(sampleCollection, roundHS)
-    od = OrderedDict(sorted(nomissingHHSCollection.items()))
 
     with open(
             "../../../results/SlidingTilePuzzle/sampleData/" + dirName +
             "-samples.json", "w") as json_file:
-        json.dump(od, json_file)
+        json.dump(sampleCollection, json_file)
 
 
 #---------- plotting Hist---------------------------

@@ -6,16 +6,33 @@ Author: Tianyi Gu
 Date: 08/27/2019
 '''
 
+import json
 import os
-from collections import defaultdict
+import sys
+from collections import OrderedDict, defaultdict
 
 import dumpAndPlot
+
+
+def printUsage():
+    print "usage: python distribution.py <tile type> <dump file>"
+    print "tile type: uniform heavy inverse"
+    print "dump file: d(distribution) postd(poset search distribution)"
 
 
 def main():
 
     # Hard coded result directories
-    tileType = "heavy"
+    tileType = sys.argv[1]
+
+    fileType = sys.argv[2]
+
+    if fileType == "postd":
+        with open("../../../results/SlidingTilePuzzle/sampleData/" +
+                  tileType + "-samples-postSearch.json") as json_file:
+            data = json.load(json_file)
+            dumpAndPlot.createDistAndDump(data, tileType, fileType)
+        return
 
     h_collection = defaultdict(list)
 
@@ -47,7 +64,7 @@ def main():
             hs = 999999
 
             processed = i * 100.0 / totalFiles
-            print "file processed", "%.2f" % processed, "%"
+            print "read file processed", "%.2f" % processed, "%"
 
             for line in f:
                 line = line.replace('"', '')
@@ -74,11 +91,15 @@ def main():
                     0
                 })
 
-    # dumpAndPlot.dumphhstar(h_collection, tileType)
+    print("fix missing data...")
+    nomissingHHSCollection = dumpAndPlot.fixMissing(h_collection)
+    od = OrderedDict(sorted(nomissingHHSCollection.items()))
+
+    dumpAndPlot.createDistAndDump(od, tileType, fileType)
 
     # dumpAndPlot.dumphhat2file(h_collection, tileType)
 
-    dumpAndPlot.dumphSamples(h_collection, tileType)
+    # dumpAndPlot.dumphSamples(h_collection, tileType)
 
     # dumpAndPlot.plotHist(h_collection, tileType)
 

@@ -59,11 +59,12 @@ class PostSearchCollection : public CollectionBase {
 public:
   virtual void parsingSamples(ifstream& f,
             const string& instanceDir) override {
-        string jsonStr;
         if (!f.good()) {
             cout << "sample file does not exist!!!i\n";
             exit(1);
         }
+
+        string jsonStr;
         getline(f, jsonStr);
         f.close();
         rapidjson::Document jsonDoc;
@@ -106,18 +107,30 @@ public:
     }
 
     virtual void dumpPostSearchSamples(ofstream& f) const override{
+        // sort by h before dump
+        vector<string> keys;
+
+        for (auto& it : postSearchCollection) {
+            keys.push_back(it.first);
+        }
+
+		sort(keys.begin(),keys.end());
+
+		//dump to json
+
         rapidjson::StringBuffer s;
         rapidjson::Writer<rapidjson::StringBuffer> writer(s);
 
         writer.StartObject(); 
-        for (auto& it : postSearchCollection) {
-            writer.Key(it.first.c_str()); 
+
+        for (auto& h : keys) {
+            writer.Key(h.c_str()); 
             writer.StartArray();
 
-            for (auto& s : it.second) {
+            for (auto& s : postSearchCollection.at(h)) {
                 writer.StartObject();
 
-				// TODO this does not work with invers now
+                // TODO this does not work with invers now
                 writer.Key("instance");
                 writer.String(s.instanceName.c_str());
                 writer.Key("hstar");
@@ -269,6 +282,31 @@ private:
             cout << "Hist Data file does not exist!!!i\n";
             exit(1);
         }
+		/*string jsonStr;*/
+        //getline(f, jsonStr);
+        //f.close();
+        //rapidjson::Document jsonDoc;
+        //jsonDoc.Parse(jsonStr.c_str());
+
+        //for (auto& m : jsonDoc.GetObject()) {
+
+            //string h = m.name.GetString();
+            //vector<Sample> sampleList;
+
+            //for (auto& instance : m.value.GetArray()) {
+
+				//// TODO this does not work with invers now
+                //string instanceName = instance["instance"].GetString();
+                //int counter = instance["counter"].GetInt();
+                //Cost hstar  = instance["hstar"].GetInt();
+                //Cost deltaH  = instance["deltaH"].GetInt();
+
+                //RawState s = getStateByInstanceName(instanceName, instanceDir);
+				//sampleList.push_back(Sample(s,deltaH,counter,hstar, instanceName));
+			//}
+
+            //hSampleCollection[h] = sampleList;
+        /*}*/
 
         string line;
 
