@@ -97,11 +97,11 @@ def main():
     nomissingHHSCollection = dumpAndPlot.fixMissing(h_collection)
     od = OrderedDict(sorted(nomissingHHSCollection.items()))
 
-    dumpAndPlot.createDistAndDump(od, tileType, fileType)
+    if fileType == "d":
+        dumpAndPlot.createDistAndDump(od, tileType, fileType)
+        dumpAndPlot.dumphSamples(od, tileType)
 
     # dumpAndPlot.dumphhat2file(h_collection, tileType)
-
-    # dumpAndPlot.dumphSamples(h_collection, tileType)
 
     # dumpAndPlot.plotHist(h_collection, tileType)
 

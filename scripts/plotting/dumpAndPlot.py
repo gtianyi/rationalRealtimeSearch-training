@@ -58,6 +58,9 @@ def createDistAndDump(hhsCollection, dirName, fileType):
         hist["bins"] = sortedBins
         dist[h] = hist
 
+    dist = OrderedDict(
+                sorted(dist.items(), key=lambda item: float(item[0])))
+
     with open(
             "../../../results/SlidingTilePuzzle/sampleData/" + dirName +
             "-statSummary-" + fileType + ".json", "w") as json_file:

@@ -97,7 +97,7 @@ public:
         for (auto it = hSampleCollection.begin(); it != hSampleCollection.end();
                 it++) {
             for (auto& s : it->second) {
-                 const auto& samples = lookahead(s.rawS);
+                 const auto& samples = lookahead(s.rawS, s.deltaH);
                  postSearchCollection[it->first].insert(
                          postSearchCollection[it->first].end(),
                          samples.begin(),
@@ -178,9 +178,9 @@ private:
 
 		Sample(const Sample& rhs, Cost shift)
                 : rawS(rhs.rawS),
-                  deltaH(rhs.deltaH + shift),
+                  deltaH(rhs.deltaH),
                   freqCounter(rhs.freqCounter),
-                  hstar(rhs.hstar),
+                  hstar(rhs.hstar+shift),
                   instanceName(rhs.instanceName){};
     };
 
@@ -292,16 +292,29 @@ private:
 		f.close();
     }
 
-    vector<Sample> lookahead(const RawState& s) const {
+    vector<Sample> lookahead(const RawState& s, const Cost deltaH) const {
+		// s: the raw sample state
+		// deltaH, the shift cost if this sample is a borrowed sample
         Cost backuphhat = std::numeric_limits<double>::infinity();
 
         Domain d;
 
+        Cost h = d.heuristic(s);
+
+        vector<Sample> ret;
+        if (h == 0) {
+            for (const auto& s :
+                    hSampleCollection.at(double2string(h, hsPrecision))) {
+                ret.push_back(Sample(s, deltaH));
+            }
+            return ret;
+        }
+
         auto children = d.successors(s);
 
-		Cost bestChildH;
-		Cost bestChildShift;
-		Cost bestChildEdgeCost;
+        Cost bestChildH;
+        Cost bestChildShift;
+        Cost bestChildEdgeCost;
 
         for (auto& c : children) {
             Cost h = d.heuristic(c);
@@ -318,10 +331,9 @@ private:
             }
         }
 
-        vector<Sample> ret;
         for (const auto& s :
                 hSampleCollection.at(double2string(bestChildH, hsPrecision))) {
-            ret.push_back(Sample(s, bestChildEdgeCost + bestChildShift));
+            ret.push_back(Sample(s, bestChildEdgeCost + bestChildShift + deltaH));
         }
 
         return ret;

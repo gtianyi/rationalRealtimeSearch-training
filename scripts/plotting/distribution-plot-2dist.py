@@ -6,11 +6,12 @@ Author: Tianyi Gu
 Date: 08/29/2019
 '''
 
-from collections import OrderedDict, defaultdict
-
-import sys
-from datetime import datetime
+import json
 import os
+import sys
+from collections import OrderedDict, defaultdict
+from datetime import datetime
+
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
@@ -96,34 +97,6 @@ def make_histrogram(h_value, hslistpair, file_dir):
     return
 
 
-def parse_data_file(fname):
-    ''' parse data from a file
-    format in each line:
-    <h> <# of data points> <data_1> <count_1> <data_2> <count_2> ...
-
-    keyworkd arguments:
-    fname -- input file
-    '''
-    h_collection = defaultdict(list)
-
-    input_file = open(fname, "r")
-
-    for line in input_file:
-        values = line.split()
-        h_value = values[0]
-        count = (int)(values[1])
-        cur = 2
-        while cur < len(values):
-            cur_count = (int)(values[cur + 1])
-            while cur_count > 0:
-                h_collection[h_value].append((float)(values[cur]))
-                cur_count = cur_count - 1
-            cur = cur + 2
-        assert len(h_collection[h_value]) == count
-
-    return h_collection
-
-
 def merge2map(map_1, map_2):
     '''merge two h->hs maps into one map h->[hs,hs]
        first is hs
@@ -140,6 +113,24 @@ def merge2map(map_1, map_2):
     return ret_map
 
 
+def makeupSamples(dist):
+    totoalSample = 1000
+
+    ret = {}
+
+    for h in dist:
+        samples = []
+
+        
+        for onebin in dist[h]["bins"]:
+            print onebin
+            samples += int(totoalSample * float(onebin["prob"])) * [onebin["h*"]]
+
+        ret[h] = samples
+
+    return ret
+
+
 def main():
 
     if len(sys.argv) != 2:
@@ -147,13 +138,19 @@ def main():
         return
 
     FILE_BELIEF = "../../../results/SlidingTilePuzzle/sampleData/" + sys.argv[
-        1] + "-statSummary.txt.freq.nomissing"
+        1] + "-statSummary-d.json"
     FILE_PS_BELIEF = "../../../results/SlidingTilePuzzle/sampleData/" + sys.argv[
-        1] + "-statSummary-postSearch.txt.freq.nomissing"
+        1] + "-statSummary-postd.json"
 
     print "reading in data..."
-    H_TO_HS = parse_data_file(FILE_BELIEF)
-    H_TO_PSHS = parse_data_file(FILE_PS_BELIEF)
+    H_TO_HS = {}
+    H_TO_PSHS = {}
+
+    with open(FILE_BELIEF) as json_file:
+        H_TO_HS = makeupSamples(json.load(json_file))
+
+    with open(FILE_PS_BELIEF) as json_file:
+        H_TO_PSHS = makeupSamples(json.load(json_file))
 
     H_TO_HSS_MAP = merge2map(H_TO_HS, H_TO_PSHS)
 
