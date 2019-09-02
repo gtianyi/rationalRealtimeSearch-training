@@ -27,7 +27,7 @@ def createDistAndDump(hhsCollection, dirName, fileType):
     print("creating distribution...")
     print("h count " + str(len(hhsCollection)))
 
-    dist = []
+    dist = {}
 
     for h, hslist in hhsCollection.items():
         print "create distribution processing ", "%.2f" % (
@@ -56,7 +56,7 @@ def createDistAndDump(hhsCollection, dirName, fileType):
 
         sortedBins = sorted(bins, key=itemgetter('prob'), reverse=True)
         hist["bins"] = sortedBins
-        dist.append({h: hist})
+        dist[h] = hist
 
     with open(
             "../../../results/SlidingTilePuzzle/sampleData/" + dirName +
@@ -90,8 +90,7 @@ def fixMissing(hhsCollection, roundHS=False):
 
             nomissingHS = getNoMissingHSOfH(hCur, lowH, od)
 
-            print("hcur ", hCur, "lowH ", lowH, "hghH ", highHCur,
-                  "data size ", len(nomissingHS))
+            print("hcur ", hCur, "lowH ", lowH, "data size", len(nomissingHS))
 
             nomissingHHSCollection[hCur] = nomissingHS
 
@@ -109,10 +108,10 @@ def getNoMissingHSOfH(h, lowH, od):
     if len(nomissingHS) < 200 and lowH != None:
 
         smallHHSCollection = OrderedDict(
-            sorted(od.items()[:od.keys().index(lowH)], reverse=True))
+            sorted(od.items()[:od.keys().index(lowH) + 1], reverse=True))
         grabDataFromOrderedCollection(smallHHSCollection, nomissingHS, h)
 
-        return nomissingHS
+    return nomissingHS
 
 
 def grabDataFromOrderedCollection(orderdCollection, nomissingHS, nomissingh):
