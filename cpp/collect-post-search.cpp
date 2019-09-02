@@ -188,7 +188,7 @@ private:
 
     struct Hist {
         struct Bin {
-            Bin(Cost hs, int count) : value(hs), count(count) {
+            Bin(Cost hs, float prob) : value(hs), prob(prob) {
                 valueString = double2string(hs, hsPrecision);
             }
 
@@ -200,70 +200,50 @@ private:
             Cost getValue() const { return value; }
             string getValueString() const { return valueString; }
 
-            void setCount(int c) { count = c; }
-            int getCount() const { return count; }
-            void addCount(int c) { count += c; }
+            void setProb(float p) { prob = p; }
+            int getProb() const { return prob; }
+            //void addCount(int c) { count += c; }
 
             void print(ofstream& f) const {
-                f << valueString << " " << count << " ";
+                f << valueString << " " << prob << " ";
             }
 
         private:
             Cost value;
             string valueString;
-            int count;
+            float prob;
         };
 
-        Hist() : mean(0), totalCount(0) {}
+        Hist() : mean(0), totalProb(0) {}
 
         void push(Bin&& bin) {
-            mean = (mean * totalCount + bin.getValue() * bin.getCount()) /
-                    (double)(totalCount + bin.getCount());
-            totalCount += bin.getCount();
+            mean += bin.getValue() * bin.getProb();
+            totalProb += bin.getProb();
             bins.push_back(std::move(bin));
-        }
-
-        void updateBin(int binIndex, int addcount) {
-            auto& bin = bins[binIndex];
-            mean = (mean * totalCount + bin.getValue() * addcount) /
-                    (double)(totalCount + addcount);
-
-            bin.addCount(addcount);
-            totalCount += addcount;
         }
 
         Hist shift(Cost c) const {
             Hist retHist;
 
             retHist.mean = mean + c;
-            retHist.totalCount = totalCount;
+            retHist.totalProb = totalProb;
 
             for (auto bin : bins) {
-                Bin newBin(bin.getValue() + c, bin.getCount());
+                Bin newBin(bin.getValue() + c, bin.getProb());
                 retHist.bins.push_back(newBin);
             }
 
             return retHist;
         }
 
-        void print(ofstream& f) const {
-            f << totalCount << " ";
-            for (const auto& bin : bins) {
-                bin.print(f);
-            }
-            f << "\n";
-        }
-
         vector<Bin> getBins() const { return bins; }
 
         double getMean() const { return mean; }
 
-        int getTotalCount() const { return totalCount; }
-
     private:
         vector<Bin> bins;
         double mean;
-        int totalCount;
+        float totalProb;
     };
 
     typedef typename Hist::Bin Bin;
@@ -282,55 +262,30 @@ private:
             cout << "Hist Data file does not exist!!!i\n";
             exit(1);
         }
-		/*string jsonStr;*/
-        //getline(f, jsonStr);
-        //f.close();
-        //rapidjson::Document jsonDoc;
-        //jsonDoc.Parse(jsonStr.c_str());
+		string jsonStr;
+		getline(f, jsonStr);
+		f.close();
+		rapidjson::Document jsonDoc;
+		jsonDoc.Parse(jsonStr.c_str());
 
-        //for (auto& m : jsonDoc.GetObject()) {
+		for (auto& m : jsonDoc.GetObject()) {
 
-            //string h = m.name.GetString();
-            //vector<Sample> sampleList;
-
-            //for (auto& instance : m.value.GetArray()) {
-
-				//// TODO this does not work with invers now
-                //string instanceName = instance["instance"].GetString();
-                //int counter = instance["counter"].GetInt();
-                //Cost hstar  = instance["hstar"].GetInt();
-                //Cost deltaH  = instance["deltaH"].GetInt();
-
-                //RawState s = getStateByInstanceName(instanceName, instanceDir);
-				//sampleList.push_back(Sample(s,deltaH,counter,hstar, instanceName));
-			//}
-
-            //hSampleCollection[h] = sampleList;
-        /*}*/
-
-        string line;
-
-		string hstring;
-		Cost hs, hvalue;
-		int valueCount, hsCount;
-
-        while (getline(f, line)) {
-            stringstream ss(line);
-
-            ss >> hvalue;
-			hstring = double2string(hvalue, hPrecision);
-            ss >> valueCount;
+			auto hstring = m.name.GetString();
+			Cost h = stod(hstring);
 
 			Hist hist;
-            while (ss >> hs) {
-                ss >> hsCount;
-				hist.push(Bin(hs, hsCount));
-            }
+			auto& bins = m.value.GetObject()["bins"];
+			for (auto& instance : bins.GetArray()) {
 
-            //assert(hist.getTotalCount() == valueCount);
+				// TODO this does not work with invers now
+				Cost hstar  = instance["h*"].GetInt();
+				Cost prob  = instance["prob"].GetFloat();
+
+				hist.push(Bin(hstar, prob));
+			}
 			originalhHist[hstring]=hist;
-			originalhValues.push_back(hvalue);
-        }
+			originalhValues.push_back(h);
+		}
 
 		std::sort(originalhValues.begin(),originalhValues.end());
 
@@ -419,7 +374,7 @@ public:
             sampleFile = "../results/SlidingTilePuzzle/sampleData/"
                          "uniform-samples.json";
             distributionFile = "../results/SlidingTilePuzzle/sampleData/"
-                               "uniform-statSummary.txt";
+                               "uniform-statSummary-d.json";
             postSearchFile = "../results/SlidingTilePuzzle/sampleData/"
                              "uniform-samples-postSearch.json";
 
@@ -431,7 +386,7 @@ public:
             sampleFile = "../results/SlidingTilePuzzle/sampleData/"
                          "inverse_20_0.1_200-samples.json";
             distributionFile = "../results/SlidingTilePuzzle/sampleData/"
-                               "inverse-statSummary-20-0.1-200-backup.txt";
+                               "inverse-statSummary-20-0.1-200-backup-d.json";
             postSearchFile = "../results/SlidingTilePuzzle/sampleData/"
                              "inverse-samples-20-0.1-200-postSearch.json";
 
@@ -443,7 +398,7 @@ public:
             sampleFile = "../results/SlidingTilePuzzle/sampleData/"
                          "heavy-samples.json";
             distributionFile = "../results/SlidingTilePuzzle/sampleData/"
-                               "heavy-statSummary.txt";
+                               "heavy-statSummary-d.json";
             postSearchFile = "../results/SlidingTilePuzzle/sampleData/"
                              "heavy-samples-postSearch.json";
 

@@ -30,8 +30,8 @@ def createDistAndDump(hhsCollection, dirName, fileType):
     dist = []
 
     for h, hslist in hhsCollection.items():
-        print "create distribution processing ", "%.2f" % (len(dist)*100.0 / len(
-            hhsCollection)), "%"
+        print "create distribution processing ", "%.2f" % (
+            len(dist) * 100.0 / len(hhsCollection)), "%"
 
         hsSet = sorted(set([x["hstar"] for x in hslist]))
         # not how many unique states
@@ -85,14 +85,10 @@ def fixMissing(hhsCollection, roundHS=False):
         hCur = prevH + hStep
 
         lowH = None if prevH < 0 else prevH
-        highH = None if od.keys().index(h) == len(
-            od.keys()) - 1 else od.keys()[od.keys().index(h) + 1]
 
         while (hCur <= h):
 
-            highHCur = highH if hCur == h else h
-
-            nomissingHS = getNoMissingHSOfH(hCur, lowH, highHCur, od)
+            nomissingHS = getNoMissingHSOfH(hCur, lowH, od)
 
             print("hcur ", hCur, "lowH ", lowH, "hghH ", highHCur,
                   "data size ", len(nomissingHS))
@@ -106,7 +102,7 @@ def fixMissing(hhsCollection, roundHS=False):
     return nomissingHHSCollection
 
 
-def getNoMissingHSOfH(h, lowH, highH, od):
+def getNoMissingHSOfH(h, lowH, od):
     nomissingHS = od[h][:] if h in od else []
 
     #go down and pull up
@@ -116,13 +112,7 @@ def getNoMissingHSOfH(h, lowH, highH, od):
             sorted(od.items()[:od.keys().index(lowH)], reverse=True))
         grabDataFromOrderedCollection(smallHHSCollection, nomissingHS, h)
 
-    #go up and pull down
-    if len(nomissingHS) < 200 and highH != None:
-
-        largeHHSCollection = OrderedDict(od.items()[od.keys().index(highH):])
-        grabDataFromOrderedCollection(largeHHSCollection, nomissingHS, h)
-
-    return nomissingHS
+        return nomissingHS
 
 
 def grabDataFromOrderedCollection(orderdCollection, nomissingHS, nomissingh):
@@ -138,6 +128,8 @@ def grabDataFromOrderedCollection(orderdCollection, nomissingHS, nomissingh):
             deltah = nomissingh - h
             if instance["hstar"] + deltah < nomissingh:
                 print "h to fix ", nomissingh, "pull down from ", h, "instance", instance
+                assert (instance["hstar"] + deltah >= nomissingh)
+
             shifted = shiftInstance(instance, deltah)
             nomissingHS.append(shifted)
 
