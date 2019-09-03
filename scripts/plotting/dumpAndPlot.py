@@ -99,7 +99,6 @@ def fixMissing(hhsCollection, roundHS=False):
 
             hCur = hCur + hStep
 
-
         nomissingHHSCollection[h] = hslist
 
         prevH = h
