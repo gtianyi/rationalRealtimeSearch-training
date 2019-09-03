@@ -89,7 +89,7 @@ def fixMissing(hhsCollection, roundHS=False):
 
         lowH = None if prevH < 0 else prevH
 
-        while (hCur <= h):
+        while (hCur < h):
 
             nomissingHS = getNoMissingHSOfH(hCur, lowH, od)
 
@@ -98,6 +98,9 @@ def fixMissing(hhsCollection, roundHS=False):
             nomissingHHSCollection[hCur] = nomissingHS
 
             hCur = hCur + hStep
+
+
+        nomissingHHSCollection[h] = hslist
 
         prevH = h
 
