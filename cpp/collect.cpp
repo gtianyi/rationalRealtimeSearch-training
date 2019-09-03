@@ -29,6 +29,12 @@ public:
                 : h(_h), d(_d), state(_s), frequencyCounter(1) {}
     };
 
+    struct NodeCompare {
+        bool operator()(const shared_ptr<Node> l, const shared_ptr<Node> r) {
+            return l->frequencyCounter > r->frequencyCounter;
+        }
+    };
+
     void parsingDumpFile(ifstream& f) {
         fileCount++;
         string line;
@@ -90,29 +96,10 @@ public:
                 sampleSet.insert(
                         sampleSet.end(), it->second.begin(), it->second.end());
             } else {
-                // obtain a random number from hardware
-                std::random_device rd;
-
-                // seed the generator
-                std::mt19937 eng(rd());
-
-                // define the range
-                std::uniform_int_distribution<> distr(
-                        0, it->second.size() - 1); 
-
-				//sample from range
-                unordered_set<int> sampleIDSet;
-
-                while (sampleIDSet.size() < sampleCount) {
-                    sampleIDSet.insert(distr(eng)); // generate numbers
-                }
-
-                for (typename unordered_set<int>::iterator idit =
-                                sampleIDSet.begin();
-                        idit != sampleIDSet.end();
-                        idit++) {
-                    sampleSet.push_back(it->second[*idit]);
-                }
+                std::sort(it->second.begin(), it->second.end(), NodeCompare());
+                sampleSet.insert(sampleSet.end(),
+                        it->second.begin(),
+                        it->second.begin() + sampleCount);
             }
         }
     }
