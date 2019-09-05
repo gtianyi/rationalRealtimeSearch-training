@@ -121,10 +121,10 @@ def makeupSamples(dist):
     for h in dist:
         samples = []
 
-        
         for onebin in dist[h]["bins"]:
             print onebin
-            samples += int(totoalSample * float(onebin["prob"])) * [onebin["h*"]]
+            samples += int(
+                totoalSample * float(onebin["prob"])) * [onebin["h*"]]
 
         ret[h] = samples
 

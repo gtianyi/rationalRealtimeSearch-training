@@ -5,9 +5,11 @@
 #include <sstream>
 #include <unordered_map>
 #include <unordered_set>
+#include <queue>
 #include <memory>
 #include <random>
 #include "domain/SlidingTilePuzzle.h"
+#include "utility/PriorityQueue.h"
 #include <boost/functional/hash.hpp>
 
 
@@ -46,13 +48,56 @@ public:
         double d;
         State state;
         int hGroup;
+        int frequencyCounter;
 
-        Node(Cost _h, double _d, State _s) : h(_h), d(_d), state(_s) {
+        Node(Cost _h, double _d, State _s)
+                : h(_h), d(_d), state(_s), frequencyCounter(1) {
             hGroup = (int)floor(h / histInterval);
+        }
+
+        static bool compareNodesFeq(const shared_ptr<Node> a,
+                const shared_ptr<Node> b) {
+            return a->frequencyCounter < b->frequencyCounter;
+        };
+    };
+
+    struct Bucket {
+        Bucket()
+                : topFreqQueue(PriorityQueue<shared_ptr<Node>>(
+                          Node::compareNodesFeq)) {}
+
+        std::unordered_set<shared_ptr<Node>,
+                hash_func<Collection<Domain>>,
+                cmp_func<Collection<Domain>>>
+                topFreqSet;
+
+        PriorityQueue<shared_ptr<Node>> topFreqQueue;
+
+        void insert(shared_ptr<Node> n) {
+            shared_ptr<Node> nodeInSide;
+            if (topFreqSet.find(n) != topFreqSet.end()) {
+                nodeInSide = *topFreqSet.find(n);
+                nodeInSide->frequencyCounter++;
+                topFreqQueue.update(nodeInSide);
+            } else {
+                nodeInSide = n;
+                inSertToQueue(nodeInSide);
+            }
+        }
+
+    private:
+        void inSertToQueue(shared_ptr<Node> n) {
+            if (topFreqQueue.size() >= 10000) {
+                auto& worstNode = topFreqQueue.top();
+                topFreqSet.erase(worstNode);
+                topFreqQueue.pop();
+                topFreqQueue.push(n);
+                topFreqSet.insert(n);
+            }
         }
     };
 
-    void parsingDumpFile(ifstream& f, int sampleCount) {
+    void parsingDumpFile(ifstream& f) {
         fileCount++;
         string line;
 
@@ -108,37 +153,52 @@ public:
 
             bucket.insert(n);
 
-            if (bucket.size() > sampleCount)
-			{
-                // obtain a random number from hardware
-                std::random_device rd;
+            /*if (bucket.size() > sampleCount)*/
+			//{
+                //// obtain a random number from hardware
+                //std::random_device rd;
 
-                // seed the generator
-                std::mt19937 eng(rd());
+                //// seed the generator
+                //std::mt19937 eng(rd());
 
-                // define the range
-                std::uniform_int_distribution<> distr(0, bucket.size() - 1);
+                //// define the range
+                //std::uniform_int_distribution<> distr(0, bucket.size() - 1);
 
-                int randPos = distr(eng);
+                //int randPos = distr(eng);
 
-                bucket.erase(std::next(bucket.begin(), randPos));
-            }
+                //bucket.erase(std::next(bucket.begin(), randPos));
+            /*}*/
         }
     };
 
     void dumpSampleSet(string tileType) {
         int id = 0;
         int hcount = 0;
+
+        string fileFrequencyRecord =
+                "../results/SlidingTilePuzzle/sampleProblem/" + tileType + "/" +
+                "0FrequencyCounter.txt";
+
+        ofstream counterFile(fileFrequencyRecord);
+
         for (int i = 0; i < htableSize; i++) {
-            auto& bucket = hCollection[i];
+            auto& bucket = hCollection[i].topFreqQueue;
 
             if (bucket.size() == 0)
                 continue;
 
 			hcount++;
 			
-            for (auto it = bucket.begin(); it!=bucket.end();++it) {
+            while(!bucket.empty()) {
+                if (bucket.size() > 200) {
+                    bucket.pop();
+                    continue;
+                }
+
                 id++;
+
+                auto n = bucket.top();
+                bucket.pop();
                 string fileName =
                         "../results/SlidingTilePuzzle/sampleProblem/" +
                         tileType + "/" + to_string(id) + ".st";
@@ -147,10 +207,16 @@ public:
 
                 //std::cout << (*it)->state << "\n";
 
-                (*it)->state.dumpToProblemFile(f);
+                n->state.dumpToProblemFile(f);
                 f.close();
+
+                counterFile << to_string(id) << " " << n->frequencyCounter
+                            << "\n";
             }
-		}
+        }
+
+        counterFile.close();
+
         cout << "h count " << hcount << endl;
         cout << "dump count " << id << endl;
     }
@@ -158,22 +224,19 @@ public:
 	Collection() : fileCount(0){};
 
 private:
-    static constexpr double histInterval = 0.01;
-    static constexpr double histMax = 12.0;
+    static constexpr double histInterval = 0.1;
+    static constexpr double histMax = 20.0;
     static constexpr int htableSize = (int)histMax / histInterval;
 
-    std::unordered_set<shared_ptr<Node>,
-            hash_func<Collection<Domain>>,
-            cmp_func<Collection<Domain>>>
-            hCollection[htableSize];
+    Bucket hCollection[htableSize];
 
     int fileCount;
-
 };
 
 int main(int argc, char** argv) {
     if (argc != 6) {
-        cout << "Wrong number of arguments: ./collect <weight> <first instance> <last instance> <tile type> <sample count>"
+        cout << "Wrong number of arguments: ./collect-inverse <weight> <first "
+                "instance> <last instance> <tile type> <sample count>"
              << endl;
         exit(1);
     }
@@ -186,9 +249,10 @@ int main(int argc, char** argv) {
 
 	string tileType = argv[4];
 
-    int sampleCount = stoi(argv[5]);
+	int sampleCount = stoi(argv[5]);
 
 	Collection<SlidingTilePuzzle> collection;
+
 
     for (int i = firstNum; i <= lastNum; i++) {
         string fileName = "../results/SlidingTilePuzzle/distributionTest/" +
@@ -196,10 +260,11 @@ int main(int argc, char** argv) {
 
         std::ifstream f(fileName);
 
-        collection.parsingDumpFile(f, sampleCount);
+        collection.parsingDumpFile(f);
 
         f.close();
     }
 
     collection.dumpSampleSet(tileType);
-}
+};
+
