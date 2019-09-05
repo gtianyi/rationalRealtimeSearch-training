@@ -49,16 +49,18 @@ public:
         State state;
         int hGroup;
         int frequencyCounter;
+        int maxCounter;
 
         Node(Cost _h, double _d, State _s)
-                : h(_h), d(_d), state(_s), frequencyCounter(1) {
+                : h(_h), d(_d), state(_s), frequencyCounter(1) ,maxCounter(1){
             hGroup = (int)floor(h / histInterval);
         }
 
-        static bool compareNodesFeq(const shared_ptr<Node> a,
-                const shared_ptr<Node> b) {
-            return a->frequencyCounter < b->frequencyCounter;
-        };
+        void increaseCounter() {
+            frequencyCounter++;
+            if (maxCounter < 999)
+                maxCounter++;
+        }
     };
 
     struct Bucket {
@@ -80,7 +82,7 @@ public:
 
             if (mapit != freqBuckListIndexMap.end()) {
                 auto nodeInSide = mapit->first;
-                auto& bucket = freqBuckList[nodeInSide->frequencyCounter];
+                auto& bucket = freqBuckList[nodeInSide->maxCounter];
 
                 auto buckSize = bucket.size();
                 if (buckSize != 1) {
@@ -89,11 +91,10 @@ public:
 
                 bucket.pop_back();
 
-                auto oldfc = nodeInSide->frequencyCounter;
+                auto oldfc = nodeInSide->maxCounter;
 
-                nodeInSide->frequencyCounter++;
-                auto newBucket = min(nodeInSide->frequencyCounter, 999);
-                nodeInSide->frequencyCounter = newBucket;
+                nodeInSide->increaseCounter();
+                auto newBucket = nodeInSide->maxCounter;
 
 				freqBuckListIndexMap[nodeInSide]=freqBuckList[newBucket].size();
 
