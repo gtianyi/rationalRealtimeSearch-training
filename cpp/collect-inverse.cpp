@@ -76,7 +76,7 @@ public:
 		
 
         void insert(shared_ptr<Node> n) {
-			auto& mapit = freqBuckListIndexMap.find(n);
+			const auto& mapit = freqBuckListIndexMap.find(n);
 
             if (mapit != freqBuckListIndexMap.end()) {
                 auto& bucket = freqBuckList[n->frequencyCounter];
@@ -212,9 +212,9 @@ public:
         ofstream counterFile(fileFrequencyRecord);
 
         for (int i = 0; i < htableSize; i++) {
-            auto& bucket = hCollection[i].topFreqQueue;
+            auto& bucket = hCollection[i];
 
-            if (bucket.size() == 0)
+            if (bucket.size == 0)
                 continue;
 
             hcount++;
