@@ -2,7 +2,7 @@
 
 #g++ -g -std=c++11 -static ../cpp/distributionPractice.cpp -o ../../build_release/distributionPractice
 #g++ -g -std=c++11 -static ../cpp/collect.cpp -o ../../build_release/collect
-g++ -g -std=c++11 -static ../cpp/collect-inverse.cpp -o ../../build_release/collect-inverse
+g++ -o3 -std=c++11 -static ../cpp/collect-inverse.cpp -o ../../build_release/collect-inverse
 #g++ -g -std=c++11 -static ../cpp/collect-post-search.cpp -o ../../build_release/collect-post-search
 #g++ -g -std=c++11 -static ../cpp/fastAStar/*.cc -o ../../build_release/tiles-uniform
 #g++ -o3 -std=c++11 -static ../cpp/fastAStar-pdb/*.cc -o ../../build_release/tiles-pdb

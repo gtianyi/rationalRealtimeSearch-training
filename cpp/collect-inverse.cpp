@@ -58,7 +58,7 @@ public:
 
         void increaseCounter() {
             frequencyCounter++;
-            if (maxCounter < 999)
+            if (maxCounter < 1999)
                 maxCounter++;
         }
     };
@@ -72,7 +72,7 @@ public:
                 cmp_func<Collection<Domain>>>
                 freqBuckListIndexMap;
 
-		vector<shared_ptr<Node>> freqBuckList[1000];
+		vector<shared_ptr<Node>> freqBuckList[2000];
 		int minNonEmptyBucket;
 		int size;
 		
@@ -86,6 +86,7 @@ public:
 
                 auto buckSize = bucket.size();
                 if (buckSize != 1) {
+                    freqBuckListIndexMap[bucket[buckSize - 1]] = mapit->second;
                     bucket[mapit->second] = bucket[buckSize - 1];
                 }
 
@@ -109,7 +110,7 @@ public:
 
     private:
         void fixMinimum(int i) {
-            for (; i < 1000; i++) {
+            for (; i < 2000; i++) {
                 if (!freqBuckList[i].empty()) {
                     minNonEmptyBucket = i;
                     return;
@@ -118,7 +119,7 @@ public:
         }
 
         void insert2bk(shared_ptr<Node> n) {
-            if (size > 1000000) {
+            if (size > 2000000) {
                 auto& bucket = freqBuckList[minNonEmptyBucket];
 				auto worst = bucket[bucket.size()-1];
 				freqBuckListIndexMap.erase(worst);
@@ -229,7 +230,7 @@ public:
             hcount++;
 
 			int bucketDump = 0;
-            for (int freqC = 999; freqC >= 0; freqC--) {
+            for (int freqC = 1999; freqC >= 0; freqC--) {
                 if (bucket.freqBuckList[freqC].empty())
                     continue;
 
@@ -270,7 +271,7 @@ public:
 
 private:
     static constexpr double histInterval = 0.1;
-    static constexpr double histMax = 20.0;
+    static constexpr double histMax = 12.0;
     static constexpr int htableSize = (int)histMax / histInterval;
 
     Bucket hCollection[htableSize];
