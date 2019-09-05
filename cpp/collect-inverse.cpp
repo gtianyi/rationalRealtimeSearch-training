@@ -63,37 +63,67 @@ public:
 
     struct Bucket {
         Bucket()
-                : topFreqQueue(PriorityQueue<shared_ptr<Node>>(
-                          Node::compareNodesFeq)) {}
+                : minNonEmptyBucket(0) {}
 
-        std::unordered_set<shared_ptr<Node>,
+        std::unordered_map<shared_ptr<Node>,int,
                 hash_func<Collection<Domain>>,
                 cmp_func<Collection<Domain>>>
-                topFreqSet;
+                freqBuckListIndexMap;
 
-        PriorityQueue<shared_ptr<Node>> topFreqQueue;
+		vector<shared_ptr<Node>> freqBuckList[10000];
+		int minNonEmptyBucket;
+		int size;
+		
 
         void insert(shared_ptr<Node> n) {
-            shared_ptr<Node> nodeInSide;
-            if (topFreqSet.find(n) != topFreqSet.end()) {
-                nodeInSide = *topFreqSet.find(n);
+			auto& mapit = freqBuckListIndexMap.find(n);
+
+            if (mapit != freqBuckListIndexMap.end()) {
+                auto& bucket = freqBuckList[n->frequencyCounter];
+                auto nodeInSide = bucket[mapit->second];
+
+                auto buckSize = bucket.size();
+                if (buckSize != 1) {
+                    bucket[mapit->second] = bucket[buckSize - 1];
+                }
+
+                bucket.pop_back();
+
+                auto oldfc = nodeInSide->frequencyCounter;
+
                 nodeInSide->frequencyCounter++;
-                topFreqQueue.update(nodeInSide);
+                auto newBucket = min(nodeInSide->frequencyCounter, 10000);
+
+                freqBuckList[newBucket].push_back(nodeInSide);
+
+                if (oldfc == minNonEmptyBucket)
+                    fixMinimum(n->frequencyCounter);
             } else {
-                nodeInSide = n;
-                inSertToQueue(nodeInSide);
+                insert2bk(n);
             }
         }
 
     private:
-        void inSertToQueue(shared_ptr<Node> n) {
-            if (topFreqQueue.size() >= 10000) {
-                auto& worstNode = topFreqQueue.top();
-                topFreqSet.erase(worstNode);
-                topFreqQueue.pop();
-                topFreqQueue.push(n);
-                topFreqSet.insert(n);
+        void fixMinimum(int i) {
+            for (; i < 10000; i++) {
+                if (!freqBuckList[i].empty()) {
+                    minNonEmptyBucket = i;
+                    return;
+                }
             }
+        }
+
+        void insert2bk(shared_ptr<Node> n) {
+            if (size > 1000000) {
+                auto& bucket = freqBuckList[minNonEmptyBucket];
+                bucket.pop_back();
+            }
+
+            freqBuckList[0].push_back(n);
+
+            size++;
+
+            minNonEmptyBucket = 0;
         }
     };
 
@@ -187,34 +217,40 @@ public:
             if (bucket.size() == 0)
                 continue;
 
-			hcount++;
-			
-            while(!bucket.empty()) {
-                if (bucket.size() > 200) {
-                    bucket.pop();
+            hcount++;
+
+			int bucketDump = 0;
+            for (int freqC = 9999; freqC >= 0; freqC--) {
+                if (bucket.freqBuckList[freqC].empty())
                     continue;
+
+                if (bucketDump > 200)
+                    break;
+
+                for (auto n : bucket.freqBuckList[freqC]) {
+                    if (bucketDump > 200)
+                        break;
+
+					bucketDump++;
+
+                    id++;
+                    string fileName = "../results/SlidingTilePuzzle/"
+                                      "sampleProblem/" +
+                            tileType + "/" + to_string(id) + ".st";
+
+                    ofstream f(fileName);
+
+                    // std::cout << (*it)->state << "\n";
+
+                    n->state.dumpToProblemFile(f);
+                    f.close();
+
+                    counterFile << to_string(id) << " " << n->frequencyCounter
+                                << "\n";
                 }
-
-                id++;
-
-                auto n = bucket.top();
-                bucket.pop();
-                string fileName =
-                        "../results/SlidingTilePuzzle/sampleProblem/" +
-                        tileType + "/" + to_string(id) + ".st";
-
-                ofstream f(fileName);
-
-                //std::cout << (*it)->state << "\n";
-
-                n->state.dumpToProblemFile(f);
-                f.close();
-
-                counterFile << to_string(id) << " " << n->frequencyCounter
-                            << "\n";
             }
-        }
-
+		}
+         
         counterFile.close();
 
         cout << "h count " << hcount << endl;
