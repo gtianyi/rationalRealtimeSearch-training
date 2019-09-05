@@ -93,12 +93,13 @@ public:
 
                 nodeInSide->frequencyCounter++;
                 auto newBucket = min(nodeInSide->frequencyCounter, 999);
+                nodeInSide->frequencyCounter = newBucket;
 
 				freqBuckListIndexMap[nodeInSide]=freqBuckList[newBucket].size();
 
                 freqBuckList[newBucket].push_back(nodeInSide);
 
-                if (oldfc == minNonEmptyBucket)
+                if (oldfc == minNonEmptyBucket && bucket.size() == 0)
                     fixMinimum(oldfc);
             } else {
                 insert2bk(n);
