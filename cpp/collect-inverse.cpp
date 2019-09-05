@@ -63,14 +63,14 @@ public:
 
     struct Bucket {
         Bucket()
-                : minNonEmptyBucket(0) {}
+                : minNonEmptyBucket(1) {}
 
         std::unordered_map<shared_ptr<Node>,int,
                 hash_func<Collection<Domain>>,
                 cmp_func<Collection<Domain>>>
                 freqBuckListIndexMap;
 
-		vector<shared_ptr<Node>> freqBuckList[10000];
+		vector<shared_ptr<Node>> freqBuckList[1000];
 		int minNonEmptyBucket;
 		int size;
 		
@@ -79,8 +79,8 @@ public:
 			const auto& mapit = freqBuckListIndexMap.find(n);
 
             if (mapit != freqBuckListIndexMap.end()) {
-                auto& bucket = freqBuckList[n->frequencyCounter];
-                auto nodeInSide = bucket[mapit->second];
+                auto nodeInSide = mapit->first;
+                auto& bucket = freqBuckList[nodeInSide->frequencyCounter];
 
                 auto buckSize = bucket.size();
                 if (buckSize != 1) {
@@ -92,12 +92,14 @@ public:
                 auto oldfc = nodeInSide->frequencyCounter;
 
                 nodeInSide->frequencyCounter++;
-                auto newBucket = min(nodeInSide->frequencyCounter, 10000);
+                auto newBucket = min(nodeInSide->frequencyCounter, 999);
+
+				freqBuckListIndexMap[nodeInSide]=freqBuckList[newBucket].size();
 
                 freqBuckList[newBucket].push_back(nodeInSide);
 
                 if (oldfc == minNonEmptyBucket)
-                    fixMinimum(n->frequencyCounter);
+                    fixMinimum(oldfc);
             } else {
                 insert2bk(n);
             }
@@ -105,7 +107,7 @@ public:
 
     private:
         void fixMinimum(int i) {
-            for (; i < 10000; i++) {
+            for (; i < 1000; i++) {
                 if (!freqBuckList[i].empty()) {
                     minNonEmptyBucket = i;
                     return;
@@ -116,14 +118,19 @@ public:
         void insert2bk(shared_ptr<Node> n) {
             if (size > 1000000) {
                 auto& bucket = freqBuckList[minNonEmptyBucket];
+				auto worst = bucket[bucket.size()-1];
+				freqBuckListIndexMap.erase(worst);
                 bucket.pop_back();
+                size--;
             }
 
-            freqBuckList[0].push_back(n);
+            freqBuckListIndexMap[n] = freqBuckList[1].size();
+
+            freqBuckList[1].push_back(n);
 
             size++;
 
-            minNonEmptyBucket = 0;
+            minNonEmptyBucket = 1;
         }
     };
 
@@ -220,7 +227,7 @@ public:
             hcount++;
 
 			int bucketDump = 0;
-            for (int freqC = 9999; freqC >= 0; freqC--) {
+            for (int freqC = 999; freqC >= 0; freqC--) {
                 if (bucket.freqBuckList[freqC].empty())
                     continue;
 
