@@ -161,7 +161,7 @@ int main(int argc, const char* argv[]) {
 
 		//create a place holder for the process
 		ofstream processPlaceHolder(resultFile+".temp");
-        processPlaceHolder << "place holder ";
+        processPlaceHolder << "a";
 		processPlaceHolder.close();
 
         ofstream output(resultFile);
