@@ -44,9 +44,16 @@ string double2string(double c, int precision) {
         return stream.str();
 }
 
-constexpr int hPrecision = 0;
-constexpr int hsPrecision = 0;
-constexpr double hSearchDownStep = 1;
+//TODO change this to be not hard coded
+//uniform and heavy
+//constexpr int hPrecision = 0;
+//constexpr int hsPrecision = 0;
+//constexpr double hSearchDownStep = 1;
+
+//inverse
+constexpr int hPrecision = 1;
+constexpr int hsPrecision = 2;
+constexpr double hSearchDownStep = 0.1;
 
 struct CollectionBase{
     virtual void parsingSamples(ifstream& f, const string& instanceDir)=0; 
@@ -77,11 +84,13 @@ public:
 
             for (auto& instance : m.value.GetArray()) {
 
-				// TODO this does not work with invers now
                 string instanceName = instance["instance"].GetString();
                 int counter = instance["counter"].GetInt();
-                Cost hstar  = instance["hstar"].GetInt();
-                Cost deltaH  = instance["deltaH"].GetInt();
+                bool isFloat = instanceDir == "inverse";
+                Cost hstar = isFloat ? instance["hstar"].GetFloat() :
+                                       instance["hstar"].GetInt();
+                Cost deltaH = isFloat ? instance["deltaH"].GetFloat() :
+                                        instance["deltaH"].GetInt();
 
                 RawState s = getStateByInstanceName(instanceName, instanceDir);
 				sampleList.push_back(Sample(s,deltaH,counter,hstar, instanceName));
@@ -106,12 +115,25 @@ public:
         }
     }
 
+    bool isFloat(const string& s) const {
+        float tempfloat;
+        istringstream iss(s);
+        iss >> tempfloat;
+        return !iss.fail();
+	}
+
     virtual void dumpPostSearchSamples(ofstream& f) const override{
         // sort by h before dump
         vector<string> keys;
 
+		bool isFloatH = false;
+
         for (auto& it : postSearchCollection) {
             keys.push_back(it.first);
+
+            if (!isFloatH) {
+                isFloatH = isFloat(it.first);
+            }
         }
 
 		sort(keys.begin(),keys.end());
@@ -130,15 +152,26 @@ public:
             for (auto& s : postSearchCollection.at(h)) {
                 writer.StartObject();
 
-                // TODO this does not work with invers now
                 writer.Key("instance");
                 writer.String(s.instanceName.c_str());
-                writer.Key("hstar");
-                writer.Uint(s.hstar);
                 writer.Key("counter");
                 writer.Uint(s.freqCounter);
-                writer.Key("deltaH");
-                writer.Uint(s.deltaH);
+
+                if (isFloatH) {
+
+                    writer.Key("hstar");
+                    writer.Double(s.hstar);
+                    writer.Key("deltaH");
+                    writer.Double(s.deltaH);
+
+                } else {
+
+                    writer.Key("hstar");
+                    writer.Uint(s.hstar);
+                    writer.Key("deltaH");
+                    writer.Uint(s.deltaH);
+
+                }
 
                 writer.EndObject();
             }
@@ -258,38 +291,40 @@ private:
     }
   
     void parseHistData(ifstream& f) {
+
         if (!f.good()) {
             cout << "Hist Data file does not exist!!!i\n";
             exit(1);
         }
-		string jsonStr;
-		getline(f, jsonStr);
-		f.close();
-		rapidjson::Document jsonDoc;
-		jsonDoc.Parse(jsonStr.c_str());
 
-		for (auto& m : jsonDoc.GetObject()) {
+        string jsonStr;
+        getline(f, jsonStr);
+        f.close();
+        rapidjson::Document jsonDoc;
+        jsonDoc.Parse(jsonStr.c_str());
 
-			auto hstring = m.name.GetString();
-			Cost h = stod(hstring);
+        for (auto& m : jsonDoc.GetObject()) {
+            auto hstring = m.name.GetString();
+            Cost h = stod(hstring);
 
-			Hist hist;
-			auto& bins = m.value.GetObject()["bins"];
-			for (auto& instance : bins.GetArray()) {
+            Hist hist;
+            auto& bins = m.value.GetObject()["bins"];
+            for (auto& instance : bins.GetArray()) {
 
-				// TODO this does not work with invers now
-				Cost hstar  = instance["h*"].GetInt();
-				Cost prob  = stod(instance["prob"].GetString());
+                Cost hstar = isFloat(hstring) ? instance["h*"].GetFloat() :
+                                                instance["h*"].GetInt();
+                Cost prob = stod(instance["prob"].GetString());
 
-				hist.push(Bin(hstar, prob));
-			}
-			originalhHist[hstring]=hist;
-			originalhValues.push_back(h);
-		}
+                hist.push(Bin(hstar, prob));
+            }
 
-		std::sort(originalhValues.begin(),originalhValues.end());
+            originalhHist[hstring] = hist;
+            originalhValues.push_back(h);
+        }
 
-		f.close();
+        std::sort(originalhValues.begin(), originalhValues.end());
+
+        f.close();
     }
 
     vector<Sample> lookahead(const RawState& s, const Cost deltaH) const {
@@ -304,7 +339,7 @@ private:
         vector<Sample> ret;
         if (h == 0) {
             for (const auto& s :
-                    hSampleCollection.at(double2string(h, hsPrecision))) {
+                    hSampleCollection.at(double2string(h, hPrecision))) {
                 ret.push_back(Sample(s, deltaH));
             }
             return ret;
@@ -332,7 +367,7 @@ private:
         }
 
         for (const auto& s :
-                hSampleCollection.at(double2string(bestChildH, hsPrecision))) {
+                hSampleCollection.at(double2string(bestChildH, hPrecision))) {
             ret.push_back(Sample(s, bestChildEdgeCost + bestChildShift + deltaH));
         }
 
@@ -397,13 +432,13 @@ public:
                     make_shared<PostSearchCollection<SlidingTilePuzzle>>();
         } else if (tileType == "inverse") {
             sampleFile = "../results/SlidingTilePuzzle/sampleData/"
-                         "inverse_20_0.1_200-samples.json";
+                         "inverse-samples.json";
             distributionFile = "../results/SlidingTilePuzzle/sampleData/"
-                               "inverse-statSummary-20-0.1-200-backup-d.json";
+                               "inverse-statSummary-d.json";
             postSearchFile = "../results/SlidingTilePuzzle/sampleData/"
-                             "inverse-samples-20-0.1-200-postSearch.json";
+                             "inverse-samples-postSearch.json";
 
-            instanceDir = "inverse-20-0.1-200";
+            instanceDir = "inverse";
 
             post_search_collection =
                     make_shared<PostSearchCollection<InverseTilePuzzle>>();

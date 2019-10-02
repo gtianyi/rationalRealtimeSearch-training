@@ -58,8 +58,7 @@ def createDistAndDump(hhsCollection, dirName, fileType):
         hist["bins"] = sortedBins
         dist[h] = hist
 
-    dist = OrderedDict(
-                sorted(dist.items(), key=lambda item: float(item[0])))
+    dist = OrderedDict(sorted(dist.items(), key=lambda item: float(item[0])))
 
     with open(
             "../../../results/SlidingTilePuzzle/sampleData/" + dirName +
@@ -76,7 +75,7 @@ def fixMissing(hhsCollection, roundHS=False):
         for h, hslist in od.items():
             #save to 0.1 to make histogram
             for x in hslist:
-                x.update("hstar", round(x["hstar"], 2))
+                x.update({"hstar": round(x["hstar"], 2)})
 
     nomissingHHSCollection = {}
 
@@ -132,7 +131,10 @@ def grabDataFromOrderedCollection(orderdCollection, nomissingHS, nomissingh):
             deltah = nomissingh - h
             if instance["hstar"] + deltah < nomissingh:
                 print "h to fix ", nomissingh, "pull down from ", h, "instance", instance
-                assert (instance["hstar"] + deltah >= nomissingh)
+                if isinstance(h, int):
+                    assert (instance["hstar"] + deltah >= nomissingh)
+                else:
+                    assert (round(instance["hstar"] + deltah, 1) >= nomissingh)
 
             shifted = shiftInstance(instance, deltah)
             nomissingHS.append(shifted)

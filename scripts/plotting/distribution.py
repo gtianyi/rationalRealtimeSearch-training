@@ -20,6 +20,12 @@ def printUsage():
     print "dump file: d(distribution) postd(poset search distribution)"
 
 
+def getHgroup(h, roundH=False):
+    if roundH:
+        return round(h, 1)
+    return h
+
+
 def main():
 
     # Hard coded result directories
@@ -73,16 +79,16 @@ def main():
 
                 if "initial heuristic" in line:
                     for s in line.split():
-                        if s.isdigit():
-                            h = int(s)
+                        if any(c.isdigit() for c in s):
+                            h = eval(s)
 
                 if "solution length" in line:
                     for s in line.split():
-                        if s.isdigit():
-                            hs = int(s)
+                        if any(c.isdigit() for c in s):
+                            hs = eval(s)
 
             if h != 999999 and hs != 999999:
-                h_collection[h].append({
+                h_collection[getHgroup(h, tileType == "inverse")].append({
                     "hstar":
                     hs,
                     "counter":
@@ -94,7 +100,8 @@ def main():
                 })
 
     print("fix missing data...")
-    nomissingHHSCollection = dumpAndPlot.fixMissing(h_collection)
+    nomissingHHSCollection = dumpAndPlot.fixMissing(h_collection,
+                                                    tileType == "inverse")
     od = OrderedDict(sorted(nomissingHHSCollection.items()))
 
     if fileType == "d":
