@@ -350,7 +350,7 @@ public:
 		}
 	}
 
-private:
+protected:
 	static bool duplicateDetection(Node* node, unordered_map<State, Node*, Hash>& closed, PriorityQueue<Node*>& open, 
 		vector<TopLevelAction>& tlaList)
 	{
