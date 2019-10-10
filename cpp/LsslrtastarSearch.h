@@ -47,7 +47,7 @@ public:
             // Check if a goal has been reached
             if (this->domain.isGoal(start->getState())) {
                 // Calculate path cost and return solution
-                calculateCost(start, res);
+                this->calculateCost(start, res);
 
                 res.totalCpuTime = double(clock() - startTime) /
                         CLOCKS_PER_SEC / iterationCounter;
@@ -55,13 +55,13 @@ public:
                 return res;
             }
 
-            restartLists(start);
+            this->restartLists(start);
 
             // Exploration Phase
             this->domain.updateEpsilons();
 
             // First, generate the top-level actions
-            generateTopLevelActions(start, res);
+            this->generateTopLevelActions(start, res);
 
             // Expand some nodes until expnasion limit
             this->expansionAlgo->expand(this->open, this->closed, this->tlas, duplicateDetection_recordVisited, res);
@@ -73,8 +73,6 @@ public:
                         CLOCKS_PER_SEC / iterationCounter;
                 break;
             }
-
-			recordVisited();
 
             //  Learning Phase
             this->learningAlgo->learn(this->open, this->closed);
@@ -161,3 +159,6 @@ private:
 
 	static unordered_map<State, Node*, Hash> allGeneratedStates;
 };
+
+template<typename T>
+unordered_map<typename LssLRTAStarSearch<T>::State, typename LssLRTAStarSearch<T>::Node *, typename LssLRTAStarSearch<T>::Hash> LssLRTAStarSearch<T>::allGeneratedStates;
