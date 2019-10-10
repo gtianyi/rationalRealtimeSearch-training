@@ -223,7 +223,7 @@ public:
 
     ~RealTimeSearch() { clean(); }
 
-    ResultContainer search() {
+    virtual ResultContainer search() {
         domain.initialize(expansionPolicy, lookahead);
 
         ResultContainer res;

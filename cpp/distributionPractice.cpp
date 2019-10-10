@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
     }
 
     if (alg == "wastar") {
-        float weight = stof(argv[2]);
+        float weight = stof(argv[3]);
 
         WAStarSearch<SlidingTilePuzzle> wastarsearch(*world, weight);
 
@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
             out.close();
         }
     } else if (alg == "lsslrtastar") {
-        int lookaheadDepth = stof(argv[2]);
+        int lookaheadDepth = stof(argv[3]);
 
         LssLRTAStarSearch<SlidingTilePuzzle> lsslrta(
                 *world, "a-star", "learn", "minimin", lookaheadDepth);

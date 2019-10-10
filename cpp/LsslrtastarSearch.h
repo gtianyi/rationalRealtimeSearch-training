@@ -5,8 +5,19 @@ template <class Domain>
 class LssLRTAStarSearch : public RealTimeSearch<Domain> {
     typedef typename RealTimeSearch<Domain>::Node Node;
     typedef typename RealTimeSearch<Domain>::State State;
+    typedef typename RealTimeSearch<Domain>::Cost Cost;
     typedef typename RealTimeSearch<Domain>::Hash Hash;
     typedef typename RealTimeSearch<Domain>::TopLevelAction TopLevelAction;
+
+    struct DumpNode {
+        Cost h;
+        Cost d;
+
+        DumpNode(Node* n) {
+            h = n->getHValue();
+            d = n->getDValue();
+        }
+	};
 
 public:
     LssLRTAStarSearch(Domain& domain,
@@ -25,90 +36,98 @@ public:
                       belief) {}
 
    ResultContainer search() {
-        this->domain.initialize(this->expansionPolicy, this->lookahead);
+       this->domain.initialize(this->expansionPolicy, this->lookahead);
 
-        ResultContainer res;
+       ResultContainer res;
 
-        // Get the start node
-        Node* start = new Node(0,
-                this->domain.heuristic(this->domain.getStartState()),
-                this->domain.distance(this->domain.getStartState()),
-                this->domain.distanceErr(this->domain.getStartState()),
-                this->domain.epsilonHGlobal(),
-                this->domain.epsilonDGlobal(),
-                this->domain.getStartState(),
-                NULL,
-                -1);
+       // Get the start node
+       Node* start = new Node(0,
+               this->domain.heuristic(this->domain.getStartState()),
+               this->domain.distance(this->domain.getStartState()),
+               this->domain.distanceErr(this->domain.getStartState()),
+               this->domain.epsilonHGlobal(),
+               this->domain.epsilonDGlobal(),
+               this->domain.getStartState(),
+               NULL,
+               -1);
 
-        clock_t startTime = clock();
-        int iterationCounter = 1;
+       recordGenerated(start);
 
-        while (1) {
-            // Check if a goal has been reached
-            if (this->domain.isGoal(start->getState())) {
-                // Calculate path cost and return solution
-                this->calculateCost(start, res);
+       clock_t startTime = clock();
+       int iterationCounter = 1;
 
-                res.totalCpuTime = double(clock() - startTime) /
-                        CLOCKS_PER_SEC / iterationCounter;
+       while (1) {
+           // Check if a goal has been reached
+           if (this->domain.isGoal(start->getState())) {
+               // Calculate path cost and return solution
+               this->calculateCost(start, res);
 
-                return res;
-            }
+               res.totalCpuTime = double(clock() - startTime) / CLOCKS_PER_SEC /
+                       iterationCounter;
 
-            this->restartLists(start);
+               return res;
+           }
 
-            // Exploration Phase
-            this->domain.updateEpsilons();
+           this->restartLists(start);
 
-            // First, generate the top-level actions
-            this->generateTopLevelActions(start, res);
+           // Exploration Phase
+           this->domain.updateEpsilons();
 
-            // Expand some nodes until expnasion limit
-            this->expansionAlgo->expand(this->open, this->closed, this->tlas, duplicateDetection_recordVisited, res);
+           // First, generate the top-level actions
+           this->generateTopLevelActions(start, res);
 
-            // Check if this is a dead end 
-			// or reach the lookahead limit
-            if (this->open.empty()) {
-                res.totalCpuTime = double(clock() - startTime) /
-                        CLOCKS_PER_SEC / iterationCounter;
-                break;
-            }
+           // Expand some nodes until expnasion limit
+           this->expansionAlgo->expand(this->open,
+                   this->closed,
+                   this->tlas,
+                   duplicateDetection_recordGenerated,
+                   res);
 
-            //  Learning Phase
-            this->learningAlgo->learn(this->open, this->closed);
+           // Check if this is a dead end
+           // or reach the lookahead limit
+           if (this->open.empty()) {
+               res.totalCpuTime = double(clock() - startTime) / CLOCKS_PER_SEC /
+                       iterationCounter;
+               break;
+           }
 
-            // Decision-making Phase
-            start = this->decisionAlgo->backup(this->open, this->tlas, start);
+           //  Learning Phase
+           this->learningAlgo->learn(this->open, this->closed);
 
-            iterationCounter++;
+           // Decision-making Phase
+           start = this->decisionAlgo->backup(this->open, this->tlas, start);
+
+           iterationCounter++;
         }
 
 		return res;
     }
 
     void dumpClosedList(ofstream& out) {
-        for (typename unordered_map<State, Node*, Hash>::iterator it =
+        cout << "dump size: " << allGeneratedStates.size() << endl;
+        for (typename unordered_map<State, DumpNode, Hash>::iterator it =
                         allGeneratedStates.begin();
                 it != allGeneratedStates.end();
                 it++) {
             out << it->first;
-            out << it->second->getHValue() << " " << it->second->getDValue()
+            out << it->second.h << " " << it->second.d
                 << " " << it->first.key() << endl;
         }
     }
 
 private:
-    static void recordVisited(Node* node) {
-            if (allGeneratedStates.find(node->getState()) != allGeneratedStates.end()) {
-                allGeneratedStates[node->getState()] = node;
+    static void recordGenerated(Node* node) {
+            if (allGeneratedStates.find(node->getState()) == allGeneratedStates.end()) {
+                allGeneratedStates.emplace(
+                        std::make_pair(node->getState(), DumpNode(node)));
             }
     }
 
-    static bool duplicateDetection_recordVisited(Node* node,
+    static bool duplicateDetection_recordGenerated(Node* node,
             unordered_map<State, Node*, Hash>& closed,
             PriorityQueue<Node*>& open,
             vector<TopLevelAction>& tlaList) {
-        recordVisited(node);
+        recordGenerated(node);
         // Check if this state exists
         typename unordered_map<State, Node*, Hash>::iterator it =
                 closed.find(node->getState());
@@ -157,8 +176,8 @@ private:
         return false;
 	}
 
-	static unordered_map<State, Node*, Hash> allGeneratedStates;
+	static unordered_map<State, DumpNode, Hash> allGeneratedStates;
 };
 
 template<typename T>
-unordered_map<typename LssLRTAStarSearch<T>::State, typename LssLRTAStarSearch<T>::Node *, typename LssLRTAStarSearch<T>::Hash> LssLRTAStarSearch<T>::allGeneratedStates;
+unordered_map<typename LssLRTAStarSearch<T>::State, typename LssLRTAStarSearch<T>::DumpNode, typename LssLRTAStarSearch<T>::Hash> LssLRTAStarSearch<T>::allGeneratedStates;
