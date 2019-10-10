@@ -2,13 +2,13 @@
 
 if [ "$1" = "help" ] || [ "$1" = "-help" ] || [ "$1" = "?" ]
 then
-  echo "./multiThread-uniform.sh <# of processes> <starting instance #> <# of instances to test> <search algorithm>"
+  echo "./multiThread-uniform.sh <# of processes> <starting instance #> <# of instances to test> <search algorithm> <collect algorithm>"
   exit 1
 fi
 
-if (($# < 4))
+if (($# < 5))
 then
-  echo "./multiThread-uniform.sh <# of processes> <starting instance #> <# of instances to test> <search algorithm>"
+  echo "./multiThread-uniform.sh <# of processes> <starting instance #> <# of instances to test> <search algorithm> <collect algorithm>"
   exit 1
 fi
 

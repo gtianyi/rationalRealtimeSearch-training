@@ -104,19 +104,19 @@ public:
         }
     }
 
-    void dumpSampleSet(string tileType) {
+    void dumpSampleSet(string tileType, string alg) {
         int id = 0;
 
         string fileFrequencyRecord =
                 "../results/SlidingTilePuzzle/sampleProblem/" + tileType + "/" +
-                "0FrequencyCounter.txt";
+                alg + "/" + "0FrequencyCounter.txt";
 
         ofstream counterFile(fileFrequencyRecord);
 
         for (auto n : sampleSet) {
             id++;
             string fileName = "../results/SlidingTilePuzzle/sampleProblem/" +
-                    tileType + "/" + to_string(id) + ".st";
+                    tileType + "/" + alg + "/" + to_string(id) + ".st";
 
             ofstream f(fileName);
 
@@ -141,28 +141,30 @@ private:
 };
 
 int main(int argc, char** argv) {
-    if (argc != 6) {
-        cout << "Wrong number of arguments: ./collect <weight> <first instance> <last instance> <tile type> <sample count>"
+    if (argc != 7) {
+        cout << "Wrong number of arguments: ./collect <alg> <algPara> <first instance> <last instance> <tile type> <sample count>"
              << endl;
         exit(1);
     }
 
-    string weight = argv[1];
+	string alg = argv[1];
 
-    int firstNum = stoi(argv[2]);
+    string algPara = argv[2];
 
-    int lastNum = stoi(argv[3]);
+    int firstNum = stoi(argv[3]);
 
-	string tileType = argv[4];
+    int lastNum = stoi(argv[4]);
 
-    int sampleCount = stoi(argv[5]);
+	string tileType = argv[5];
 
+    int sampleCount = stoi(argv[6]);
 
-	Collection<SlidingTilePuzzle> collection;
+    Collection<SlidingTilePuzzle> collection;
 
     for (int i = firstNum; i <= lastNum; i++) {
         string fileName = "../results/SlidingTilePuzzle/distributionTest/" +
-                tileType + "/W" + weight + "-" + std::to_string(i) + ".txt";
+                tileType + "/" + alg + "/Para" + algPara + "-" +
+                std::to_string(i) + ".txt";
 
         std::ifstream f(fileName);
 
@@ -175,5 +177,5 @@ int main(int argc, char** argv) {
 
 	collection.sampleStatesForH(sampleCount);
 
-	collection.dumpSampleSet(tileType);
+	collection.dumpSampleSet(tileType, alg);
 }

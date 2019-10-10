@@ -75,7 +75,6 @@ public:
 		vector<shared_ptr<Node>> freqBuckList[2000];
 		int minNonEmptyBucket;
 		int size;
-		
 
         void insert(shared_ptr<Node> n) {
 			const auto& mapit = freqBuckListIndexMap.find(n);
