@@ -6,6 +6,7 @@ class LssLRTAStarSearch : public RealTimeSearch<Domain> {
     typedef typename RealTimeSearch<Domain>::Node Node;
     typedef typename RealTimeSearch<Domain>::State State;
     typedef typename RealTimeSearch<Domain>::Hash Hash;
+    typedef typename RealTimeSearch<Domain>::TopLevelAction TopLevelAction;
 
 public:
     LssLRTAStarSearch(Domain& domain,
@@ -63,7 +64,7 @@ public:
             generateTopLevelActions(start, res);
 
             // Expand some nodes until expnasion limit
-            this->expansionAlgo->expand(this->open, this->closed, this->tlas, this->duplicateDetection, res);
+            this->expansionAlgo->expand(this->open, this->closed, this->tlas, duplicateDetection_recordVisited, res);
 
             // Check if this is a dead end 
 			// or reach the lookahead limit
@@ -89,8 +90,8 @@ public:
 
     void dumpClosedList(ofstream& out) {
         for (typename unordered_map<State, Node*, Hash>::iterator it =
-                        allVisitedStates.begin();
-                it != allVisitedStates.end();
+                        allGeneratedStates.begin();
+                it != allGeneratedStates.end();
                 it++) {
             out << it->first;
             out << it->second->getHValue() << " " << it->second->getDValue()
@@ -99,16 +100,64 @@ public:
     }
 
 private:
-    void recordVisited() {
-        // keep the copy of the first time we see it
-        for (typename unordered_map<State, Node*, Hash>::iterator it =
-                        this->closed.begin();
-                it != this->closed.end();
-                it++)
-            if (allVisitedStates.find(it->first) != allVisitedStates.end()) {
-                allVisitedStates[it->first] = it->second;
-            } 
+    static void recordVisited(Node* node) {
+            if (allGeneratedStates.find(node->getState()) != allGeneratedStates.end()) {
+                allGeneratedStates[node->getState()] = node;
+            }
+    }
+
+    static bool duplicateDetection_recordVisited(Node* node,
+            unordered_map<State, Node*, Hash>& closed,
+            PriorityQueue<Node*>& open,
+            vector<TopLevelAction>& tlaList) {
+        recordVisited(node);
+        // Check if this state exists
+        typename unordered_map<State, Node*, Hash>::iterator it =
+                closed.find(node->getState());
+
+        if (it != closed.end()) {
+            // This state has been generated before, check if its node is on
+            // OPEN
+            if (it->second->onOpen()) {
+                // This node is on OPEN, keep the better g-value
+                if (node->getGValue() < it->second->getGValue()) {
+                    tlaList[it->second->getOwningTLA()].open.remove(it->second);
+                    it->second->setGValue(node->getGValue());
+                    it->second->setParent(node->getParent());
+                    it->second->setHValue(node->getHValue());
+                    it->second->setDValue(node->getDValue());
+                    it->second->setDErrValue(node->getDErrValue());
+                    it->second->setEpsilonH(node->getEpsilonH());
+                    it->second->setEpsilonD(node->getEpsilonD());
+                    it->second->setState(node->getState());
+                    it->second->setOwningTLA(node->getOwningTLA());
+                    tlaList[node->getOwningTLA()].open.push(it->second);
+                }
+            } else {
+                // This node is on CLOSED, compare the f-values. If this new
+                // f-value is better, reset g, h, and d.
+                // Then reopen the node.
+                if (node->getFValue() < it->second->getFValue()) {
+                    it->second->setGValue(node->getGValue());
+                    it->second->setParent(node->getParent());
+                    it->second->setHValue(node->getHValue());
+                    it->second->setDValue(node->getDValue());
+                    it->second->setDErrValue(node->getDErrValue());
+                    it->second->setEpsilonH(node->getEpsilonH());
+                    it->second->setEpsilonD(node->getEpsilonD());
+                    it->second->setState(node->getState());
+                    it->second->setOwningTLA(node->getOwningTLA());
+                    tlaList[node->getOwningTLA()].open.push(it->second);
+                    it->second->reOpen();
+                    open.push(it->second);
+                }
+            }
+
+            return true;
+        }
+
+        return false;
 	}
 
-	unordered_map<State, Node*, Hash> allVisitedStates;
+	static unordered_map<State, Node*, Hash> allGeneratedStates;
 };
