@@ -16,7 +16,6 @@
 
 using namespace std;
 
-
 template<typename D>
 struct hash_func  
 {  
@@ -46,14 +45,14 @@ string double2string(double c, int precision) {
 
 //TODO change this to be not hard coded
 //uniform and heavy
-//constexpr int hPrecision = 0;
-//constexpr int hsPrecision = 0;
-//constexpr double hSearchDownStep = 1;
+constexpr int hPrecision = 0;
+constexpr int hsPrecision = 0;
+constexpr double hSearchDownStep = 1;
 
 //inverse
-constexpr int hPrecision = 1;
-constexpr int hsPrecision = 2;
-constexpr double hSearchDownStep = 0.1;
+/*constexpr int hPrecision = 1;*/
+//constexpr int hsPrecision = 2;
+//constexpr double hSearchDownStep = 0.1;
 
 struct CollectionBase{
     virtual void parsingSamples(ifstream& f, const string& instanceDir)=0; 
@@ -82,9 +81,12 @@ public:
             string h = m.name.GetString();
             vector<Sample> sampleList;
 
+            cout << "h " << h << endl;
+
             for (auto& instance : m.value.GetArray()) {
 
                 string instanceName = instance["instance"].GetString();
+
                 int counter = instance["counter"].GetInt();
                 bool isFloat = instanceDir == "inverse";
                 Cost hstar = isFloat ? instance["hstar"].GetFloat() :
@@ -93,8 +95,12 @@ public:
                                         instance["deltaH"].GetInt();
 
                 RawState s = getStateByInstanceName(instanceName, instanceDir);
-				sampleList.push_back(Sample(s,deltaH,counter,hstar, instanceName));
-			}
+
+                cout << "instamce " << instanceName << endl;
+                sampleList.push_back(
+                        Sample(s, deltaH, counter, hstar, instanceName));
+
+            }
 
             hSampleCollection[h] = sampleList;
         }
@@ -426,7 +432,7 @@ public:
             postSearchFile = "../results/SlidingTilePuzzle/sampleData/"
                              "uniform-samples-postSearch.json";
 
-            instanceDir = "uniform";
+            instanceDir = "uniform/lsslrtastar";
 
             post_search_collection =
                     make_shared<PostSearchCollection<SlidingTilePuzzle>>();
@@ -466,6 +472,7 @@ public:
 
     void run() {
         // read each line get all 200-ish samples
+        cout << "parsing samples" << endl;
         post_search_collection->parsingSamples(f_sample, instanceDir);
 
         // for each sample problem, expand it find its succssors and their
@@ -477,8 +484,10 @@ public:
         // for all 200-ish post-search beliefs, merge them by doing numerical
         // intergation
         // now we have the mapping that map h to post-search h*
+        cout << "compute postsearch hist" << endl;
         post_search_collection->computePostSearchHist(f_distribution);
 
+        cout << "dumap post search samples" << endl;
         post_search_collection->dumpPostSearchSamples(f_out);
     }
 

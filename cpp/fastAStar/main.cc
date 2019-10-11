@@ -41,7 +41,7 @@ int main(int argc, const char *argv[]) {
         dfpair(stdout, "total cpu time", "%g", ctime);
         dfpair(stdout, "total nodes expanded", "%lu", search->expd);
         dfpair(stdout, "total nodes generated", "%lu", search->gend);
-        dfpair(stdout, "solution length", "%u", (unsigned int)path.size());
+        dfpair(stdout, "solution length", "%u", (unsigned int)path.size()-1);
         dffooter(stdout);
 	} catch (const Fatal &f) {
 		fputs(f.msg, stderr);

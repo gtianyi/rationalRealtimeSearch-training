@@ -15,8 +15,9 @@ import dumpAndPlot
 
 
 def printUsage():
-    print "usage: python distribution.py <tile type> <dump file>"
+    print "usage: python distribution.py <tile type> <training alg> <dump file>"
     print "tile type: uniform heavy inverse"
+    print "training alg: wastar lsslrtastar"
     print "dump file: d(distribution) postd(poset search distribution)"
 
 
@@ -31,7 +32,9 @@ def main():
     # Hard coded result directories
     tileType = sys.argv[1]
 
-    fileType = sys.argv[2]
+    trainigType = sys.argv[2]
+
+    fileType = sys.argv[3]
 
     if fileType == "postd":
         with open("../../../results/SlidingTilePuzzle/sampleData/" + tileType +
@@ -52,7 +55,8 @@ def main():
     print("reading in frequency file...")
     with open(
             "../../../results/SlidingTilePuzzle/sampleProblem/" + tileType +
-            "/0FrequencyCounter.txt", "r") as frequencycounterFile:
+            "/" + trainigType + "/0FrequencyCounter.txt",
+            "r") as frequencycounterFile:
         #parse the frequency counter file
         for line in frequencycounterFile:
             line = line.split(" ")
@@ -61,12 +65,12 @@ def main():
     #parse the instance solution file
     print("reading in solution files...")
     allFiles = os.listdir("../../../results/SlidingTilePuzzle/sampleData/" +
-                          tileType)
+                          tileType + "/" + trainigType)
     totalFiles = len(allFiles)
     for i, oneFile in enumerate(allFiles):
         with open(
                 "../../../results/SlidingTilePuzzle/sampleData/" + tileType +
-                "/" + oneFile, "r") as f:
+                "/" + trainigType + "/" + oneFile, "r") as f:
 
             h = 999999
             hs = 999999
@@ -114,4 +118,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) < 4:
+        printUsage()
+    else:
+        main()
