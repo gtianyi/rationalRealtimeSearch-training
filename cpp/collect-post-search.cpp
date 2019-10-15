@@ -138,7 +138,11 @@ public:
             keys.push_back(it.first);
 
             if (!isFloatH) {
-                isFloatH = isFloat(it.first);
+                istringstream iss(it.first);
+                float tempf;
+				int tempint;
+                iss >> tempf;
+                isFloatH = ceilf(tempf) != tempf;
             }
         }
 

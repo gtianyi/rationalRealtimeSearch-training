@@ -2,13 +2,13 @@
 
 if [ "$1" = "help" ] || [ "$1" = "-help" ] || [ "$1" = "?" ]
 then
-  echo "./multiThread-pdb.sh <# of processes> <starting instance #> <# of instances to test> <search algorithm> <tile type>"
+  echo "./multiThread-pdb.sh <# of processes> <starting instance #> <# of instances to test> <search algorithm> <tile type> <training type>"
   exit 1
 fi
 
-if (($# < 5))
+if (($# < 6))
 then
-  echo "./multiThread-pdb.sh <# of processes> <starting instance #> <# of instances to test> <search algorithm> <tile type>"
+  echo "./multiThread-pdb.sh <# of processes> <starting instance #> <# of instances to test> <search algorithm> <tile type> <training type>"
   exit 1
 fi
 
@@ -25,6 +25,7 @@ searchalg=$4
 
 tileType=$5
 
+trainingType=$6
 
 numProcs=0
 
@@ -34,7 +35,7 @@ mkdir -p ../../../results/SlidingTilePuzzle/sampleData/${tileType}
 
 while ((numProcs < ${maxProcs}))
 do
-    file="../../../results/SlidingTilePuzzle/sampleProblem/${tileType}/${instance}.st"
+    file="../../../results/SlidingTilePuzzle/sampleProblem/${tileType}/${trainingType}/${instance}.st"
 	../../../build_release/tiles-pdb ${searchalg} ${tileType} ${firstInstance} ${maxInstances} &
 	sleep 1
     let numProcs++

@@ -32,17 +32,18 @@ def main():
     # Hard coded result directories
     tileType = sys.argv[1]
 
-    trainigType = sys.argv[2]
+    trainingType = sys.argv[2]
 
     fileType = sys.argv[3]
 
     if fileType == "postd":
         with open("../../../results/SlidingTilePuzzle/sampleData/" + tileType +
+                  "-" + trainingType +
                   "-samples-postSearch.json") as json_file:
             data = json.load(json_file)
             od = OrderedDict(
                 sorted(data.items(), key=lambda item: float(item[0])))
-            dumpAndPlot.createDistAndDump(od, tileType, fileType)
+            dumpAndPlot.createDistAndDump(od, tileType, fileType, trainingType)
         return
 
     h_collection = defaultdict(list)
@@ -55,7 +56,7 @@ def main():
     print("reading in frequency file...")
     with open(
             "../../../results/SlidingTilePuzzle/sampleProblem/" + tileType +
-            "/" + trainigType + "/0FrequencyCounter.txt",
+            "/" + trainingType + "/0FrequencyCounter.txt",
             "r") as frequencycounterFile:
         #parse the frequency counter file
         for line in frequencycounterFile:
@@ -65,12 +66,12 @@ def main():
     #parse the instance solution file
     print("reading in solution files...")
     allFiles = os.listdir("../../../results/SlidingTilePuzzle/sampleData/" +
-                          tileType + "/" + trainigType)
+                          tileType + "/" + trainingType)
     totalFiles = len(allFiles)
     for i, oneFile in enumerate(allFiles):
         with open(
                 "../../../results/SlidingTilePuzzle/sampleData/" + tileType +
-                "/" + trainigType + "/" + oneFile, "r") as f:
+                "/" + trainingType + "/" + oneFile, "r") as f:
 
             h = 999999
             hs = 999999
@@ -109,8 +110,8 @@ def main():
     od = OrderedDict(sorted(nomissingHHSCollection.items()))
 
     if fileType == "d":
-        dumpAndPlot.createDistAndDump(od, tileType, fileType)
-        dumpAndPlot.dumphSamples(od, tileType)
+        dumpAndPlot.createDistAndDump(od, tileType, fileType, trainingType)
+        dumpAndPlot.dumphSamples(od, tileType + "-" + trainingType)
 
     # dumpAndPlot.dumphhat2file(h_collection, tileType)
 

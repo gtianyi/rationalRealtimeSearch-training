@@ -7,6 +7,7 @@
 #include "astar.hpp"
 #include <cstring>
 #include <memory>
+#include <sys/stat.h>
 
 using namespace std;
 
@@ -129,8 +130,8 @@ bool checkisGoodPuzzle(ifstream& input) {
 }
 
 int main(int argc, const char* argv[]) {
-    if (argc != 5)
-        throw Fatal("Usage: tiles <algorithm> <tiletype> <start instance> "
+    if (argc != 6)
+        throw Fatal("Usage: tiles <algorithm> <tiletype> <trainingType> <start instance> "
                     "<number of instance to run>");
 
     std::unordered_map<uint64_t, float> htable1;
@@ -139,20 +140,31 @@ int main(int argc, const char* argv[]) {
     std::vector<int> sixTiles1;
     std::vector<int> sixTiles2;
 
+	// create result directory if not exist
+    string resultDir = "/home/aifs1/gu/phd/research/workingPaper/"
+                       "realtime-nancy/results/SlidingTilePuzzle/"
+                       "sampleData/" +
+            string(argv[2]) + "/" + string(argv[3]);
+
+    string mkdirCMD = "mkdir -p " + resultDir;
+    std::system(mkdirCMD.c_str());
+
+    string inputDir = "/home/aifs1/gu/phd/research/workingPaper/"
+                      "realtime-nancy/results/SlidingTilePuzzle/"
+                      "sampleProblem/" +
+            string(argv[2]) + "/" + string(argv[3]);
+
 	//cout<<"initial table\n";
     std::string tileType = argv[2];
     initializePDB(htable1, htable2, tileType, sixTiles1, sixTiles2);
     // cout<<"initial finished\n";
 
-    int startInstance = stoi(argv[3]);
-    int numberOfInstance = stoi(argv[4]);
+    int startInstance = stoi(argv[4]);
+    int numberOfInstance = stoi(argv[5]);
 
     for (int i = 0; i < numberOfInstance; i++) {
         int instanceID = startInstance + i;
-        string resultFile = "/home/aifs1/gu/phd/research/workingPaper/"
-                            "realtime-nancy/results/SlidingTilePuzzle/"
-                            "sampleData/" +
-                string(argv[2]) + "/" + to_string(instanceID) + ".txt";
+        string resultFile = resultDir + "/" + to_string(instanceID) + ".txt";
         ifstream checkRetExist(resultFile);
         ifstream checkProcessExist(resultFile+".temp");
         if (checkRetExist.good() || checkProcessExist.good()) {
@@ -166,14 +178,7 @@ int main(int argc, const char* argv[]) {
 
         ofstream output(resultFile);
 
-		string inputFile = "/home/aifs1/gu/phd/research/workingPaper/"
-						   "realtime-nancy/results/SlidingTilePuzzle/"
-						   "sampleProblem/" +
-				string(argv[2]) + "/" + to_string(instanceID) + ".st";
-
-       /* string inputFile = "/home/aifs1/gu/phd/research/workingPaper/"*/
-                           //"realtime-nancy/worlds/slidingTile/" +
-                //to_string(instanceID) + "-4x4.st";
+        string inputFile = inputDir + "/" + to_string(instanceID) + ".st";
 
         ifstream input(inputFile);
         ifstream inputcheck(inputFile);

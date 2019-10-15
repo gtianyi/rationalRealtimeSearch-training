@@ -23,7 +23,7 @@ __author__ = 'Tianyi Gu'
 #---------- Dump out h-hstar ---------------------------
 
 
-def createDistAndDump(hhsCollection, dirName, fileType):
+def createDistAndDump(hhsCollection, dirName, fileType, trainingType):
     print("creating distribution...")
     print("h count " + str(len(hhsCollection)))
 
@@ -62,7 +62,8 @@ def createDistAndDump(hhsCollection, dirName, fileType):
 
     with open(
             "../../../results/SlidingTilePuzzle/sampleData/" + dirName +
-            "-statSummary-" + fileType + ".json", "w") as json_file:
+            "-statSummary-" + fileType + "-" + trainingType + ".json",
+            "w") as json_file:
         json.dump(dist, json_file)
 
 
