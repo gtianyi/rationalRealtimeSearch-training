@@ -31,12 +31,12 @@ numProcs=0
 
 trap "exit" INT
 
-mkdir -p ../../../results/SlidingTilePuzzle/sampleData/${tileType}
+mkdir -p ../../../results/SlidingTilePuzzle/sampleData/${tileType}/${trainingType}
 
 while ((numProcs < ${maxProcs}))
 do
     file="../../../results/SlidingTilePuzzle/sampleProblem/${tileType}/${trainingType}/${instance}.st"
-	../../../build_release/tiles-pdb ${searchalg} ${tileType} ${firstInstance} ${maxInstances} &
+	../../../build_release/tiles-pdb ${searchalg} ${tileType} ${trainingType} ${firstInstance} ${maxInstances} &
 	sleep 1
     let numProcs++
 done
