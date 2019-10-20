@@ -96,7 +96,6 @@ public:
 
                 RawState s = getStateByInstanceName(instanceName, instanceDir);
 
-                cout << "instamce " << instanceName << endl;
                 sampleList.push_back(
                         Sample(s, deltaH, counter, hstar, instanceName));
 
@@ -427,47 +426,29 @@ private:
 
 class IOFiles {
 public:
-    IOFiles(string tileType) {
+    IOFiles(string tileType, string trainingType) {
         if (tileType == "uniform") {
-            sampleFile = "../results/SlidingTilePuzzle/sampleData/"
-                         "uniform-samples.json";
-            distributionFile = "../results/SlidingTilePuzzle/sampleData/"
-                               "uniform-statSummary-d.json";
-            postSearchFile = "../results/SlidingTilePuzzle/sampleData/"
-                             "uniform-samples-postSearch.json";
-
-            instanceDir = "uniform/lsslrtastar";
-
             post_search_collection =
                     make_shared<PostSearchCollection<SlidingTilePuzzle>>();
         } else if (tileType == "inverse") {
-            sampleFile = "../results/SlidingTilePuzzle/sampleData/"
-                         "inverse-samples.json";
-            distributionFile = "../results/SlidingTilePuzzle/sampleData/"
-                               "inverse-statSummary-d.json";
-            postSearchFile = "../results/SlidingTilePuzzle/sampleData/"
-                             "inverse-samples-postSearch.json";
-
-            instanceDir = "inverse";
-
             post_search_collection =
                     make_shared<PostSearchCollection<InverseTilePuzzle>>();
         }  else if (tileType == "heavy") {
-            sampleFile = "../results/SlidingTilePuzzle/sampleData/"
-                         "heavy-samples.json";
-            distributionFile = "../results/SlidingTilePuzzle/sampleData/"
-                               "heavy-statSummary-d.json";
-            postSearchFile = "../results/SlidingTilePuzzle/sampleData/"
-                             "heavy-samples-postSearch.json";
-
-            instanceDir = "heavy";
-
             post_search_collection =
                     make_shared<PostSearchCollection<HeavyTilePuzzle>>();
         } else {
             cout << "not support tile type" << tileType << endl;
             exit(1);
         }
+
+        sampleFile = "../results/SlidingTilePuzzle/sampleData/" + tileType +
+                "-" + trainingType + "-samples.json";
+        distributionFile = "../results/SlidingTilePuzzle/sampleData/" +
+                tileType + "-" + trainingType + "-statSummary-d.json";
+        postSearchFile = "../results/SlidingTilePuzzle/sampleData/" + tileType +
+                "-" + trainingType + "-samples-postSearch.json";
+
+        instanceDir = tileType + "/" + trainingType;
 
         f_sample = std::ifstream(sampleFile);
         f_distribution = std::ifstream(distributionFile);
@@ -509,13 +490,14 @@ private:
 };
 
 int main(int argc, char** argv) {
-    if (argc != 2) {
-        cout << "Wrong number of arguments: ./collect-post-search <tile type>"
+    if (argc != 3) {
+        cout << "Wrong number of arguments: ./collect-post-search <tile type> <trainingType>"
              << "\ntile type: uniform, inverse, heavy"
+             << "\ntraining type: wastar lsslrtastar"
              << endl;
         exit(1);
     }
 
-    IOFiles ioFiles(argv[1]);
+    IOFiles ioFiles(argv[1], argv[2]);
     ioFiles.run();
 }

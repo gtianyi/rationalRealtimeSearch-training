@@ -61,8 +61,8 @@ def createDistAndDump(hhsCollection, dirName, fileType, trainingType):
     dist = OrderedDict(sorted(dist.items(), key=lambda item: float(item[0])))
 
     with open(
-            "../../../results/SlidingTilePuzzle/sampleData/" + dirName +
-            "-statSummary-" + fileType + "-" + trainingType + ".json",
+            "../../../results/SlidingTilePuzzle/sampleData/" + dirName + "-" +
+            trainingType + "-statSummary-" + fileType + ".json",
             "w") as json_file:
         json.dump(dist, json_file)
 
