@@ -7,6 +7,7 @@
 #include <unordered_set>
 #include <memory>
 #include <random>
+#include <climits>
 #include "domain/SlidingTilePuzzle.h"
 
 
@@ -107,6 +108,11 @@ public:
     void dumpSampleSet(string tileType, string alg) {
         int id = 0;
 
+        string mkdirCMD =
+                "mkdir -p ../results/SlidingTilePuzzle/sampleProblem/" +
+                tileType + "/" + alg;
+        std::system(mkdirCMD.c_str());
+
         string fileFrequencyRecord =
                 "../results/SlidingTilePuzzle/sampleProblem/" + tileType + "/" +
                 alg + "/" + "0FrequencyCounter.txt";
@@ -159,11 +165,14 @@ int main(int argc, char** argv) {
 
     int sampleCount = stoi(argv[6]);
 
+	sampleCount = INT_MAX;
+
     Collection<SlidingTilePuzzle> collection;
 
     for (int i = firstNum; i <= lastNum; i++) {
         string fileName = "../results/SlidingTilePuzzle/distributionTest/" +
-                tileType + "/" + alg + "/Para" + algPara + "-" +
+                //tileType + "/" + alg + "/Para" + algPara + "-" +
+                tileType + "/" + alg + "/W" + algPara + "-" +
                 std::to_string(i) + ".txt";
 
         std::ifstream f(fileName);
