@@ -10,6 +10,7 @@ import json
 import os
 import sys
 from collections import OrderedDict, defaultdict
+import re
 
 import dumpAndPlot
 
@@ -77,7 +78,7 @@ def main():
             hs = 999999
 
             processed = i * 100.0 / totalFiles
-            print "read file processed", "%.2f" % processed, "%"
+            print "read file ", oneFile, " processed ", "%.2f" % processed, "%"
 
             for line in f:
                 line = line.replace('"', '')
@@ -88,9 +89,13 @@ def main():
                             h = eval(s)
 
                 if "solution length" in line:
-                    for s in line.split():
-                        if any(c.isdigit() for c in s):
-                            hs = eval(s)
+                    #this only works for uniform and heavy
+                    # to prevent the bug of read "solution lenght 213end"
+                    hs = eval(re.findall(r"\d+", line)[0])
+
+                    # for s in line.split():
+                        # if any(c.isdigit() for c in s):
+                            # hs = eval(s)
 
             if h != 999999 and hs != 999999:
                 h_collection[getHgroup(h, tileType == "inverse")].append({

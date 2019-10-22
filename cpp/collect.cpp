@@ -77,6 +77,8 @@ public:
     };
 
     void arrangeCollectionByH() {
+        cout << "observed states " << nodeCollection.size() << endl;
+        cout << "arrange collection by h " << endl;
         for (typename unordered_map<unsigned long long,
                      shared_ptr<Node>>::iterator it = nodeCollection.begin();
                 it != nodeCollection.end();
@@ -165,7 +167,7 @@ int main(int argc, char** argv) {
 
     int sampleCount = stoi(argv[6]);
 
-	sampleCount = INT_MAX;
+	//sampleCount = INT_MAX;
 
     Collection<SlidingTilePuzzle> collection;
 
