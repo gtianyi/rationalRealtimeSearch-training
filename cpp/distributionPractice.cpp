@@ -9,51 +9,41 @@
 
 using namespace std;
 
+struct BaseWorld {
+    virtual void* getWorld(istream& mystdin) = 0;
+};
+
 template <typename Domain, typename Subdomain>
-struct World {
-    auto getWorld(istream& mystdin) {
-        if
-            constexpr(std::is_same_v<Domain,SlidingTilePuzzle>) {
-                // if constexpr(std::is_pointer_v<int>) {
-                shared_ptr<SlidingTilePuzzle> world = make_shared<Subdomain>(mystdin);
-                return world;
-            }
-        else if
-            constexpr(std::is_same_v<Domain,TreeWorld>) {
-                // else if constexpr(domain =="randomtree"){
-                shared_ptr<TreeWorld> world = make_shared<TreeWorld>(mystdin);
-                return world;
-            }
-        else {
-            shared_ptr<TreeWorld> world = make_shared<TreeWorld>(mystdin);
-            return world;
-            cout << "wrong domain type: tile, randomtree" << endl;
-            exit(1);
-        }
+struct World :BaseWorld{
+    void* getWorld(istream& mystdin) {
+        shared_ptr<Domain> world = make_shared<Subdomain>(mystdin);
+        return world;
     }
 };
 
 template<typename Domain, typename Algpara>
 struct Search{
-    auto getSearch(TreeWorld& d, int p) {
-        if
-            constexpr(std::is_same_v<Algpara, double>) {
-                WAStarSearch<Domain> wastarsearch(d, p);
-                return wastarsearch;
-            }
-        else if
-            constexpr(std::is_same_v<Algpara, int>) {
-                LssLRTAStarSearch<Domain> lsslrta(
-                        d, "a-star", "learn", "minimin", p);
-                return lsslrta;
-            }
-        else {
-            LssLRTAStarSearch<Domain> lsslrta(
-                    d, "a-star", "learn", "minimin", p);
-            return lsslrta;
-        }
-    }
+	auto getSearch(Domain& d, Algpara p) {
+		if
+			constexpr(std::is_same_v<Algpara, double>) {
+				WAStarSearch<Domain> wastarsearch(d, p);
+				return wastarsearch;
+			}
+		else if
+			constexpr(std::is_same_v<Algpara, int>) {
+				LssLRTAStarSearch<Domain> lsslrta(
+						d, "a-star", "learn", "minimin", p);
+				return lsslrta;
+			}
+		else {
+			LssLRTAStarSearch<Domain> lsslrta(
+					d, "a-star", "learn", "minimin", p);
+			return lsslrta;
+		}
+	}
 };
+
+
 
 int main(int argc, char** argv) {
     cxxopts::Options options("./distributionPractice",
@@ -105,19 +95,40 @@ int main(int argc, char** argv) {
             {"heavy", typeid(HeavyTilePuzzle)},
             {"inverse", typeid(InverseTilePuzzle)}};
 
-	unordered_map<string, std::type_index> algorithms = {
-            {"wastar", typeid(double)},
-            {"lsslrtastar", typeid(int)}};
+    unordered_map<string, std::type_index> algorithms = {
+            {"wastar", typeid(double)}, {"lsslrtastar", typeid(int)}};
 
-    auto world = World<decltype(domains[args["domain"].as<std::string>()]),
-                         decltype(subdomains[args["subdomain"].as<std::string>()])>()
-                         .getWorld(cin);
+    auto d = args["domain"].as<std::string>();
+    auto sd = args["subdomain"].as<std::string>();
+    auto alg = args["alg"].as<std::string>();
 
-    auto search = Search<decltype(domains[args["domain"].as<std::string>()]),
-                          decltype(algorithms[args["alg"].as<std::string>()])>()
-                          .getSearch(*world, args["par"].as<int>());
+	shared_ptr<BaseWorld> w;
 
-    auto res = search.search();
+    if (d == "randomtree") {
+        w = make_shared<World<TreeWorld, TreeWorld>>();
+		auto world = w->getWorld(cin);
+        auto search = Search<TreeWorld, int>().getSearch(*world, args["par"].as<int>());
+        ResultContainer res = search.search();
+    } else if (d == "tile") {
+        if (sd == "uniform") {
+            auto world =
+                    World<SlidingTilePuzzle, SlidingTilePuzzle>().getWorld(cin);
+            if (alg == "wastar") {
+                auto search = Search<SlidingTilePuzzle, double>().getSearch(
+                        *world, args["par"].as<double>());
+
+                WAStarResultContainer wastarRes = search.search();
+            } else if (alg == "lssltrastar") {
+                auto search = Search<SlidingTilePuzzle, int>().getSearch(
+                        *world, args["par"].as<int>());
+
+                ResultContainer res = search.search();
+            }
+        }
+		
+    }
+
+    // auto res = search.search();
 
     // if (alg == "wastar") {
     // float weight = stof(argv[3]);
