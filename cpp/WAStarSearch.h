@@ -9,6 +9,7 @@
 #include "domain/SlidingTilePuzzle.h"
 #include "domain/HeavyTilePuzzle.h"
 #include "domain/InverseTilePuzzle.h"
+#include "domain/TreeWorld.h"
 
 using namespace std;
 
@@ -16,9 +17,9 @@ template<class Domain>
 class WAStarSearch
 {
 public:
-    typedef typename SlidingTilePuzzle::State State;
-    typedef typename SlidingTilePuzzle::Cost Cost;
-    typedef typename SlidingTilePuzzle::HashState Hash;
+    typedef typename Domain::State State;
+    typedef typename Domain::Cost Cost;
+    typedef typename Domain::HashState Hash;
 
     struct Node {
         Cost g;
@@ -71,12 +72,12 @@ public:
 
     };
 
-    WAStarSearch(SlidingTilePuzzle& domain,
+    WAStarSearch(Domain& domain,
             float weight)
             : domain(domain),
               weight(weight) {
         wastar =
-                new WAStar<SlidingTilePuzzle, Node>(domain, weight, "f");
+                new WAStar<Domain, Node>(domain, weight, "f");
          }
 
     ~WAStarSearch() { clean(); }
@@ -164,7 +165,7 @@ private:
     }
 
 protected:
-    SlidingTilePuzzle& domain;
+    Domain& domain;
     WAStar<Domain, Node>* wastar;
     PriorityQueue<Node*> open;
     unordered_map<State, Node*, Hash> closed;
