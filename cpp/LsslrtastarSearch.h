@@ -1,10 +1,11 @@
 #pragma once
 #include "RealTimeSearch.h"
+#include "SuboptimalSearchBase.h"
 
 template <class Domain>
-class LssLRTAStarSearch : public RealTimeSearch<Domain> {
+class LssLRTAStarSearch : public RealTimeSearch<Domain>, public SuboptimalSearch {
     typedef typename RealTimeSearch<Domain>::Node Node;
-    typedef typename RealTimeSearch<Domain>::State State;
+	typedef typename RealTimeSearch<Domain>::State State;
     typedef typename RealTimeSearch<Domain>::Cost Cost;
     typedef typename RealTimeSearch<Domain>::Hash Hash;
     typedef typename RealTimeSearch<Domain>::TopLevelAction TopLevelAction;
@@ -35,10 +36,10 @@ public:
                       k,
                       belief) {}
 
-   ResultContainer search() {
+   SuboptSearchResultContainer subOptSearch() {
        this->domain.initialize(this->expansionPolicy, this->lookahead);
 
-       ResultContainer res;
+       SuboptSearchResultContainer res;
 
        // Get the start node
        Node* start = new Node(0,

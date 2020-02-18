@@ -9,43 +9,8 @@
 
 using namespace std;
 
-struct BaseWorld {
-    virtual void* getWorld(istream& mystdin) = 0;
-};
-
-template <typename Domain, typename Subdomain>
-struct World :BaseWorld{
-    void* getWorld(istream& mystdin) {
-        shared_ptr<Domain> world = make_shared<Subdomain>(mystdin);
-        return world;
-    }
-};
-
-template<typename Domain, typename Algpara>
-struct Search{
-	auto getSearch(Domain& d, Algpara p) {
-		if
-			constexpr(std::is_same_v<Algpara, double>) {
-				WAStarSearch<Domain> wastarsearch(d, p);
-				return wastarsearch;
-			}
-		else if
-			constexpr(std::is_same_v<Algpara, int>) {
-				LssLRTAStarSearch<Domain> lsslrta(
-						d, "a-star", "learn", "minimin", p);
-				return lsslrta;
-			}
-		else {
-			LssLRTAStarSearch<Domain> lsslrta(
-					d, "a-star", "learn", "minimin", p);
-			return lsslrta;
-		}
-	}
-};
-
-
-
 int main(int argc, char** argv) {
+
     cxxopts::Options options("./distributionPractice",
             "This is a suboptimal search to collect observed states");
 
@@ -70,114 +35,61 @@ int main(int argc, char** argv) {
 
     auto args = options.parse(argc, argv);
 
-	//=======================;
-
-  /*  if (argc > 5 || argc < 4) {*/
-        //cout << "Wrong number of arguments:  <puzzle type> <alg> <alg arg> < "
-                //"optional : output file > < <domain file> "
-             //<< endl;
-        //cout << "" << endl;
-        //cout << "alg: wastar, lsslrtastar" << endl;
-        //cout << "" << endl;
-        //exit(1);
-	//}
-
-	//string puzzleType = argv[1];
-	
-	//string alg = argv[2];
-	//
-    unordered_map<string, std::type_index> domains = {
-            {"tile", typeid(SlidingTilePuzzle)},
-            {"randomtree", typeid(TreeWorld)}};
-
-    unordered_map<string, std::type_index> subdomains = {
-            {"uniform", typeid(SlidingTilePuzzle)},
-            {"heavy", typeid(HeavyTilePuzzle)},
-            {"inverse", typeid(InverseTilePuzzle)}};
-
-    unordered_map<string, std::type_index> algorithms = {
-            {"wastar", typeid(double)}, {"lsslrtastar", typeid(int)}};
-
     auto d = args["domain"].as<std::string>();
     auto sd = args["subdomain"].as<std::string>();
     auto alg = args["alg"].as<std::string>();
 
-	shared_ptr<BaseWorld> w;
+	shared_ptr<SuboptimalSearch> searchPtr;
 
+	// create domain world and search algorithm
     if (d == "randomtree") {
-        w = make_shared<World<TreeWorld, TreeWorld>>();
-		auto world = w->getWorld(cin);
-        auto search = Search<TreeWorld, int>().getSearch(*world, args["par"].as<int>());
-        ResultContainer res = search.search();
+
+        shared_ptr<TreeWorld> world = make_shared<TreeWorld>(cin);
+		auto lookahead = args["par"].as<int>();
+		searchPtr = make_shared<LssLRTAStarSearch<TreeWorld>>(*world,"a-star", "learn", "minimin", lookahead);
+
     } else if (d == "tile") {
+        shared_ptr<SlidingTilePuzzle> world;
+
         if (sd == "uniform") {
-            auto world =
-                    World<SlidingTilePuzzle, SlidingTilePuzzle>().getWorld(cin);
-            if (alg == "wastar") {
-                auto search = Search<SlidingTilePuzzle, double>().getSearch(
-                        *world, args["par"].as<double>());
-
-                WAStarResultContainer wastarRes = search.search();
-            } else if (alg == "lssltrastar") {
-                auto search = Search<SlidingTilePuzzle, int>().getSearch(
-                        *world, args["par"].as<int>());
-
-                ResultContainer res = search.search();
-            }
+            world = make_shared<SlidingTilePuzzle>(cin);
+        } else if (sd == "heavy") {
+            world = make_shared<HeavyTilePuzzle>(cin);
+        } else if (sd == "inverse") {
+            world = make_shared<InverseTilePuzzle>(cin);
+        } else {
+            cout << "wrong tile type!\n";
+            exit(1);
         }
-		
+
+        if (alg == "wastar") {
+            auto weight = args["par"].as<double>();
+            searchPtr = make_shared<WAStarSearch<SlidingTilePuzzle>>(
+                    *world, weight);
+        }
+		else if (alg == "lsslrtastar") {
+            auto lookahead = args["par"].as<int>();
+            searchPtr = make_shared<LssLRTAStarSearch<SlidingTilePuzzle>>(
+                    *world, "a-star", "learn", "minimin", lookahead);
+        }
     }
 
-    // auto res = search.search();
+	//perform search
+    auto res = searchPtr->subOptSearch();
 
-    // if (alg == "wastar") {
-    // float weight = stof(argv[3]);
+	//dumpout result and observed states
+    if (args.count("output")) {
+        ofstream out(args["output"].as<std::string>());
 
-    // WAStarSearch<SlidingTilePuzzle> wastarsearch(*world, weight);
+        out << res.nodesExpanded << " " << res.solutionFound << " "
+            << res.solutionCost << endl;
 
-    // WAStarResultContainer wastarRes = wastarsearch.search();
+        searchPtr->dumpClosedList(out);
 
-    //// PracticeResults practiceRes = wastarsearch.practice(wastarRes);
+        out.close();
 
-    //// JSONObject json = new JSONObject(wastarRes);
-
-    //// string result = json.toString(2);
-
-    // if (argc < 5) {
-    // cout << wastarRes.nodesExpanded << " " << wastarRes.solutionFound
-    //<< " " << wastarRes.solutionCost << " " << wastarRes.initialH
-    //<< endl;
-    //} else {
-    // ofstream out(argv[4]);
-
-    // out << wastarRes.nodesExpanded << " " << wastarRes.solutionFound
-    //<< " " << wastarRes.solutionCost << endl;
-
-    // wastarsearch.dumpClosedList(out);
-
-    // out.close();
-    //}
-    //} else if (alg == "lsslrtastar") {
-    // int lookaheadDepth = stof(argv[3]);
-
-    // LssLRTAStarSearch<SlidingTilePuzzle> lsslrta(
-    //*world, "a-star", "learn", "minimin", lookaheadDepth);
-
-    // ResultContainer res = lsslrta.search();
-
-    // if (argc < 5) {
-    // cout << res.nodesExpanded << " " << res.solutionFound << " "
-    //<< res.solutionCost << "\n"
-    //<< endl;
-    //} else {
-    // ofstream out(argv[4]);
-
-    // out << res.nodesExpanded << " " << res.solutionFound << " "
-    //<< res.solutionCost << endl;
-
-    // lsslrta.dumpClosedList(out);
-
-    // out.close();
-    //}
-    /*}*/
+    } else {
+        cout << res.nodesExpanded << " " << res.solutionFound << " "
+             << res.solutionCost << " " << res.initialH << endl;
+    }
 }

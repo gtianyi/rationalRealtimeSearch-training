@@ -4,6 +4,6 @@
 
 using namespace std;
 
-struct WAStarResultContainer : ResultContainer {
+struct SuboptSearchResultContainer : ResultContainer {
     double initialH;
 };
