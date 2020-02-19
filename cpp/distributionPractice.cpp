@@ -40,27 +40,24 @@ int main(int argc, char** argv) {
     auto alg = args["alg"].as<std::string>();
     auto para = args["par"].as<double>();
 
-    shared_ptr<SuboptimalSearch> searchPtr;
+    SuboptimalSearch* searchPtr;
 
     // create domain world and search algorithm
     if (d == "randomtree") {
-
-        shared_ptr<SlidingTilePuzzle> world = make_shared<SlidingTilePuzzle>(cin);
-		auto lookahead = (int)para;
-		searchPtr = make_shared<WAStarSearch<SlidingTilePuzzle>>(
-                    *world, 2.0);
-        //searchPtr = make_shared<LssLRTAStarSearch<SlidingTilePuzzle>>(
-                //*world, "a-star", "learn", "minimin", lookahead);
+        TreeWorld* world = new TreeWorld(cin);
+        auto lookahead = (int)para;
+        searchPtr = new LssLRTAStarSearch<TreeWorld>(
+                *world, "a-star", "learn", "minimin", lookahead);
 
     } else if (d == "tile") {
-        shared_ptr<SlidingTilePuzzle> world;
+        SlidingTilePuzzle* world;
 
         if (sd == "uniform") {
-            world = make_shared<SlidingTilePuzzle>(cin);
+            world = new SlidingTilePuzzle(cin);
         } else if (sd == "heavy") {
-            world = make_shared<HeavyTilePuzzle>(cin);
+            world = new HeavyTilePuzzle(cin);
         } else if (sd == "inverse") {
-            world = make_shared<InverseTilePuzzle>(cin);
+            world = new InverseTilePuzzle(cin);
         } else {
             cout << "wrong tile type!\n";
             exit(1);
@@ -68,15 +65,14 @@ int main(int argc, char** argv) {
 
         if (alg == "wastar") {
             auto weight = para;
-            searchPtr = make_shared<WAStarSearch<SlidingTilePuzzle>>(
+            searchPtr = new WAStarSearch<SlidingTilePuzzle>(
                     *world, weight);
-        }
-		else if (alg == "lsslrtastar") {
+        } else if (alg == "lsslrtastar") {
             auto lookahead = (int)para;
-            searchPtr = make_shared<LssLRTAStarSearch<SlidingTilePuzzle>>(
+            searchPtr = new LssLRTAStarSearch<SlidingTilePuzzle>(
                     *world, "a-star", "learn", "minimin", lookahead);
         }
-    }
+	}
 
 	//perform search
     auto res = searchPtr->subOptSearch();
