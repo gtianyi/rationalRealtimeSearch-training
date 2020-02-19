@@ -39,7 +39,7 @@ flags = [
     '-DIKFAST_NO_MAIN',
     '-I/usr/local/include',
     '-I/usr/local/lib',
-    '-std=c++17',
+    '-std=c++11',
 ]
 
 

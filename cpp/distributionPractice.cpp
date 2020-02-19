@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
 		 cxxopts::value<std::string>()->default_value("lsslrtastar"))
 
         ("p,par", "weight for weighted A*, lookahead for lsslrta*", 
-		 cxxopts::value<double>()->default_value("2.0"))
+		 cxxopts::value<double>()->default_value("100"))
 
 		("o,output", "output file", cxxopts::value<std::string>())
 
@@ -38,15 +38,19 @@ int main(int argc, char** argv) {
     auto d = args["domain"].as<std::string>();
     auto sd = args["subdomain"].as<std::string>();
     auto alg = args["alg"].as<std::string>();
+    auto para = args["par"].as<double>();
 
-	shared_ptr<SuboptimalSearch> searchPtr;
+    shared_ptr<SuboptimalSearch> searchPtr;
 
-	// create domain world and search algorithm
+    // create domain world and search algorithm
     if (d == "randomtree") {
 
-        shared_ptr<TreeWorld> world = make_shared<TreeWorld>(cin);
-		auto lookahead = args["par"].as<int>();
-		searchPtr = make_shared<LssLRTAStarSearch<TreeWorld>>(*world,"a-star", "learn", "minimin", lookahead);
+        shared_ptr<SlidingTilePuzzle> world = make_shared<SlidingTilePuzzle>(cin);
+		auto lookahead = (int)para;
+		searchPtr = make_shared<WAStarSearch<SlidingTilePuzzle>>(
+                    *world, 2.0);
+        //searchPtr = make_shared<LssLRTAStarSearch<SlidingTilePuzzle>>(
+                //*world, "a-star", "learn", "minimin", lookahead);
 
     } else if (d == "tile") {
         shared_ptr<SlidingTilePuzzle> world;
@@ -63,12 +67,12 @@ int main(int argc, char** argv) {
         }
 
         if (alg == "wastar") {
-            auto weight = args["par"].as<double>();
+            auto weight = para;
             searchPtr = make_shared<WAStarSearch<SlidingTilePuzzle>>(
                     *world, weight);
         }
 		else if (alg == "lsslrtastar") {
-            auto lookahead = args["par"].as<int>();
+            auto lookahead = (int)para;
             searchPtr = make_shared<LssLRTAStarSearch<SlidingTilePuzzle>>(
                     *world, "a-star", "learn", "minimin", lookahead);
         }

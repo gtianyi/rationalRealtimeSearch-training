@@ -36,69 +36,70 @@ public:
                       k,
                       belief) {}
 
-   SuboptSearchResultContainer subOptSearch() {
-       this->domain.initialize(this->expansionPolicy, this->lookahead);
+    SuboptSearchResultContainer subOptSearch() {
+        this->domain.initialize(this->expansionPolicy, this->lookahead);
 
-       SuboptSearchResultContainer res;
+        SuboptSearchResultContainer res;
 
-       // Get the start node
-       Node* start = new Node(0,
-               this->domain.heuristic(this->domain.getStartState()),
-               this->domain.distance(this->domain.getStartState()),
-               this->domain.distanceErr(this->domain.getStartState()),
-               this->domain.epsilonHGlobal(),
-               this->domain.epsilonDGlobal(),
-               this->domain.getStartState(),
-               NULL,
-               -1);
+        auto d = this->domain.distance(this->domain.getStartState());
+        // Get the start node
+        Node* start = new Node(0,
+                this->domain.heuristic(this->domain.getStartState()),
+                this->domain.distance(this->domain.getStartState()),
+                this->domain.distanceErr(this->domain.getStartState()),
+                this->domain.epsilonHGlobal(),
+                this->domain.epsilonDGlobal(),
+                this->domain.getStartState(),
+                NULL,
+                -1);
 
-       recordGenerated(start);
+        recordGenerated(start);
 
-       clock_t startTime = clock();
-       int iterationCounter = 1;
+        clock_t startTime = clock();
+        int iterationCounter = 1;
 
-       while (1) {
-           // Check if a goal has been reached
-           if (this->domain.isGoal(start->getState())) {
-               // Calculate path cost and return solution
-               this->calculateCost(start, res);
+        while (1) {
+            // Check if a goal has been reached
+            if (this->domain.isGoal(start->getState())) {
+                // Calculate path cost and return solution
+                this->calculateCost(start, res);
 
-               res.totalCpuTime = double(clock() - startTime) / CLOCKS_PER_SEC /
-                       iterationCounter;
+                res.totalCpuTime = double(clock() - startTime) /
+                        CLOCKS_PER_SEC / iterationCounter;
 
-               return res;
-           }
+                return res;
+            }
 
-           this->restartLists(start);
+            this->restartLists(start);
 
-           // Exploration Phase
-           this->domain.updateEpsilons();
+            // Exploration Phase
+            this->domain.updateEpsilons();
 
-           // First, generate the top-level actions
-           this->generateTopLevelActions(start, res);
+            // First, generate the top-level actions
+            this->generateTopLevelActions(start, res);
 
-           // Expand some nodes until expnasion limit
-           this->expansionAlgo->expand(this->open,
-                   this->closed,
-                   this->tlas,
-                   duplicateDetection_recordGenerated,
-                   res);
+            // Expand some nodes until expnasion limit
+            this->expansionAlgo->expand(this->open,
+                    this->closed,
+                    this->tlas,
+                    duplicateDetection_recordGenerated,
+                    res);
 
-           // Check if this is a dead end
-           // or reach the lookahead limit
-           if (this->open.empty()) {
-               res.totalCpuTime = double(clock() - startTime) / CLOCKS_PER_SEC /
-                       iterationCounter;
-               break;
-           }
+            // Check if this is a dead end
+            // or reach the lookahead limit
+            if (this->open.empty()) {
+                res.totalCpuTime = double(clock() - startTime) /
+                        CLOCKS_PER_SEC / iterationCounter;
+                break;
+            }
 
-           //  Learning Phase
-           this->learningAlgo->learn(this->open, this->closed);
+            //  Learning Phase
+            this->learningAlgo->learn(this->open, this->closed);
 
-           // Decision-making Phase
-           start = this->decisionAlgo->backup(this->open, this->tlas, start);
+            // Decision-making Phase
+            start = this->decisionAlgo->backup(this->open, this->tlas, start);
 
-           iterationCounter++;
+            iterationCounter++;
         }
 
 		return res;
@@ -111,8 +112,8 @@ public:
                 it != allGeneratedStates.end();
                 it++) {
             out << it->first;
-            out << it->second.h << " " << it->second.d
-                << " " << it->first.key() << endl;
+            out << it->second.h << " " << it->second.d << " " << it->first.key()
+                << endl;
         }
     }
 
