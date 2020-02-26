@@ -111,7 +111,7 @@ public:
                         allGeneratedStates.begin();
                 it != allGeneratedStates.end();
                 it++) {
-            out << it->first;
+            out << it->first << " ";
             out << it->second.h << " " << it->second.d << " " << it->first.key()
                 << endl;
         }
