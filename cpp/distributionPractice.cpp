@@ -35,6 +35,11 @@ int main(int argc, char** argv) {
 
     auto args = options.parse(argc, argv);
 
+    if (args.count("help")) {
+        std::cout << options.help() << std::endl;
+        exit(0);
+	}
+
     auto d = args["domain"].as<std::string>();
     auto sd = args["subdomain"].as<std::string>();
     auto alg = args["alg"].as<std::string>();
