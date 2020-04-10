@@ -11,6 +11,7 @@
 #include "domain/HeavyTilePuzzle.h"
 #include "domain/InverseTilePuzzle.h"
 #include "domain/TreeWorld.h"
+#include "domain/PancakePuzzle.h"
 
 using namespace std;
 

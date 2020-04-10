@@ -1,21 +1,18 @@
 #!/bin/bash
 
-if [ "$1" = "help" ] || [ "$1" = "-help" ] || [ "$1" = "?" ]
-then
-  echo "./singleThread-distributionExpHarness.sh <starting instance #> <# of instances to test> <Puzzle Type> <alg> <alg para> "
-  echo "Available puzzle types are uniform heavy"
+print_usage () {
+  echo "./singleThread-distributionExpHarness.sh <starting instance #> <# of instances to test> <domain type> <subdomain type> <alg> <alg para> "
+  echo "Available domain types are tile, pancake"
+  echo "Available tile subdomain ypes are uniform heavy"
+  echo "Available pancake subdomain ypes are regular heavy"
   echo "Available algorithms are wastar lsslrtastar"
   echo "algorithm parameters for wastar: weight, lsslrtastar: lookahead"
   exit 1
-fi
+}
 
-if (($# < 5))
+if [ "$1" = "help" ] || [ "$1" = "-help" ] || [ "$1" = "?" ] || (($# < 6))
 then
-  echo "./singleThread-distributionExpHarness.sh <starting instance #> <# of instances to test> <Puzzle Type> <alg> <alg para> "
-  echo "Available puzzle types are uniform heavy"
-  echo "Available algorithms are wastar lsslrtastar"
-  echo "algorithm parameters for wastar: weight, lsslrtastar: lookahead"
-  exit 1
+  print_usage
 fi
 
 # Which instance to start testing on
@@ -28,30 +25,53 @@ lastInstance=$(( $firstInstance + $maxInstances ))
 # The domain to run on
 domainType=$3
 
+# The sub domain to run on
+subDomainType=$4
+
 # algorithm
-algType=$4
+algType=$5
 
-algPara=$5
+algPara=$6
 
-mkdir -p ../../../results/SlidingTilePuzzle/distributionTest/${domainType}/${algType}
-  instance=$firstInstance
-  while ((instance < lastInstance))
-  do
-    file="../../../worlds/slidingTile/${instance}-4x4.st"
-    if [ -f ../../../results/SlidingTilePuzzle/distributionTest/${domainType}/${algType}/Para${algPara}-${instance}.txt ] || [ -f ../../../results/SlidingTilePuzzle/distributionTest/${domainType}/${algType}/Para${algPara}-${instance}.temp ]
-	then 
+domainsize="16"
+ext="pan"
+
+if [ "$domainType" == "tile" ]; then
+
+  domainsize="4x4"
+  ext="st"
+
+fi
+
+mkdir -p ../../../results/${domainType}/distributionTest/${subDomainType}/${algType}
+instance=$firstInstance
+while ((instance < lastInstance))
+do
+    infile="../../../worlds/${domainType}/${instance}-${domainsize}.${ext}"
+	outfile_name="../../../results/${domainType}/distributionTest/${subDomainType}/\
+${algType}/Para${algPara}-${instance}-${domainsize}"
+	outfile="${outfile_name}.txt"
+	tempfile="${outfile_name}.temp"
+
+    if [ -f ${outfile} ] || [ -f ${tempfile} ]; then 
+
 	  let instance++
+
 	else
-      echo "t" > ../../../results/SlidingTilePuzzle/distributionTest/${domainType}/${algType}/Para${algPara}-${instance}.temp
 
-      ./../../../build_release/distributionPractice ${domainType} ${algType} ${algPara} ../../../results/SlidingTilePuzzle/distributionTest/${domainType}/${algType}/Para${algPara}-${instance}.txt < ${file} 
+      echo "t" > ${tempfile} 
 
-	  if [ -f ../../../results/SlidingTilePuzzle/distributionTest/${domainType}/${algType}/Para${algPara}-${instance}.temp ]
-      then
-		rm ../../../results/SlidingTilePuzzle/distributionTest/${domainType}/${algType}/Para${algPara}-${instance}.temp
+      ./../../../build_release/distributionPractice \
+			  -d ${domainType} -s ${subDomainType} -a ${algType} \
+			  -p ${algPara}  -o ${outfile} < ${infile} 
+
+	  if [ -f ${tempfile} ]; then
+		rm ${tempfile}
       fi
 	  
 	  let instance++
+
 	fi
-  done
+
+done
 

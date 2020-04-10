@@ -16,17 +16,17 @@ int main(int argc, char** argv) {
 
     options.add_options()
 
-		("d,domain", "domain type: randomtree, tile", 
-		 cxxopts::value<std::string>()->default_value("randomtree"))
+		("d,domain", "domain type: randomtree, tile, pancake", 
+		 cxxopts::value<std::string>()->default_value("pancake"))
 
-        ("s,subdomain", "puzzle type: uniform, inverse, heavy, sqrt", 
-		 cxxopts::value<std::string>()->default_value("uniform"))
+        ("s,subdomain", "puzzle type: uniform, inverse, heavy, sqrt; pancake type: regular, heavy", 
+		 cxxopts::value<std::string>()->default_value("regular"))
 
         ("a,alg", "suboptimal algorithm: wastar, lsslrtastar", 
-		 cxxopts::value<std::string>()->default_value("lsslrtastar"))
+		 cxxopts::value<std::string>()->default_value("wastar"))
 
         ("p,par", "weight for weighted A*, lookahead for lsslrta*", 
-		 cxxopts::value<double>()->default_value("100"))
+		 cxxopts::value<double>()->default_value("2"))
 
 		("o,output", "output file", cxxopts::value<std::string>())
 
@@ -77,12 +77,33 @@ int main(int argc, char** argv) {
             searchPtr = new LssLRTAStarSearch<SlidingTilePuzzle>(
                     *world, "a-star", "learn", "minimin", lookahead);
         }
-	}
+    } else if (d == "pancake") {
+        PancakePuzzle* world;
 
-	//perform search
+        world = new PancakePuzzle(cin);
+
+        if (sd == "heavy") {
+            world->setVariant(1);
+        } 
+
+        if (alg == "wastar") {
+            auto weight = para;
+            searchPtr = new WAStarSearch<PancakePuzzle>(*world, weight);
+        } else if (alg == "lsslrtastar") {
+            auto lookahead = (int)para;
+            searchPtr = new LssLRTAStarSearch<PancakePuzzle>(
+                    *world, "a-star", "learn", "minimin", lookahead);
+        }
+    } else {
+        cout << "unknow domain!\n";
+        std::cout << options.help() << std::endl;
+        exit(0);
+    }
+
+    // perform search
     auto res = searchPtr->subOptSearch();
 
-	//dumpout result and observed states
+    // dumpout result and observed states
     if (args.count("output")) {
         ofstream out(args["output"].as<std::string>());
 
