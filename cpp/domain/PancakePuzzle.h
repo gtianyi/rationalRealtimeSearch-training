@@ -25,11 +25,11 @@ public:
     public:
         State() {}
 
-        State(std::vector<unsigned char> b, int l) : ordering(b), label(l) {
+        State(std::vector<unsigned int> b, int l) : ordering(b), label(l) {
             generateKey();
         }
 
-        std::vector<unsigned char> getOrdering() const { return ordering; }
+        std::vector<unsigned int> getOrdering() const { return ordering; }
 
         friend std::ostream& operator<<(std::ostream& stream,
                 const PancakePuzzle::State& state) {
@@ -55,7 +55,7 @@ public:
             unsigned long long fnv_prime = 0x100000001B3;
             int i;
             for (i = 0; i < ordering.size(); ++i) {
-                unsigned char value = ordering[i];
+                unsigned int value = ordering[i];
                 offset_basis = offset_basis ^ value;
                 offset_basis *= fnv_prime;
             }
@@ -93,7 +93,7 @@ public:
     }
 
     private:
-		std::vector<unsigned char> ordering;
+		std::vector<unsigned int> ordering;
 		int label;
 		unsigned long long theKey = -1;
     };
@@ -111,7 +111,7 @@ public:
 
         // Skip the next line
         getline(input, line);
-        std::vector<unsigned char> rows(size, 0);
+        std::vector<unsigned int> rows(size, 0);
 
         startOrdering = rows;
         endOrdering = rows;
@@ -326,7 +326,7 @@ public:
     }
 
     void flipOrdering(std::vector<State>& succs,
-            std::vector<unsigned char> ordering,
+            std::vector<unsigned int> ordering,
             int loc) const {
         int start = 0;
         int end = loc;
@@ -464,13 +464,13 @@ public:
 
 	bool validatePath(queue<int> path)
     {
-        std::vector<unsigned char> board = startOrdering;
+        std::vector<unsigned int> board = startOrdering;
 
         std::vector<State> successors;
 
         while (!path.empty())
         {
-            char action = path.front();
+            int action = path.front();
             int start = 0;
 			int end = path.front();
 			while(start < end){
@@ -487,8 +487,8 @@ public:
 
     
 
-    std::vector<unsigned char> startOrdering;
-	std::vector<unsigned char> endOrdering;
+    std::vector<unsigned int> startOrdering;
+	std::vector<unsigned int> endOrdering;
     
     State startState;
 	SlidingWindow<int> expansionDelayWindow;

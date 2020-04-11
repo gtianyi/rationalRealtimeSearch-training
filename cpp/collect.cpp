@@ -173,29 +173,28 @@ class CollectionPancake : public Collection<Domain> {
         cout << "file #: " << this->fileCount << " ";
         cout << "file info: " << line << endl;
 
-        while (!f.eof()) {
-            vector<unsigned char> pcake;
-            getline(f, line);
+        while (getline(f, line)) {
+            vector<unsigned int> pcake(size, 0);
             stringstream ss(line);
             for (int p = 0; p < size; p++) {
-				 unsigned char pan;
-				 ss >> pan;
-				 pcake.push_back(pan);
+                std::string pan;
+                ss >> pan;
+                pcake[p] = stoi(pan);
             }
 
-			int h, d;
-			unsigned long long key;
-			ss >> h;
-			ss >> d;
-			ss >> key;
+            int h, d;
+            unsigned long long key;
+            ss >> h;
+            ss >> d;
+            ss >> key;
 
-			if (this->nodeCollection.find(key) == this->nodeCollection.end()) {
-				State s(pcake, 0);
-				shared_ptr<Node> n = make_shared<Node>(h, d, s);
-				this->nodeCollection[key] = n;
-			} else {
-				this->nodeCollection[key]->frequencyCounter++;
-			}
+            if (this->nodeCollection.find(key) == this->nodeCollection.end()) {
+                State s(pcake, 0);
+                shared_ptr<Node> n = make_shared<Node>(h, d, s);
+                this->nodeCollection[key] = n;
+            } else {
+                this->nodeCollection[key]->frequencyCounter++;
+            }
 		}
 	};
 };
