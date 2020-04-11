@@ -49,7 +49,7 @@ while ((instance < lastInstance))
 do
     infile="../../../worlds/${domainType}/${instance}-${domainsize}.${ext}"
 	outfile_name="../../../results/${domainType}/distributionTest/${subDomainType}/\
-${algType}/Para${algPara}-${instance}-${domainsize}"
+${algType}/Para${algPara}-${domainsize}-${instance}"
 	outfile="${outfile_name}.txt"
 	tempfile="${outfile_name}.temp"
 

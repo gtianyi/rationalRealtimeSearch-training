@@ -2,6 +2,7 @@
 #include <limits>
 #include <ostream>
 #include <sstream>
+#include <fstream>
 #include <string>
 #include <queue>
 #include <vector>
@@ -74,6 +75,22 @@ public:
         int getLabel() const { return label; }
 
         void markStart() { label = 0; }
+
+        void dumpToProblemFile(ofstream& f) {
+            f << ordering.size() << "\n";
+
+            f << "starting positions for pancake :\n";
+
+            for (int r = 0; r < ordering.size(); r++) {
+                f << ordering[r] << "\n";
+        }
+
+        f << "end positions pancake:\n";
+
+        for (int i = 1; i <= ordering.size(); i++) {
+            f << i << "\n";
+        }
+    }
 
     private:
 		std::vector<unsigned char> ordering;
@@ -467,6 +484,8 @@ public:
             return true;
         return false;
     }
+
+    
 
     std::vector<unsigned char> startOrdering;
 	std::vector<unsigned char> endOrdering;
