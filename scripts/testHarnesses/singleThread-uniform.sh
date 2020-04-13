@@ -3,7 +3,7 @@
 print_usage(){
   echo "./singleThread-uniform.sh"
   echo "[-f instance]                    default: 1"
-  echo "[-n # of instances to test]      default: 100"
+  echo "[-n # of instances to solve]     default: 1"
   echo "[-d domain]                      default: pancake"
   echo "[-s subdomain]                   default: regular"
   echo "[-z domain size]                 default: 16"
