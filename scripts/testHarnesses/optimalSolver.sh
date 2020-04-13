@@ -148,7 +148,6 @@ do
 	    let instance++
 	else
         echo "t" > ${tempfile} 
-        echo "solving ${instance}"  
 
 	    ../../../build_release/${solver_command} < ${infile} > ${outfile} 
 

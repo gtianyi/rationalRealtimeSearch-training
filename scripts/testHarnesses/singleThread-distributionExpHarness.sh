@@ -1,7 +1,8 @@
 #!/bin/bash
 
 print_usage () {
-  echo "./singleThread-distributionExpHarness.sh <starting instance #> <# of instances to test> <domain type> <subdomain type> <alg> <alg para> "
+  echo "./singleThread-distributionExpHarness.sh <starting instance #>\
+		  <# of instances to test> <domain type> <subdomain type> <alg> <alg para> "
   echo "Available domain types are tile, pancake"
   echo "Available tile subdomain ypes are uniform heavy"
   echo "Available pancake subdomain ypes are regular heavy"
@@ -10,8 +11,7 @@ print_usage () {
   exit 1
 }
 
-if [ "$1" = "help" ] || [ "$1" = "-help" ] || [ "$1" = "?" ] || (($# < 6))
-then
+if [ "$1" = "help" ] || [ "$1" = "-help" ] || [ "$1" = "?" ] || (($# < 6)); then
   print_usage
 fi
 
