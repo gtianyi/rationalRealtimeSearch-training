@@ -4,6 +4,7 @@
 #include <memory>
 #include <typeindex>
 #include "WAStarSearch.h"
+#include "IDAStarSearch.h"
 #include "LsslrtastarSearch.h"
 #include "utility/cxxopts/include/cxxopts.hpp"
 
@@ -45,7 +46,7 @@ int main(int argc, char** argv) {
     auto alg = args["alg"].as<std::string>();
     auto para = args["par"].as<double>();
 
-    SuboptimalSearch* searchPtr;
+    Search* searchPtr;
 
     // create domain world and search algorithm
     if (d == "randomtree") {
@@ -94,6 +95,10 @@ int main(int argc, char** argv) {
             searchPtr = new LssLRTAStarSearch<PancakePuzzle>(
                     *world, "a-star", "learn", "minimin", lookahead);
         }
+
+		else if (alg == "idastar"){
+            searchPtr = new IDAStarSearch<PancakePuzzle>(*world);
+		}
     } else {
         cout << "unknow domain!\n";
         std::cout << options.help() << std::endl;
@@ -101,7 +106,7 @@ int main(int argc, char** argv) {
     }
 
     // perform search
-    auto res = searchPtr->subOptSearch();
+    auto res = searchPtr->doSearch();
 
     // dumpout result and observed states
     if (args.count("output")) {

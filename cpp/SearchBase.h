@@ -5,7 +5,7 @@ using namespace std;
 
 class Search {
 public:
-    virtual SearchResultContainer search() = 0;
+    virtual SearchResultContainer doSearch() = 0;
 
     virtual void dumpClosedList(ofstream& out) = 0;
 };

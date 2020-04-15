@@ -83,7 +83,7 @@ public:
 
     ~WAStarSearch() { clean(); }
 
-    SearchResultContainer search() {
+    SearchResultContainer doSearch() {
         SearchResultContainer res;
 
         // Get the start node
