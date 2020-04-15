@@ -1,6 +1,5 @@
 #! /bin/bash
-
-g++ -g -std=c++11 -static ../cpp/distributionPractice.cpp -o ../../build_release/distributionPractice
+g++ -o3 -std=c++11 -static ../cpp/distributionPractice.cpp -o ../../build_release/distributionPractice
 #g++ -g -std=c++11 -static ../cpp/collect.cpp -o ../../build_release/collect
 #g++ -o3 -std=c++11 -static ../cpp/collect-inverse.cpp -o ../../build_release/collect-inverse
 #g++ -g -std=c++11 -static ../cpp/collect-post-search.cpp -o ../../build_release/collect-post-search

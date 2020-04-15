@@ -20,6 +20,10 @@ public:
         return correctedH[state];
     }
 
+    Cost heuristic_no_recording(const State& state) {
+        return manhattanDistanceWithInverseFaceCost(state);
+    }
+
     Cost manhattanDistanceWithInverseFaceCost(const State& state) const {
         Cost manhattanSum = 0;
 

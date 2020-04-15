@@ -58,7 +58,7 @@ public:
     };
 
     IDAStarSearch(Domain& domain) : domain(domain){
-        idastar = new IDAStar<Domain, Node>(domain, "f");
+        idastar = new IDAStar<Domain, Node>(domain);
     }
 
     ~IDAStarSearch() { delete idastar; }

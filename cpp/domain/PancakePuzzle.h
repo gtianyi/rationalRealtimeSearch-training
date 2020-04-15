@@ -257,6 +257,10 @@ public:
 		return correctedH[state];
 	}
 
+    Cost heuristic_no_recording(const State& state) {
+		return  gapHeuristic(state);
+	}
+
     Cost epsilonHGlobal()	{
 		return curEpsilonH;
 	}
@@ -484,8 +488,6 @@ public:
             return true;
         return false;
     }
-
-    
 
     std::vector<unsigned int> startOrdering;
 	std::vector<unsigned int> endOrdering;

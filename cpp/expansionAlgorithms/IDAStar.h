@@ -15,8 +15,7 @@ class IDAStar {
 	typedef typename Domain::HashState Hash;
 
 public:
-    IDAStar(Domain& domain, string sorting)
-            : domain(domain), sortingFunction(sorting) {}
+    IDAStar(Domain& domain): domain(domain){}
 
     double search(Node* root, SearchResultContainer& _res) {
         res = _res;
@@ -29,66 +28,25 @@ public:
 
         unsigned int n = 0;
 
+        cout << "iter: " << std::setw(3) << n << " bound: " << std::setw(5)
+             << bound << " expd: " << std::setw(8) << res.nodesExpanded
+             << " gend: " << std::setw(8) << res.nodesGenerated << endl;
+
         do {
             dfs(root, NULL);
             n++;
-            cout << "iter: " << std::setw(3) << n 
+			cout << "iter: " << std::setw(3) << n 
 				 << " bound: " << std::setw(5) << bound
-                 << " expd: "  << std::setw(8) << res.nodesExpanded
-                 << " gend: "  << std::setw(8) << res.nodesGenerated << endl;
+				 << " expd: "  << std::setw(8) << res.nodesExpanded
+				 << " gend: "  << std::setw(8) << res.nodesGenerated << endl;
 
             setBound((int)std::pow(2, n));
             resetHistAndIncumbentCost();
         } while (solutionCost >=  hugeCost);
 
+        _res = res;
         return solutionCost;
     }
-
-
-    double search(PriorityQueue<Node*>& open,
-            unordered_map<State, Node*, Hash>& closed,
-            std::function<bool(Node*,
-                    unordered_map<State, Node*, Hash>&,
-                    PriorityQueue<Node*>&)> duplicateDetection,
-            SearchResultContainer& res) {
-        sortOpen(open);
-
-        // Expand until find the goal
-        while (!open.empty()) {
-            // Pop lowest fhat-value off open
-            Node* cur = open.top();
-
-            // Check if current node is goal
-            if (domain.isGoal(cur->getState())) {
-                return cur->getFValue();
-            }
-
-            res.nodesExpanded++;
-
-            open.pop();
-            cur->close();
-
-            vector<State> children = domain.successors(cur->getState());
-            res.nodesGenerated += children.size();
-
-            for (State child : children) {
-                Node* childNode =
-                        new Node(cur->getGValue() + domain.getEdgeCost(child),
-                                 domain.heuristic(child),
-                                child,
-                                cur);
-
-                bool dup = duplicateDetection(childNode, closed, open);
-
-                // Duplicate detection
-                if (!dup) {
-                    open.push(childNode);
-                    closed[child] = childNode;
-                } else
-                    delete childNode;
-            }
-        }
-	}
 
 private:
 	void resetHistAndIncumbentCost() {
@@ -130,7 +88,6 @@ private:
 
         if (f <= bound && domain.isGoal(n->getState())) {
 			incumbentCost = f;
-			//std::cout << "incumbentCost " << f << "\n";
             solutionCost =f;
 			return true;
         }
@@ -143,19 +100,20 @@ private:
         res.nodesExpanded++;
 
         vector<State> children = domain.successors(n->getState());
-        res.nodesGenerated += children.size();
 
         bool goal = false;
         for (State child : children) {
-            Node* childNode =
-                    new Node(n->getGValue() + domain.getEdgeCost(child),
-                            domain.heuristic(child),
-                            child,
-                            n);
 
 			//prevent circle, but not sure if this is 100% enough
-            if (p && childNode->getState() == p->getState())
+            if (p && child == p->getState())
                 continue;
+
+            res.nodesGenerated++;
+            Node* childNode =
+                    new Node(n->getGValue() + domain.getEdgeCost(child),
+                            domain.heuristic_no_recording(child),
+                            child,
+                            n);
 
             if (dfs(childNode, n)) {
                 goal = true;
@@ -169,7 +127,6 @@ private:
 
 protected:
 	Domain & domain;
-	string sortingFunction;
 
 	Cost solutionCost;
     Cost  incumbentCost;

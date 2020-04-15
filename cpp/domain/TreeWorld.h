@@ -140,7 +140,9 @@ public:
 		return 0;
 	}
 
-	Cost epsilonHGlobal()
+    Cost heuristic_no_recording(const State& state) { return 0; }
+
+    Cost epsilonHGlobal()
 	{
 		return curEpsilonH;
 	}

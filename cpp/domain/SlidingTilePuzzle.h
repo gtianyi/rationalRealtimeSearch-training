@@ -262,6 +262,11 @@ public:
         return correctedH[state];
     }
 
+    virtual Cost heuristic_no_recording(const State& state) {
+      return  manhattanDistance(state);
+    }
+
+
     Cost epsilonHGlobal() { return curEpsilonH; }
 
     Cost epsilonDGlobal() { return curEpsilonD; }
