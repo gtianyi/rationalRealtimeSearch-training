@@ -15,7 +15,7 @@ print_usage(){
   exit 1
 }
 
-if [ "$1" = "help" ] || [ "$1" = "-help" ] || [ "$1" = "?" ]; then
+if [ "$1" = "-h" ] || [ "$1" = "-help" ] || [ "$1" = "?" ]; then
   print_usage
 fi
 
@@ -106,6 +106,8 @@ echo "first ${first}"
 echo "n_of_i ${n_of_i}"
 echo "domain ${domain}"
 echo "subdomain ${subdomain}"
+echo "size ${size}"
+echo "thread ${maxProcs}"
 
 solver_command=""
 
@@ -128,14 +130,7 @@ ${suboptimal_solver}/Para${suboptimal_para}/${size}"
 
 mkdir -p ${outfile_dir}
 
-numProcs=0
-
-#stop all if hit ctrl+c
-trap "exit" INT
-
-while ((numProcs < ${maxProcs}))
-do
-
+run(){
   instance=$first
   while ((instance < last))
   do
@@ -158,8 +153,15 @@ do
 	    let instance++
 	  fi
   done
+}
 
+#stop all if hit ctrl+c
+trap "exit" INT
+
+numProcs=0
+while ((numProcs < ${maxProcs}))
+do
+  run &
   sleep 1
   let numProcs++
-
 done

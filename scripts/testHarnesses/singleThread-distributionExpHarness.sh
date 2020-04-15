@@ -33,7 +33,8 @@ algType=$5
 
 algPara=$6
 
-domainsize="16"
+domainsize="64"
+
 ext="pan"
 
 if [ "$domainType" == "tile" ]; then
