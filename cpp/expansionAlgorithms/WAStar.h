@@ -2,7 +2,7 @@
 #include <unordered_map>
 #include <functional>
 #include "../utility/PriorityQueue.h"
-#include "../utility/SuboptimalSearchRresultContainer.h"
+#include "../utility/SearchResultContainer.h"
 
 using namespace std;
 
@@ -21,7 +21,7 @@ public:
             std::function<bool(Node*,
                     unordered_map<State, Node*, Hash>&,
                     PriorityQueue<Node*>&)> duplicateDetection,
-            SuboptSearchResultContainer& res) {
+            SearchResultContainer& res) {
         sortOpen(open);
 
         // Expand until find the goal

@@ -36,7 +36,7 @@ public:
                       k,
                       belief) {}
 
-    SearchResultContainer subOptSearch() {
+    SearchResultContainer search() {
         this->domain.initialize(this->expansionPolicy, this->lookahead);
 
         SearchResultContainer res;
