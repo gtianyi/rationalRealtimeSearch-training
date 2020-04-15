@@ -45,7 +45,7 @@ public:
             for (State child : children) {
                 Node* childNode =
                         new Node(cur->getGValue() + domain.getEdgeCost(child),
-                                weight * domain.heuristic(child),
+                                weight * domain.heuristic_no_recording(child),
                                 child,
                                 cur);
 
