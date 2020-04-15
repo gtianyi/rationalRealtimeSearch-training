@@ -4,8 +4,8 @@
 #include <functional>
 #include <unordered_map>
 #include "utility/PriorityQueue.h"
-#include "SuboptimalSearchBase.h"
-#include "utility/SuboptimalSearchRresultContainer.h"
+#include "SearchBase.h"
+#include "utility/SearchResultContainer.h"
 #include "expansionAlgorithms/WAStar.h"
 #include "domain/SlidingTilePuzzle.h"
 #include "domain/HeavyTilePuzzle.h"
@@ -16,7 +16,7 @@
 using namespace std;
 
 template <class Domain>
-class WAStarSearch : public SuboptimalSearch {
+class WAStarSearch : public Search {
 public:
     typedef typename Domain::State State;
     typedef typename Domain::Cost Cost;
@@ -83,8 +83,8 @@ public:
 
     ~WAStarSearch() { clean(); }
 
-    SuboptSearchResultContainer subOptSearch() {
-        SuboptSearchResultContainer res;
+    SearchResultContainer subOptSearch() {
+        SearchResultContainer res;
 
         // Get the start node
         Node* cur = new Node(0,
@@ -160,7 +160,7 @@ private:
         delete wastar;
     }
 
-    void calculateCost(double solutionCost, SuboptSearchResultContainer& res) {
+    void calculateCost(double solutionCost, SearchResultContainer& res) {
         res.solutionFound = true;
         res.solutionCost = solutionCost;
     }
