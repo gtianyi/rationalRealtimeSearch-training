@@ -28,17 +28,17 @@ public:
 
         unsigned int n = 0;
 
-        cout << "iter: " << std::setw(3) << n << " bound: " << std::setw(5)
-             << bound << " expd: " << std::setw(8) << res.nodesExpanded
-             << " gend: " << std::setw(8) << res.nodesGenerated << endl;
+  /*      cout << "iter: " << std::setw(3) << n << " bound: " << std::setw(5)*/
+             //<< bound << " expd: " << std::setw(8) << res.nodesExpanded
+             //<< " gend: " << std::setw(8) << res.nodesGenerated << endl;
 
         do {
             dfs(root, NULL);
             n++;
-			cout << "iter: " << std::setw(3) << n 
-				 << " bound: " << std::setw(5) << bound
-				 << " expd: "  << std::setw(8) << res.nodesExpanded
-				 << " gend: "  << std::setw(8) << res.nodesGenerated << endl;
+   /*         cout << "iter: " << std::setw(3) << n */
+				 //<< " bound: " << std::setw(5) << bound
+				 //<< " expd: "  << std::setw(8) << res.nodesExpanded
+				 //<< " gend: "  << std::setw(8) << res.nodesGenerated << endl;
 
             setBound((int)std::pow(2, n));
             resetHistAndIncumbentCost();

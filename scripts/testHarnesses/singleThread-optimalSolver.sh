@@ -3,11 +3,11 @@
 print_usage(){
   echo "./singleThread-uniform.sh"
   echo "[-f instance]                    default: 1"
-  echo "[-n # of instances to test]      default: 100"
+  echo "[-n # of instances to test]      default: 1"
   echo "[-d domain]                      default: pancake"
   echo "[-s subdomain]                   default: regular"
   echo "[-z domain size]                 default: 16"
-  echo "[-o optimal solver]              default: distributionPractice"
+  echo "[-o optimal solver]              default: idastar"
   echo "[-u suboptimal solver]           default: wastar"
   echo "[-p suboptimal solver parameter] default: 2"
   echo "[-h help]"
@@ -21,8 +21,8 @@ fi
 # Which instance to start testing on
 first=1
 # The number of instances to test on
-n_of_i=100
-optimal_solver="distributionPractice"
+n_of_i=1
+optimal_solver="idastar"
 domain="pancake"
 subdomain="regular"
 size="16"
@@ -109,8 +109,10 @@ echo "thread ${maxProcs}"
 
 solver_command=""
 
-if [ "$optimal_solver" == "distributionPractice" ]; then
+if [ "$optimal_solver" == "wastar" ]; then
   solver_command="distributionPractice -d ${domain} -s ${subdomain} -a wastar -p 1"
+elif [ "$optimal_solver" == "idastar" ]; then
+  solver_command="distributionPractice -d ${domain} -s ${subdomain} -a idastar"
 elif [ "$optimal_solver" == "tiles-uniform" ]; then
   solver_command="tiles-uniform idastar uniform"
 else
