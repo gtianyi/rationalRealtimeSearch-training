@@ -1,7 +1,9 @@
 #! /bin/bash
 rm -rf ../../build_release/distributionPractice
+rm -rf ../../build_debug/distributionPractice
 
 g++ -o3 -std=c++11 -static ../cpp/distributionPractice.cpp -o ../../build_release/distributionPractice
+g++ -g -std=c++11 -static ../cpp/distributionPractice.cpp -o ../../build_debug/distributionPractice
 #g++ -g -std=c++11 -static ../cpp/collect.cpp -o ../../build_release/collect
 #g++ -o3 -std=c++11 -static ../cpp/collect-inverse.cpp -o ../../build_release/collect-inverse
 #g++ -g -std=c++11 -static ../cpp/collect-post-search.cpp -o ../../build_release/collect-post-search
@@ -10,6 +12,7 @@ g++ -o3 -std=c++11 -static ../cpp/distributionPractice.cpp -o ../../build_releas
 #g++ -o3 -std=c++11 -static ../cpp/fastAStar-inverse/*.cc ../cpp/fastAStar-inverse/*.hpp -o ../../build_release/tiles-inverse
 
 chmod a+x ../../build_release/distributionPractice
+chmod a+x ../../build_debug/distributionPractice
 #chmod a+x ../../build_release/collect
 #chmod a+x ../../build_release/collect-inverse
 #chmod a+x ../../build_release/collect-post-search

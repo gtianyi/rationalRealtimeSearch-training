@@ -17,8 +17,8 @@ int main(int argc, char** argv) {
 
     options.add_options()
 
-		("d,domain", "domain type: randomtree, tile, pancake", 
-		 cxxopts::value<std::string>()->default_value("pancake"))
+		("d,domain", "domain type: randomtree, tile, pancake, racetrack", 
+		 cxxopts::value<std::string>()->default_value("racetrack"))
 
         ("s,subdomain", "puzzle type: uniform, inverse, heavy, sqrt; pancake type: regular, heavy", 
 		 cxxopts::value<std::string>()->default_value("regular"))
@@ -98,6 +98,23 @@ int main(int argc, char** argv) {
 
 		else if (alg == "idastar"){
             searchPtr = new IDAStarSearch<PancakePuzzle>(*world);
+		}
+    } else if (d == "racetrack") {
+        RaceTrack* world;
+
+        world = new RaceTrack(cin);
+
+        if (alg == "wastar") {
+            auto weight = para;
+            searchPtr = new WAStarSearch<RaceTrack>(*world, weight);
+        } else if (alg == "lsslrtastar") {
+            auto lookahead = (int)para;
+            searchPtr = new LssLRTAStarSearch<RaceTrack>(
+                    *world, "a-star", "learn", "minimin", lookahead);
+        }
+
+		else if (alg == "idastar"){
+            searchPtr = new IDAStarSearch<RaceTrack>(*world);
 		}
     } else {
         cout << "unknow domain!\n";
