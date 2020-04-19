@@ -330,7 +330,7 @@ public:
         double stepX = dx * dt;
         double stepY = dy * dt;
 
-        for (int i = 1; i < (int)distance; i++) {
+        for (int i = 1; i <= (int)distance; i++) {
             xRunning += stepX;
             yRunning += stepY;
 
