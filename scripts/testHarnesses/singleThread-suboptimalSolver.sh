@@ -1,60 +1,126 @@
 #!/bin/bash
-
-print_usage () {
-  echo "./singleThread-distributionExpHarness.sh <starting instance #>\
-		  <# of instances to test> <domain type> <subdomain type> <alg> <alg para> "
-  echo "Available domain types are tile, pancake"
-  echo "Available tile subdomain ypes are uniform heavy"
-  echo "Available pancake subdomain ypes are regular heavy"
-  echo "Available algorithms are wastar lsslrtastar"
-  echo "algorithm parameters for wastar: weight, lsslrtastar: lookahead"
+print_usage(){
+  echo "./singleThread-suboptmialSolver.sh"
+  echo "[-f instance]                    default: 1"
+  echo "[-n # of instances to test]      default: 1"
+  echo "[-d domain]                      default: racetrack"
+  echo "[-s subdomain]                   default: barto-bigger"
+  echo "[-u suboptimal solver]           default: wastar"
+  echo "[-p suboptimal solver parameter] default: 2"
+  echo "[-h help]"
   exit 1
 }
 
-if [ "$1" = "help" ] || [ "$1" = "-help" ] || [ "$1" = "?" ] || (($# < 6)); then
+if [ "$1" = "-h" ] || [ "$1" = "-help" ] || [ "$1" = "?" ]; then
   print_usage
 fi
 
 # Which instance to start testing on
-firstInstance=$1
+first=1
+# The number of instances to test on
+n_of_i=1
+domain="racetrack"
+subdomain="barto-bigger"
+size="16"
+suboptimal_solver="wastar"
+suboptimal_para="2"
 
-# The maximum number of instances to test on
-maxInstances=$2
-lastInstance=$(( $firstInstance + $maxInstances ))
+#parse arguments
+for (( i=1; i <= "$#"; i++ )); do
+    if [ ${!i} == "-f" ]; then
+        if [ $((i+1)) -le "$#" ]; then
+            var=$((i+1))
+            first=${!var}
+        fi
+    fi
 
-# The domain to run on
-domainType=$3
+    if [ ${!i} == "-n" ]; then
+        if [ $((i+1)) -le "$#" ]; then
+            var=$((i+1))
+            n_of_i=${!var}
+        fi
+    fi
 
-# The sub domain to run on
-subDomainType=$4
+    if [ ${!i} == "-d" ]; then
+        if [ $((i+1)) -le "$#" ]; then
+            var=$((i+1))
+			domain=${!var}
+        fi
+    fi
 
-# algorithm
-algType=$5
+    if [ ${!i} == "-s" ]; then
+        if [ $((i+1)) -le "$#" ]; then
+            var=$((i+1))
+			subdomain=${!var}
+        fi
+    fi
 
-algPara=$6
+    if [ ${!i} == "-z" ]; then
+        if [ $((i+1)) -le "$#" ]; then
+            var=$((i+1))
+			size=${!var}
+        fi
+    fi
 
-domainsize="50"
+    if [ ${!i} == "-u" ]; then
+        if [ $((i+1)) -le "$#" ]; then
+            var=$((i+1))
+			suboptimal_solver=${!var}
+        fi
+    fi
 
-ext="pan"
+    if [ ${!i} == "-p" ]; then
+        if [ $((i+1)) -le "$#" ]; then
+            var=$((i+1))
+			suboptimal_para=${!var}
+        fi
+    fi
 
-if [ "$domainType" == "tile" ]; then
+    if [ ${!i} == "-h" ]; then
+		print_usage
+    fi
 
-  domainsize="4x4"
-  ext="st"
+done
 
+echo "first ${first}"
+echo "n_of_i ${n_of_i}"
+echo "domain ${domain}"
+echo "subdomain ${subdomain}"
+echo "size ${size}"
+
+infile=""
+outfile=""
+
+infile_path="../../../worlds/${domain}"
+outfile_path="../../../results/${domain}/distributionTest/${subDomain}/${suboptimal_solver}"
+
+mkdir -p ${outfile_path}
+
+if [ "$domain" == "tile" ]; then
+  infile="${infile_path}/instance-${size}x${size}.st"
+  outfile="${outfile_path}/Para${suboptimal_para}-${size}-instance.txt"
 fi
 
-mkdir -p ../../../results/${domainType}/distributionTest/${subDomainType}/${algType}
-instance=$firstInstance
-while ((instance < lastInstance))
-do
-    infile="../../../worlds/${domainType}/${instance}-${domainsize}.${ext}"
-	outfile_name="../../../results/${domainType}/distributionTest/${subDomainType}/\
-${algType}/Para${algPara}-${domainsize}-${instance}"
-	outfile="${outfile_name}.txt"
-	tempfile="${outfile_name}.temp"
+if [ "$domain" == "pancake" ]; then
+  infile="${infile_path}/instance-${size}.pan"
+  outfile="${outfile_path}/Para${suboptimal_para}-${size}-instance.txt"
+fi
 
-    if [ -f ${outfile} ] || [ -f ${tempfile} ]; then 
+if [ "$domain" == "racetrack" ]; then
+  infile="${infile_path}/${subdomain}-instance.init"
+  outfile="${outfile_path}/Para${suboptimal_para}-${subdomain}-instance.txt"
+fi
+
+last=$(( $first + $n_of_i ))
+
+instance=$first
+while ((instance < last))
+do
+    infile_instance="${infile/instance/$instance}"
+	outfile_instance="${outfile/instance/$instance}"
+	tempfile="${outfile_instance}.temp"
+
+    if [ -f ${outfile_instance} ] || [ -f ${tempfile} ]; then 
 
 	  let instance++
 
@@ -63,8 +129,8 @@ ${algType}/Para${algPara}-${domainsize}-${instance}"
       echo "t" > ${tempfile} 
 
       ./../../../build_release/distributionPractice \
-			  -d ${domainType} -s ${subDomainType} -a ${algType} \
-			  -p ${algPara}  -o ${outfile} < ${infile} 
+			  -d ${domain} -s ${subdomain} -a ${suboptimal_solver} \
+			  -p ${suboptimal_para}  -o ${outfile_instance} < ${infile_instance} 
 
 	  if [ -f ${tempfile} ]; then
 		rm ${tempfile}

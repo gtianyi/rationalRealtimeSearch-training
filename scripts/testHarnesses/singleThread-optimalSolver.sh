@@ -1,7 +1,7 @@
 #!/bin/bash
 
 print_usage(){
-  echo "./singleThread-uniform.sh"
+  echo "./singleThread-optimalSolver.sh"
   echo "[-f instance]                    default: 1"
   echo "[-n # of instances to test]      default: 1"
   echo "[-d domain]                      default: pancake"

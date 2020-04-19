@@ -90,7 +90,7 @@ public:
         void dumpToProblemFile(ofstream& f) {
             f << "x y dx dy for racetrack:\n";
 			f<<x<<" "<<y<<" "<<dx<<" "<<dy<<"\n";
-            f << "goal positions are in the map:\n";
+            f << "goal positions are in the map";
 		}
 
         void markStart() { label = 's'; }
@@ -110,20 +110,20 @@ public:
         /*}*/
     };
 
-    void parseMap(std::istream& input) {
+    void parseMap(std::ifstream& raceMap) {
         string line;
-        getline(input, line);
+        getline(raceMap, line);
         stringstream ss(line);
         ss >> mapWidth;
 
-        getline(input, line);
+        getline(raceMap,line);
 
         stringstream ss2(line);
         ss2 >> mapHeight;
 
         for (int y = 0; y < mapHeight; y++) {
 
-            getline(input, line);
+            getline(raceMap,line);
             stringstream ss3(line);
 
             for (int x = 0; x < mapWidth; x++) {
@@ -152,7 +152,6 @@ public:
         cout << "size: " << mapWidth << "x" << mapHeight << "\n";
         cout << "blocked: " << blockedCells.size() << "\n";
         cout << "finish: " << finishline.size() << "\n";
-        cout << "start" << startState << "\n";
     }
 
     void initilaizeActions() {
@@ -180,17 +179,13 @@ public:
         ss >> dy;
 
         startState = State(x, y, dx, dy);
+        cout << "start" << startState << "\n";
     }
 
-    RaceTrack(std::istream& input, std::istream& initialState) {
-        parseMap(input);
+    RaceTrack(std::ifstream& raceMap, std::istream& initialState) {
+        parseMap(raceMap);
         resetInitialState(initialState);
 		initilaizeActions();
-    }
-
-    RaceTrack(std::istream& input) {
-        parseMap(input);
-        initilaizeActions();
     }
 
     bool isGoal(const State& s) const {

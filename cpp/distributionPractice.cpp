@@ -20,8 +20,10 @@ int main(int argc, char** argv) {
 		("d,domain", "domain type: randomtree, tile, pancake, racetrack", 
 		 cxxopts::value<std::string>()->default_value("racetrack"))
 
-        ("s,subdomain", "puzzle type: uniform, inverse, heavy, sqrt; pancake type: regular, heavy", 
-		 cxxopts::value<std::string>()->default_value("regular"))
+		("s,subdomain", "puzzle type: uniform, inverse, heavy, sqrt; "
+		                "pancake type: regular, heavy;"
+						"racetrack map : barto-bigger, hanse-bigger-double, uniform", 
+		 cxxopts::value<std::string>()->default_value("barto-bigger"))
 
         ("a,alg", "suboptimal algorithm: wastar, lsslrtastar", 
 		 cxxopts::value<std::string>()->default_value("wastar"))
@@ -104,7 +106,18 @@ int main(int argc, char** argv) {
     } else if (d == "racetrack") {
         RaceTrack* world;
 
-        world = new RaceTrack(cin);
+        string mapFile = "/home/aifs1/gu/phd/research/workingPaper/"
+                         "realtime-nancy/worlds/racetrack/map/" +
+                sd + ".track";
+
+        ifstream map(mapFile);
+
+        if (!map.good()) {
+            cout << "map file not exist: " << mapFile << endl;
+            exit(1);
+		}
+
+        world = new RaceTrack(map, cin);
 
         if (alg == "wastar") {
             auto weight = para;
