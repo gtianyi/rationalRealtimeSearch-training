@@ -31,6 +31,7 @@ public:
 
             // Check if current node is goal
             if (domain.isGoal(cur->getState())) {
+				getSolutionPath(res, cur);
                 return cur->getFValue();
             }
 
@@ -65,6 +66,18 @@ private:
     void sortOpen(PriorityQueue<Node*>& open) {
         open.swapComparator(Node::compareNodesF);
     }
+
+    void getSolutionPath(SearchResultContainer& res, Node* goal) {
+        auto cur = goal;
+
+        string p = "";
+        while (cur) {
+            p = cur->getState().toString() + p;
+            cur = cur->getParent();
+        }
+
+		res.soltuionPath = p;
+	}
 
 protected:
 	Domain & domain;

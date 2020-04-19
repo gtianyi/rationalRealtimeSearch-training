@@ -29,7 +29,9 @@ int main(int argc, char** argv) {
         ("p,par", "weight for weighted A*, lookahead for lsslrta*", 
 		 cxxopts::value<double>()->default_value("2"))
 
-		("o,output", "output file", cxxopts::value<std::string>())
+		("o,performenceOut", "performence Out file", cxxopts::value<std::string>())
+
+		("v,pathOut", "path Out file", cxxopts::value<std::string>())
 
         ("h,help", "Print usage")
     ;
@@ -126,8 +128,8 @@ int main(int argc, char** argv) {
     auto res = searchPtr->doSearch();
 
     // dumpout result and observed states
-    if (args.count("output")) {
-        ofstream out(args["output"].as<std::string>());
+    if (args.count("performenceOut")) {
+        ofstream out(args["performenceOut"].as<std::string>());
 
         out << res.nodesExpanded << " " << res.solutionFound << " "
             << res.solutionCost << endl;
@@ -140,4 +142,13 @@ int main(int argc, char** argv) {
         cout << res.nodesExpanded << " " << res.solutionFound << " "
              << res.solutionCost << " " << res.initialH << endl;
     }
+
+	// dumpout solution path
+    if (args.count("pathOut")) {
+        ofstream out(args["pathOut"].as<std::string>());
+        out << res.soltuionPath << endl;
+        out.close();
+    }
+
+
 }

@@ -6,4 +6,5 @@ using namespace std;
 
 struct SearchResultContainer : ResultContainer {
     double initialH;
+	string soltuionPath;
 };
