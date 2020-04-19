@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include <unordered_map>
+#include "../utility/cxxopts/include/cxxopts.hpp"
 
 using namespace std;
 class CollectionBase {
@@ -14,6 +15,8 @@ public:
     virtual void arrangeCollectionByH() = 0;
     virtual void sampleStatesForH(int sampleCount) = 0;
     virtual void dumpSampleSet(string tileType, string alg) = 0;
+	virtual string inPath(cxxopts::ParseResult& args) = 0;
+	virtual string outPath(cxxopts::ParseResult& args) = 0;
 };
 
 template <class Domain>

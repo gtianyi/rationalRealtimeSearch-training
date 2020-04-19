@@ -18,7 +18,9 @@ int main(int argc, char** argv) {
 		("d,domain", "domain type: randomtree, tile, pancake", 
 		 cxxopts::value<string>()->default_value("pancake"))
 
-        ("s,subdomain", "puzzle type: uniform, inverse, heavy, sqrt; pancake type: regular, heavy", 
+		("s,subdomain", "puzzle type: uniform, inverse, heavy, sqrt; "
+						"pancake type: regular, heavy; "
+						"racetrack map : barto-bigger, hanse-bigger-double, uniform", 
 		 cxxopts::value<string>()->default_value("regular"))
 
         ("a,alg", "suboptimal algorithm: wastar, lsslrtastar", 
@@ -35,7 +37,7 @@ int main(int argc, char** argv) {
 
 		("f,first", "first instance", cxxopts::value<int>()->default_value("1"))
 
-		("l,last", "last instance", cxxopts::value<int>()->default_value("100"))
+		("l,last", "last instance", cxxopts::value<int>()->default_value("25"))
 
         ("h,help", "Print usage")
     ;
@@ -57,44 +59,20 @@ int main(int argc, char** argv) {
     int sampleCount = args["count"].as<int>();
 
     shared_ptr<CollectionBase> collectionPtr;
-	string inPath;
-	string outPath;
-
 
     if (domain == "tile") {
-
         collectionPtr = make_shared<CollectionTile<SlidingTilePuzzle>>();
-
-        inPath = "../results/SlidingTilePuzzle/distributionTest/" +
-                // tileType + "/" + alg + "/Para" + algPara + "-" +
-                subdomain + "/" + alg + "/W" + algPara + "-";
-
-		outPath = "../results/SlidingTilePuzzle/sampleProblem/" +
-                subdomain + "/" + alg;
-
     } else if (domain == "pancake") {
-
         collectionPtr = make_shared<CollectionPancake<PancakePuzzle>>();
-
-        inPath = "../results/" + domain + "/distributionTest/" + subdomain +
-                "/" + alg + "/Para" + algPara + "-" + size + "-";
-
-        outPath = "../results/" + domain + "/sampleProblem/" + subdomain + "/" +
-                alg + "/Para" + algPara + "/" + size;
-    } else if (domain == "racetrack") {
-
-        collectionPtr = make_shared<CollectionPancake<PancakePuzzle>>();
-
-        inPath = "../results/" + domain + "/distributionTest/" + subdomain +
-                "/" + alg + "/Para" + algPara + "-" + size + "-";
-
-        outPath = "../results/" + domain + "/sampleProblem/" + subdomain + "/" +
-                alg + "/Para" + algPara + "/" + size;
+    //} else if (domain == "racetrack") {
+        //collectionPtr = make_shared<CollectionPancake<PancakePuzzle>>();
     } else {
         cout << "unknown domain!\n";
         exit(1);
 	}
 
+    string inPath = collectionPtr->inPath(args);
+    string outPath = collectionPtr->outPath(args);
 
     for (int i = firstNum; i <= lastNum; i++) {
 

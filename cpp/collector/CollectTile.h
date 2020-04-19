@@ -45,4 +45,20 @@ class CollectionTile : public Collection<Domain> {
             }
         }
     };
+
+    string inPath(cxxopts::ParseResult& args) {
+        string subdomain = args["subdomain"].as<string>();
+        string alg = args["alg"].as<string>();
+        string algPara = args["par"].as<string>();
+        return "../results/SlidingTilePuzzle/distributionTest/" +
+                subdomain + "/" + alg + "/W" + algPara + "-";
+    }
+
+    string outPath(cxxopts::ParseResult& args) {
+        string subdomain = args["subdomain"].as<string>();
+        string alg = args["alg"].as<string>();
+
+        return "../results/SlidingTilePuzzle/sampleProblem/" + subdomain + "/" +
+                alg;
+    }
 };

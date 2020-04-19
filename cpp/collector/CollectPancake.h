@@ -39,6 +39,26 @@ class CollectionPancake : public Collection<Domain> {
                 this->nodeCollection[key]->frequencyCounter++;
             }
 		}
-	};
+	}
+
+   string inPath(cxxopts::ParseResult& args) {
+        string domain = args["domain"].as<string>();
+        string subdomain = args["subdomain"].as<string>();
+        string alg = args["alg"].as<string>();
+        string algPara = args["par"].as<string>();
+        string size = args["size"].as<string>();
+        return "../results/" + domain + "/distributionTest/" + subdomain +
+                "/" + alg + "/Para" + algPara + "-" + size + "-";
+    }
+
+    string outPath(cxxopts::ParseResult& args) {
+        string subdomain = args["subdomain"].as<string>();
+        string domain = args["domain"].as<string>();
+        string alg = args["alg"].as<string>();
+        string algPara = args["par"].as<string>();
+        string size = args["size"].as<string>();
+
+        return "../results/" + domain + "/sampleProblem/" + subdomain + "/" +
+                alg + "/Para" + algPara + "/" + size;    }
 };
 
