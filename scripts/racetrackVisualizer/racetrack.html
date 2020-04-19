@@ -1,16 +1,3 @@
-
-<!-- 
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-
-<div>
-
-      <label for="files" class="btn">Select Image</label>
-
-      <input id="fileInput" style="visibility:hidden;" type="file">
-
-</div> -->
-
 <link href="https://cdnjs.cloudflare.com/ajax/libs/ratchet/2.0.2/css/ratchet.css" rel="stylesheet"/>
 <label for="mapFileInput" class="btn btn-primary btn-block btn-outlined">map file</label>
 <input type="file" id="mapFileInput" style="display: none">
@@ -19,7 +6,6 @@
 <label for="pathFileInput" class="btn btn-primary btn-block btn-outlined">path file</label>
 <input type="file" id="pathFileInput" style="display: none">
 
-<canvas id="grid" width=300 height=300>
-
-
-
+<div style="max-height: 600px;max-width:800px;overflow: scroll;">
+       <canvas id="grid" width=300 height=600></canvas>
+</div>

@@ -1,4 +1,6 @@
 $(document).ready(function() {
+	
+  var cellSize = 10;
 
   function drawCoordinates(x, y) {
     var pointSize = 3; // Change according to the size of the point.
@@ -12,9 +14,9 @@ $(document).ready(function() {
     ctx.fill(); // Close the path and fill.
   }
 
-  function drawMap(map) {
-    var cDist = 11;
-    var cSize = 10;
+  function drawMap(map, cellSize) {
+    var cDist = (cellSize + cellSize/10) ;
+    var cSize = cellSize;
 
     var lines = map.result.split('\n');
 
@@ -22,8 +24,10 @@ $(document).ready(function() {
     height = parseInt(lines[1], 10);
 
     var canvas = document.getElementById('grid');
-    canvas.width = width * cDist;
+    canvas.width = width * cDist ;
     canvas.height = height * cDist;
+    /* canvas.style.width = width * cDist * canvasScale + 'px';
+    canvas.style.height=  height * cDist * canvasScale +'px'; */
 
     var ctx = canvas.getContext('2d');
 
@@ -41,11 +45,13 @@ $(document).ready(function() {
         } else if (cells[i] == '*') {
           ctx.beginPath();
           ctx.strokeStyle = "green";
+          ctx.lineWidth = 3;
           ctx.rect(x, y, cSize, cSize);
           ctx.stroke();
         } else if (cells[i] == '@') {
           ctx.beginPath();
           ctx.strokeStyle = "blue";
+          ctx.lineWidth = 3;
           ctx.rect(x, y, cSize, cSize);
           ctx.stroke();
         }
@@ -55,11 +61,11 @@ $(document).ready(function() {
     ctx.closePath();
   }
 
-  function drawPath(path) {
+  function drawPath(path, cellSize) {
     var lines = path.result.trim().split('\n');
 
-    var cDist = 11;
-    var cCenter = 5;
+    var cDist = cellSize + cellSize/10 ;
+    var cCenter = cellSize/2;
 
     var prev = [-1, -1];
 
@@ -99,7 +105,7 @@ $(document).ready(function() {
     reader.onload = function fileReadCompleted() {
       // when the reader is done, the content is in reader.result.
       console.log(reader.result);
-      drawMap(reader);
+      drawMap(reader, cellSize);
 
     };
     reader.readAsText(this.files[0]);
@@ -115,7 +121,7 @@ $(document).ready(function() {
     reader.onload = function fileReadCompleted() {
       // when the reader is done, the content is in reader.result.
       console.log(reader.result);
-      drawPath(reader);
+      drawPath(reader, cellSize);
     };
     reader.readAsText(this.files[0]);
   });
