@@ -3,9 +3,9 @@
 #include <fstream>
 #include <memory>
 #include <typeindex>
-#include "WAStarSearch.h"
-#include "IDAStarSearch.h"
-#include "LsslrtastarSearch.h"
+#include "search/WAStarSearch.h"
+#include "search/IDAStarSearch.h"
+#include "search/LsslrtastarSearch.h"
 #include "utility/cxxopts/include/cxxopts.hpp"
 
 using namespace std;
