@@ -273,7 +273,20 @@ int main(int argc, char** argv) {
 
         outPath = "../results/" + domain + "/sampleProblem/" + subdomain + "/" +
                 alg + "/Para" + algPara + "/" + size;
-    }
+    } else if (domain == "racetrack") {
+
+        collectionPtr = make_shared<CollectionPancake<PancakePuzzle>>();
+
+        inPath = "../results/" + domain + "/distributionTest/" + subdomain +
+                "/" + alg + "/Para" + algPara + "-" + size + "-";
+
+        outPath = "../results/" + domain + "/sampleProblem/" + subdomain + "/" +
+                alg + "/Para" + algPara + "/" + size;
+    } else {
+        cout << "unknown domain!\n";
+        exit(1);
+	}
+
 
     for (int i = firstNum; i <= lastNum; i++) {
 
