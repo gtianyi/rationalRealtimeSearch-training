@@ -1,7 +1,7 @@
 #pragma once
 #include <unordered_map>
 #include <functional>
-#include "../RealTimeSearch.h"
+#include "../utility/PriorityQueue.h"
 
 template<class Domain, class Node, class TopLevelAction>
 class LearningAlgorithm
