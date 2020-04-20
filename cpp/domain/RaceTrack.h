@@ -149,9 +149,9 @@ public:
 		maxSpeed=max(maxXSpeed,maxYSpeed);
 
         startState = State(startLocation.first, startLocation.second, 0, 0);
-        cout << "size: " << mapWidth << "x" << mapHeight << "\n";
-        cout << "blocked: " << blockedCells.size() << "\n";
-        cout << "finish: " << finishline.size() << "\n";
+        //cout << "size: " << mapWidth << "x" << mapHeight << "\n";
+        //cout << "blocked: " << blockedCells.size() << "\n";
+        //cout << "finish: " << finishline.size() << "\n";
     }
 
     void initilaizeActions() {
@@ -179,7 +179,7 @@ public:
         ss >> dy;
 
         startState = State(x, y, dx, dy);
-        cout << "start" << startState << "\n";
+        //cout << "start" << startState << "\n";
     }
 
     RaceTrack(std::ifstream& raceMap, std::istream& initialState) {

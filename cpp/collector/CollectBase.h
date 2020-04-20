@@ -11,11 +11,10 @@
 using namespace std;
 class CollectionBase {
 public:
-    virtual void parsingDumpFile(ifstream& f, string& domainSize) = 0;
+    virtual void parsingDumpFiles(cxxopts::ParseResult& args) = 0;
     virtual void arrangeCollectionByH() = 0;
     virtual void sampleStatesForH(int sampleCount) = 0;
     virtual void dumpSampleSet(string tileType, string alg) = 0;
-	virtual string inPath(cxxopts::ParseResult& args) = 0;
 	virtual string outPath(cxxopts::ParseResult& args) = 0;
 };
 

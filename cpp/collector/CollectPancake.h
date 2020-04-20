@@ -6,6 +6,24 @@ class CollectionPancake : public Collection<Domain> {
     typedef typename Domain::State State;
     typedef typename Collection<Domain>::Node Node;
 
+    void parsingDumpFiles(cxxopts::ParseResult& args) {
+        int firstNum = args["first"].as<int>();
+        int lastNum = args["last"].as<int>();
+        string size = args["size"].as<string>();
+
+        auto inputPath = inPath(args);
+
+        for (int i = firstNum; i <= lastNum; i++) {
+            string fileName = inputPath + to_string(i) + ".txt";
+
+            ifstream f(fileName);
+
+            parsingDumpFile(f, size);
+
+            f.close();
+        }
+    }
+
     void parsingDumpFile(ifstream& f, string& domainSize) {
         int size = stoi(domainSize);
         this->fileCount++;

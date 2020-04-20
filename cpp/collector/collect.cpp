@@ -1,10 +1,12 @@
 #include "../domain/SlidingTilePuzzle.h"
 #include "../domain/PancakePuzzle.h"
+#include "../domain/RaceTrack.h"
 #include "../utility/cxxopts/include/cxxopts.hpp"
 
 #include "CollectBase.h"
 #include "CollectTile.h"
 #include "CollectPancake.h"
+#include "CollectRacetrack.h"
 
 using namespace std;
 
@@ -15,13 +17,13 @@ int main(int argc, char** argv) {
 
     options.add_options()
 
-		("d,domain", "domain type: randomtree, tile, pancake", 
-		 cxxopts::value<string>()->default_value("pancake"))
+		("d,domain", "domain type: randomtree, tile, pancake, racetrack", 
+		 cxxopts::value<string>()->default_value("racetrack"))
 
 		("s,subdomain", "puzzle type: uniform, inverse, heavy, sqrt; "
 						"pancake type: regular, heavy; "
 						"racetrack map : barto-bigger, hanse-bigger-double, uniform", 
-		 cxxopts::value<string>()->default_value("regular"))
+		 cxxopts::value<string>()->default_value("barto-bigger"))
 
         ("a,alg", "suboptimal algorithm: wastar, lsslrtastar", 
 		 cxxopts::value<string>()->default_value("wastar"))
@@ -50,13 +52,9 @@ int main(int argc, char** argv) {
     }
 
     string domain = args["domain"].as<string>();
-    string subdomain = args["subdomain"].as<string>();
     string alg = args["alg"].as<string>();
     string algPara = args["par"].as<string>();
-    string size = args["size"].as<string>();
-    int firstNum = args["first"].as<int>();
-    int lastNum = args["last"].as<int>();
-    int sampleCount = args["count"].as<int>();
+   int sampleCount = args["count"].as<int>();
 
     shared_ptr<CollectionBase> collectionPtr;
 
@@ -64,27 +62,16 @@ int main(int argc, char** argv) {
         collectionPtr = make_shared<CollectionTile<SlidingTilePuzzle>>();
     } else if (domain == "pancake") {
         collectionPtr = make_shared<CollectionPancake<PancakePuzzle>>();
-    //} else if (domain == "racetrack") {
-        //collectionPtr = make_shared<CollectionPancake<PancakePuzzle>>();
+	} else if (domain == "racetrack") {
+		collectionPtr = make_shared<CollectionRacetrack<RaceTrack>>();
     } else {
         cout << "unknown domain!\n";
         exit(1);
 	}
 
-    string inPath = collectionPtr->inPath(args);
     string outPath = collectionPtr->outPath(args);
 
-    for (int i = firstNum; i <= lastNum; i++) {
-
-        string fileName = inPath + to_string(i) + ".txt";
-
-        ifstream f(fileName);
-
-        collectionPtr->parsingDumpFile(f, size);
-
-        f.close();
-
-    }
+	collectionPtr->parsingDumpFiles(args);
 
 	collectionPtr->arrangeCollectionByH();
 
