@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 '''
 This file read the data and generate the distribution file for DDNancy
 
@@ -28,15 +28,15 @@ def parseArugments():
     parser.add_argument('-d',
                         action='store',
                         dest='domain',
-                        help='domain: tile, pancake(default)',
-                        default='pancake')
-    parser.add_argument(
-        '-s',
-        action='store',
-        dest='subdomain',
-        help=
-        'subdomain: tile: uniform, heavy, inverse, pancake: regular(default), heavy',
-        default='regular')
+                        help='domain: tile, pancake, racetrack(default)',
+                        default='racetrack')
+    parser.add_argument('-s',
+                        action='store',
+                        dest='subdomain',
+                        help='subdomain: tile: uniform, heavy, inverse; \
+        pancake: regular, heavy; \
+        racetrack : barto-bigger(default), hanse-bigger-double, uniform',
+                        default='barto-bigger')
     parser.add_argument('-u',
                         action='store',
                         dest='suboptimal_alg',
@@ -50,8 +50,8 @@ def parseArugments():
     parser.add_argument('-z',
                         action='store',
                         dest='size',
-                        help='domain size (default: 16)',
-                        default='16')
+                        help='domain size (default: -1)',
+                        default='-1')
     parser.add_argument(
         '-t',
         action='store',
@@ -75,9 +75,9 @@ def generatePostSearchData():
     return
 
 
-def getHgroup(h, roundH=False):
+def getHgroup(h, roundH=False, roundDec=1):
     if roundH:
-        return round(h, 1)
+        return round(float(h), roundDec)
     return h
 
 
@@ -179,7 +179,7 @@ def read_pancake(args):
 
     for i, oneFile in enumerate(allFiles):
         # if i > 2:
-            # break
+        # break
         with open(sol_file_dir + "/" + oneFile, "r") as f:
 
             h = 999999
@@ -196,6 +196,69 @@ def read_pancake(args):
 
             if info[1] == "1" and h != 999999 and hs != 999999:
                 h_collection[getHgroup(h)].append({
+                    "hstar":
+                    hs,
+                    "counter":
+                    frequencyCounter[oneFile.split(".")[0]],
+                    "instance":
+                    oneFile.split(".")[0] + ".st",
+                    "deltaH":
+                    0
+                })
+
+    # print (h_collection)
+    # print("fix missing data...")
+    # nomissingHHSCollection = dumpAndPlot.fixMissing(h_collection)
+    # od = OrderedDict(sorted(nomissingHHSCollection.items()))
+    return OrderedDict(sorted(h_collection.items()))
+
+
+def read_racetrack(args):
+    h_collection = defaultdict(list)
+    # ready the frequency counter file, this file is generated when
+    # we collect 200 unique states for each h bucket
+    frequencyCounter = defaultdict(int)
+
+    print("reading in frequency file...")
+    with open(
+            "../../../results/" + args.domain + "/sampleProblem/" +
+            args.subdomain + "/" + args.suboptimal_alg + "/Para" +
+            args.suboptimal_para + "/" + "/0FrequencyCounter.txt",
+            "r") as frequencycounterFile:
+        #parse the frequency counter file
+        for line in frequencycounterFile:
+            line = line.split(" ")
+            frequencyCounter[line[0]] = int(line[1])
+
+    #parse the instance solution file
+    sol_file_dir = "../../../results/" + args.domain + "/sampleData/" +\
+        args.subdomain + "/" + args.suboptimal_alg + "/" + args.suboptimal_para
+
+    allFiles = os.listdir(sol_file_dir)
+
+    totalFiles = len(allFiles)
+
+    print("reading in solution files, total file #: " + str(totalFiles))
+
+    for i, oneFile in enumerate(allFiles):
+        # if i > 2:
+        # break
+        with open(sol_file_dir + "/" + oneFile, "r") as f:
+
+            h = 999999
+            hs = 999999
+
+            processed = i * 100.0 / totalFiles
+            print "read file ", oneFile, " processed ", "%.2f" % processed, "%"
+
+            info = f.readline().split()
+            h = info[3]
+            hs = info[2]
+
+            print info
+
+            if info[1] == "1" and h != 999999 and hs != 999999:
+                h_collection[getHgroup(h, True, 0)].append({
                     "hstar":
                     hs,
                     "counter":
@@ -230,6 +293,8 @@ def main():
         od = read_tiles()
     elif args.domain == "pancake":
         od = read_pancake(args)
+    elif args.domain == "racetrack":
+        od = read_racetrack(args)
 
     if args.fileType == "d":
         dumpAndPlot.createDistAndDump(od, args)

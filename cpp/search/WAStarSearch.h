@@ -17,6 +17,7 @@ public:
     struct Node {
         Cost g;
         Cost h;
+        Cost unWeightedH;
 		Cost d;
         Node* parent;
         State stateRep;
@@ -30,14 +31,21 @@ public:
         State getState() const { return stateRep; }
         Node* getParent() const { return parent; }
 
+        Cost getUnweightedHValue() const { return unWeightedH; }
+
         void setHValue(Cost val) { h = val; }
         void setGValue(Cost val) { g = val; }
         void setDValue(Cost val) { d = val; }
         void setState(State s) { stateRep = s; }
         void setParent(Node* p) { parent = p; }
 
-        Node(Cost g, Cost h, State state, Node* parent)
-                : g(g), h(h), stateRep(state), parent(parent), open(true) {}
+        Node(Cost g, Cost h, Cost unWeightedH, State state, Node* parent)
+                : g(g),
+                  h(h),
+                  unWeightedH(unWeightedH),
+                  stateRep(state),
+                  parent(parent),
+                  open(true) {}
 
         friend std::ostream& operator<<(std::ostream& stream,
                 const Node& node) {
@@ -78,14 +86,15 @@ public:
     SearchResultContainer doSearch() {
         SearchResultContainer res;
 
+        auto initUnweightedH = domain.heuristic(domain.getStartState());
+        auto inith = initUnweightedH * weight;
+
         // Get the start node
-        Node* cur = new Node(0,
-                domain.heuristic(domain.getStartState()),
-                domain.getStartState(),
-                NULL);
+        Node* cur = new Node(
+                0, inith, initUnweightedH, domain.getStartState(), NULL);
 
         open.push(cur);
-		res.initialH = domain.heuristic(domain.getStartState());
+        res.initialH = initUnweightedH;
 
         // Expand some nodes
         double solutionCost =
@@ -102,7 +111,7 @@ public:
                 it != closed.end();
                 it++) {
             out << it->first;
-            out << it->second->getHValue() << " " << it->second->getDValue()
+            out << it->second->getUnweightedHValue() << " " << it->second->getDValue()
                 << " " << it->first.key() << endl;
 
         }
