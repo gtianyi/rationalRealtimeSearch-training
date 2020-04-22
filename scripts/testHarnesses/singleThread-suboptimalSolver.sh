@@ -5,6 +5,7 @@ print_usage(){
   echo "[-n # of instances to test]      default: 1"
   echo "[-d domain]                      default: racetrack"
   echo "[-s subdomain]                   default: barto-bigger"
+  echo "[-z domain size]                 default: -1"
   echo "[-u suboptimal solver]           default: wastar"
   echo "[-p suboptimal solver parameter] default: 2"
   echo "[-h help]"
@@ -21,7 +22,7 @@ first=1
 n_of_i=1
 domain="racetrack"
 subdomain="barto-bigger"
-size="16"
+size="-1"
 suboptimal_solver="wastar"
 suboptimal_para="2"
 
@@ -92,7 +93,7 @@ infile=""
 outfile=""
 
 infile_path="../../../worlds/${domain}"
-outfile_path="../../../results/${domain}/distributionTest/${subDomain}/${suboptimal_solver}"
+outfile_path="../../../results/${domain}/distributionTest/${subdomain}/${suboptimal_solver}"
 
 mkdir -p ${outfile_path}
 
