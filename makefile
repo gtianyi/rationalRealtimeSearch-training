@@ -14,7 +14,7 @@ distributionPractice:
 	rm -rf ${debug_dir}/distributionPractice-debug
 
 	${CXX} -o3 -std=${STD} -static cpp/distributionPractice.cpp -o ${release_dir}/distributionPractice
-	${CXX} -g -std=${STD} -static cpp/distributionPractice.cpp -o ${debug_dir}/distributionPractice-debug
+	${CXX} -g -D DEBUG -std=${STD} -static cpp/distributionPractice.cpp -o ${debug_dir}/distributionPractice-debug
 
 	chmod a+x ${release_dir}/distributionPractice
 	chmod a+x ${debug_dir}/distributionPractice-debug
@@ -24,7 +24,7 @@ collect:
 	rm -rf ${debug_dir}/collect-debug
 
 	${CXX} -o3 -std=${STD} -static cpp/collector/collect.cpp -o ${release_dir}/collect
-	${CXX} -g -std=${STD} -static cpp/collector/collect.cpp -o ${debug_dir}/collect-debug
+	${CXX} -g -D DEBUG -std=${STD} -static cpp/collector/collect.cpp -o ${debug_dir}/collect-debug
 
 	chmod a+x ${release_dir}/collect
 	chmod a+x ${debug_dir}/collect-debug

@@ -123,7 +123,7 @@ def main():
 
     domain = "pancake"
     in_file_Path = "../../../results/" + domain + "/sampleData/"
-    in_file_Name = "regular-wastar-2-50-statSummary-d.json"
+    in_file_Name = "regular-wastar-2-40-statSummary-d.json"
 
     FILE_BELIEF_DATA = in_file_Path + in_file_Name
 

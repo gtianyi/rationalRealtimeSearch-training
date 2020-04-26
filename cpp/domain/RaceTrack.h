@@ -9,10 +9,12 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <queue>
 #include <vector>
 #include <cassert>
 #include <cmath>
 #include "../utility/SlidingWindow.h"
+#include "../utility/debug.h"
 
 #include <bitset>
 
@@ -110,82 +112,11 @@ public:
         /*}*/
     };
 
-    void parseMap(std::ifstream& raceMap) {
-        string line;
-        getline(raceMap, line);
-        stringstream ss(line);
-        ss >> mapWidth;
-
-        getline(raceMap,line);
-
-        stringstream ss2(line);
-        ss2 >> mapHeight;
-
-        for (int y = 0; y < mapHeight; y++) {
-
-            getline(raceMap,line);
-            stringstream ss3(line);
-
-            for (int x = 0; x < mapWidth; x++) {
-                char cell;
-                ss3 >> cell;
-
-                switch (cell) {
-                case '#':
-                    blockedCells.insert(Location(x, y));
-					break;
-                case '*':
-                    finishline.insert(Location(x, y));
-					break;
-                case '@':
-                    startLocation = Location(x, y);
-					break;
-                }
-            }
-        }
-
-		maxXSpeed = mapWidth/2;
-		maxYSpeed=mapHeight/2;
-		maxSpeed=max(maxXSpeed,maxYSpeed);
-
-        startState = State(startLocation.first, startLocation.second, 0, 0);
-        //cout << "size: " << mapWidth << "x" << mapHeight << "\n";
-        //cout << "blocked: " << blockedCells.size() << "\n";
-        //cout << "finish: " << finishline.size() << "\n";
-    }
-
-    void initilaizeActions() {
-        actions = {make_pair(-1, 1),
-                make_pair(0, 1),
-                make_pair(1, 1),
-                make_pair(-1, 0),
-                make_pair(0, 0),
-                make_pair(1, 0),
-                make_pair(-1, -1),
-                make_pair(0, -1),
-                make_pair(1, -1)};
-    }
-
-    void resetInitialState(std::istream& input) {
-        string line;
-		//skip the first line
-        getline(input, line);
-        getline(input, line);
-        stringstream ss(line);
-        int x, y, dx, dy;
-        ss >> x;
-        ss >> y;
-        ss >> dx;
-        ss >> dy;
-
-        startState = State(x, y, dx, dy);
-        //cout << "start" << startState << "\n";
-    }
-
-    RaceTrack(std::ifstream& raceMap, std::istream& initialState) {
+   RaceTrack(std::ifstream& raceMap, std::istream& initialState) {
         parseMap(raceMap);
         resetInitialState(initialState);
 		initilaizeActions();
+		computeDijkstraMap();
     }
 
     bool isGoal(const State& s) const {
@@ -201,7 +132,7 @@ public:
             return correctedD[state];
         }
 
-        Cost d = maxH(state);
+        Cost d = dijkstraMaxH(state);
 
         updateDistance(state, d);
 
@@ -214,30 +145,32 @@ public:
             return correctedDerr[state];
         }
 
-        Cost derr = maxH(state);
+        Cost derr = dijkstraMaxH(state);
 
         updateDistanceErr(state, derr);
 
         return correctedDerr[state];
     }
 
-    virtual Cost heuristic(const State& state) {
+    Cost heuristic(const State& state) {
         // Check if the heuristic of this state has been updated
         if (correctedH.find(state) != correctedH.end()) {
+            //DEBUG_MSG(
+                    //"find h in table " << state << " h " << correctedH[state]);
+
             return correctedH[state];
         }
 
-        Cost h = maxH(state);
+        Cost h = dijkstraMaxH(state);
 
         updateHeuristic(state, h);
 
         return correctedH[state];
     }
 
-    virtual Cost heuristic_no_recording(const State& state) {
-      return  maxH(state);
+    Cost heuristic_no_recording(const State& state) {
+        return dijkstraMaxH(state);
     }
-
 
     Cost epsilonHGlobal() { return curEpsilonH; }
 
@@ -288,21 +221,26 @@ public:
         correctedH[state] = value;
     }
 
-    Cost maxT(const State& startState, const Location& endLoc) const {
-        return max(abs(startState.getX() - endLoc.first) / maxXSpeed,
-                abs(startState.getY() - endLoc.second) / maxYSpeed);
-    }
+    /*Cost maxT(const State& startState, const Location& endLoc) const {*/
+        //return max(abs(startState.getX() - endLoc.first) / maxXSpeed,
+                //abs(startState.getY() - endLoc.second) / maxYSpeed);
+    //}
 
-    Cost maxH(const State& state) const {
-        Cost c = COST_MAX;
+    //Cost maxH(const State& state) const {
+        //Cost c = COST_MAX;
 
-        for (const auto goalLoc : finishline) {
-            auto newC = maxT(state, goalLoc);
-            if (c > newC)
-                c = newC;
-        }
+        //for (const auto goalLoc : finishline) {
+            //auto newC = maxT(state, goalLoc);
+            //if (c > newC)
+                //c = newC;
+        //}
 
-        return c;
+        //return c;
+    /*}*/
+
+    Cost dijkstraMaxH(const State& state) const {
+        //cout << state;
+        return dijkstraMap[state.getX()][state.getY()] / maxSpeed;
     }
 
     double getBranchingFactor() const { return 9; }
@@ -312,7 +250,7 @@ public:
                 blockedCells.find(Location(x, y)) == blockedCells.end();
     }
 
-    bool isCollisionFree(int x, int y, int dx, int dy) const {
+    bool isCollisionFree(int x, int y, int dx, int dy, Location& lastLegalLocation) const {
         double distance =
                 round(sqrt(pow((double)dx, 2.0) + pow((double)dy, 2.0)));
 
@@ -333,12 +271,15 @@ public:
                 valid = false;
                 break;
             }
+
+            lastLegalLocation =
+                    Location((int)round(xRunning), (int)round(yRunning));
         }
 
         return valid;
     }
 
-    std::vector<State> successors(const State& state) const {
+    std::vector<State> successors(const State& state) {
         std::vector<State> successors;
 
         for (auto action : actions) {
@@ -349,28 +290,52 @@ public:
 			// otherwise will alway stay? 
 			// would it prefer to move so that be closer to goal
             if (newDX == 0 && newDY == 0) {
-                successors.push_back(
-                        State(state.getX(), state.getY(), newDX, newDY));
+                if (state.getDX() == 0 && state.getDY() == 0)
+                    continue;
+                State succ(state.getX(), state.getY(), newDX, newDY);
+                successors.push_back(succ);
                 continue;
             }
 
-            if (isCollisionFree(state.getX(), state.getY(), newDX, newDY)) {
-                successors.push_back(State(state.getX() + newDX,
+            auto lastLegalLocation = Location(state.getX(), state.getY());
+            if (isCollisionFree(state.getX(), state.getY(), newDX, newDY, lastLegalLocation)) {
+                State succ(state.getX() + newDX,
                         state.getY() + newDY,
                         newDX,
-                        newDY));
+                        newDY);
+
+                successors.push_back(succ);
             }
+            else if(lastLegalLocation != Location(state.getX(), state.getY())){
+                // air bag
+                State succ(lastLegalLocation.first,
+                        lastLegalLocation.second,
+                        0,
+                        0);
+
+                successors.push_back(succ);
+            }
+        }
+
+		//air bag
+        if (successors.size() == 0) {
+            State succ(state.getX(), state.getY(), 0, 0);
+            successors.push_back(succ);
+		}
+
+        //recording predecessor
+        for(const auto& succ:successors){
+            predecessorsTable[succ].push_back(state);
         }
 
         return successors;
     }
 
-    std::vector<State> predecessors(const State& state) const {
-        std::vector<State> predecessors;
-
-        //TODO not sure how to do this yet
-
-        return predecessors;
+    const std::vector<State> predecessors(const State& state) const {
+        //DEBUG_MSG("preds table size: "<<predecessorsTable.size());
+        if (predecessorsTable.find(state) != predecessorsTable.end())
+            return predecessorsTable.at(state);
+        return vector<State>();
     }
 
     bool safetyPredicate(const State& state) const { return true; }
@@ -420,9 +385,186 @@ public:
         return avg;
     }
 
+    string getSubDomainName() const { return ""; }
+
+private:
+    void parseMap(std::ifstream& raceMap) {
+        string line;
+        getline(raceMap, line);
+        stringstream ss(line);
+        ss >> mapWidth;
+
+        getline(raceMap,line);
+
+        stringstream ss2(line);
+        ss2 >> mapHeight;
+
+        for (int y = 0; y < mapHeight; y++) {
+
+            getline(raceMap,line);
+            stringstream ss3(line);
+
+            for (int x = 0; x < mapWidth; x++) {
+                char cell;
+                ss3 >> cell;
+
+                switch (cell) {
+                case '#':
+                    blockedCells.insert(Location(x, y));
+					break;
+                case '*':
+                    finishline.insert(Location(x, y));
+					break;
+                case '@':
+                    startLocation = Location(x, y);
+					break;
+                }
+            }
+        }
+
+        maxXSpeed = mapWidth / 2;
+        maxYSpeed = mapHeight / 2;
+        maxSpeed = max(maxXSpeed, maxYSpeed);
+
+        startState = State(startLocation.first, startLocation.second, 0, 0);
+        //cout << "size: " << mapWidth << "x" << mapHeight << "\n";
+        //cout << "blocked: " << blockedCells.size() << "\n";
+        //cout << "finish: " << finishline.size() << "\n";
+    }
+
+   void initilaizeActions() {
+        actions = {make_pair(-1, 1),
+                make_pair(0, 1),
+                make_pair(1, 1),
+                make_pair(-1, 0),
+                make_pair(0, 0),
+                make_pair(1, 0),
+                make_pair(-1, -1),
+                make_pair(0, -1),
+                make_pair(1, -1)};
+    }
+
+    void resetInitialState(std::istream& input) {
+        string line;
+		//skip the first line
+        getline(input, line);
+        getline(input, line);
+        stringstream ss(line);
+        int x, y, dx, dy;
+        ss >> x;
+        ss >> y;
+        ss >> dx;
+        ss >> dy;
+
+        startState = State(x, y, dx, dy);
+        //cout << "start" << startState << "\n";
+    }
+
+    void computeDijkstraMap() {
+		vector<int> col(mapHeight, std::numeric_limits<int>::max());
+        dijkstraMap = vector<vector<int>>(mapWidth, col);
+
+        for (const auto& g : finishline) {
+            dijkstraOneGoal(g, dijkstraMap);
+        }
+
+		// visualize the dijkstra map (for debug usage)
+        /*vector<int> rotateCol(mapWidth, INT_MAX);*/
+        //vector<vector<int>> rotatedMap(mapHeight, rotateCol);
+        //for (int i = 0; i < rotatedMap.size(); i++) {
+            //for (int j = 0; j < rotateCol.size(); j++) {
+                //rotatedMap[i][j] = dijkstraMap[j][i];
+            //}
+        //}
+
+        //for (auto r : rotatedMap) {
+            //for (auto c : r) {
+                //if (c > 100000)
+                    //cout << std::setw(5) << "x";
+                //else
+                    //cout << std::setw(5) << c;
+            //}
+            //cout << "\n";
+        /*}*/
+    }
+
+    void dijkstraOneGoal(const Location goal, vector<vector<int>>& dijkstraMap) {
+        DijkstraNode start(goal, 0);
+
+		priority_queue<DijkstraNode, vector<DijkstraNode>, CompareCost> open;
+		//priority_queue<DijkstraNode> open;
+        unordered_set<Location, pair_hash> closed;
+
+        open.push(start);
+        closed.insert(start.loc);
+
+        while (!open.empty()) {
+            auto n = open.top();
+            open.pop();
+
+            if (dijkstraMap[n.loc.first][n.loc.second] > n.cost) {
+                dijkstraMap[n.loc.first][n.loc.second] = n.cost;
+            }
+
+            auto kids = getLegalKids(n);
+
+            for (auto kid : kids) {
+                if (closed.find(kid.loc) == closed.end()) {
+                    open.push(kid);
+                    closed.insert(kid.loc);
+                }
+            }
+        }
+    }
+
+    struct DijkstraNode {
+        Location loc;
+        int cost;
+
+        DijkstraNode(Location l, int c) : loc(l), cost(c) {}
+		
+    };
+
+	struct CompareCost {
+		bool operator()(DijkstraNode const& n1, DijkstraNode const& n2) {
+			// return "true" if "n1" is ordered
+			// before "n2" in a max heap, for example:
+			// be careful, min heap should be return false, for example:
+			// here is min heap for cost
+			return n1.cost > n2.cost;
+		}
+	};
+
+    vector<DijkstraNode> getLegalKids(DijkstraNode n) {
+
+        vector<DijkstraNode> ret;
+        if (isLegalLocation(n.loc.first + 1, n.loc.second)) {
+            Location loc(n.loc.first + 1, n.loc.second);
+            ret.push_back(DijkstraNode(loc, n.cost + 1));
+        }
+
+        if (isLegalLocation(n.loc.first, n.loc.second + 1)) {
+            Location loc(n.loc.first, n.loc.second + 1);
+            ret.push_back(DijkstraNode(loc, n.cost + 1));
+        }
+
+        if (isLegalLocation(n.loc.first - 1, n.loc.second)) {
+            Location loc(n.loc.first - 1, n.loc.second);
+            ret.push_back(DijkstraNode(loc, n.cost + 1));
+        }
+
+        if (isLegalLocation(n.loc.first, n.loc.second - 1)) {
+            Location loc(n.loc.first, n.loc.second - 1);
+            ret.push_back(DijkstraNode(loc, n.cost + 1));
+        }
+
+		return ret;
+    }
+
     std::unordered_set<Location,pair_hash> blockedCells;
     std::unordered_set<Location,pair_hash> finishline;
 	vector<pair<int,int>> actions;
+	vector<vector<int>> dijkstraMap;
     int mapWidth;
     int mapHeight;
 	double maxXSpeed;
@@ -435,6 +577,7 @@ public:
     unordered_map<State, Cost, HashState> correctedH;
     unordered_map<State, Cost, HashState> correctedD;
     unordered_map<State, Cost, HashState> correctedDerr;
+    unordered_map<State, vector<State>, HashState> predecessorsTable;
 
     double epsilonHSum;
     double epsilonDSum;
@@ -444,4 +587,5 @@ public:
 
     string expansionPolicy;
     int lookahead;
+
 };
