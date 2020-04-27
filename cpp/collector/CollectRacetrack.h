@@ -20,6 +20,11 @@ class CollectionRacetrack : public Collection<Domain> {
 
             ifstream f(fileName);
 
+            if (!f.good()) {
+                cerr << "input file not exist: " << fileName << endl;
+                exit(1);
+            }
+
             parsingDumpFile(f, subdomain);
 
             f.close();
@@ -27,7 +32,8 @@ class CollectionRacetrack : public Collection<Domain> {
     }
 
     void parsingDumpFile(ifstream& f, string& subdomain) {
-        this->fileCount++;
+
+               this->fileCount++;
         string line;
 
         getline(f, line);
@@ -75,8 +81,8 @@ class CollectionRacetrack : public Collection<Domain> {
         string subdomain = args["subdomain"].as<string>();
         string alg = args["alg"].as<string>();
         string algPara = args["par"].as<string>();
-        return "../results/" + domain + "/distributionTest/" + alg + "/Para" +
-                algPara + "-" + subdomain + "-";
+        return "../results/" + domain + "/distributionTest/" + subdomain + "/" +
+                alg + "/Para" + algPara + "-" + subdomain + "-";
     }
 
     string outPath(cxxopts::ParseResult& args) {

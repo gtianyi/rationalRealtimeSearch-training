@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
     string domain = args["domain"].as<string>();
     string alg = args["alg"].as<string>();
     string algPara = args["par"].as<string>();
-   int sampleCount = args["count"].as<int>();
+    int sampleCount = args["count"].as<int>();
 
     shared_ptr<CollectionBase> collectionPtr;
 
