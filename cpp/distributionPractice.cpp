@@ -18,12 +18,12 @@ int main(int argc, char** argv) {
     options.add_options()
 
 		("d,domain", "domain type: randomtree, tile, pancake, racetrack", 
-		 cxxopts::value<std::string>()->default_value("racetrack"))
+		 cxxopts::value<std::string>()->default_value("pancake"))
 
 		("s,subdomain", "puzzle type: uniform, inverse, heavy, sqrt; "
-		                "pancake type: regular, heavy;"
-						"racetrack map : barto-bigger, hanse-bigger-double, uniform", 
-		 cxxopts::value<std::string>()->default_value("barto-bigger"))
+		                "pancake type: regular, heavy, sumheavy;"
+						"racetrack map : barto-big, barto-bigger, hanse-bigger-double, uniform", 
+		 cxxopts::value<std::string>()->default_value("heavy"))
 
         ("a,alg", "suboptimal algorithm: wastar, lsslrtastar", 
 		 cxxopts::value<std::string>()->default_value("wastar"))
@@ -89,6 +89,8 @@ int main(int argc, char** argv) {
 
         if (sd == "heavy") {
             world->setVariant(1);
+        }else if (sd == "sumheavy") {
+            world->setVariant(2);
         } 
 
         if (alg == "wastar") {
