@@ -121,9 +121,10 @@ def main():
     centered = True
     # rebucket = True
 
-    domain = "racetrack"
+    domain = "SlidingTilePuzzle"
     in_file_Path = "../../../results/" + domain + "/sampleData/"
-    in_file_Name = "hansen-bigger-wastar-2--1-statSummary-d.json"
+    # in_file_Name = "uniform-wastar-2-40-statSummary-d.json"
+    in_file_Name = "uniform-wastar-statSummary-d.json"
 
     FILE_BELIEF_DATA = in_file_Path + in_file_Name
 
