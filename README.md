@@ -13,7 +13,7 @@ mkdir worlds
 
 make
 ```
-# STEP TO GENERATE DATA. 
+# PIPELINE TO GENERATE DATA. 
 1. generate domain instances and put them into worlds folder
     * tiles instances can be found [here](https://github.com/ajx256/thesis-real-time-search/tree/master/worlds)  
     * feel free to email me if you need other domain's instance or generator  
