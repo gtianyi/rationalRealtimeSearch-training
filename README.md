@@ -1,5 +1,5 @@
 # ABOUT 
-This is a codebase for collecting non-parametric heuristic data error model. We run suboptimal search algorithm such as weighted A* and Lsslrta* to collect observed states. Then use optimal solver such A*, IDA*(CR) to compute the optimal cost-to-go value. In short, we generate histogram for h.
+This is a codebase for collecting non-parametric heuristic data error model. We run suboptimal search algorithm such as weighted A* and Lsslrta* to collect observed states. Then use optimal solver such as A*, IDA*(CR) (sometime with stronger heuristc) to compute the optimal cost-to-go value. In short, we generate histogram for h.
 # TO BUILD. 
 ```console
 mkdir ../realtime-nancy
