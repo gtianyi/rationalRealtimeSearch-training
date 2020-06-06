@@ -5,6 +5,7 @@ This file read the data and generate the distribution file for DDNancy
 Author: Tianyi Gu
 Date: 08/27/2019
 '''
+__author__ = 'tianyigu'
 
 import argparse
 # import json
