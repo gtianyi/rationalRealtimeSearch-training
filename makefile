@@ -29,6 +29,28 @@ collect:
 	chmod a+x ${release_dir}/collect
 	chmod a+x ${debug_dir}/collect-debug
 
+tile-pdb-heavy-inverse:
+	rm -rf ${release_dir}/tile-pdb-heavy-inverse
+	rm -rf ${debug_dir}/tile-pdb-heavy-inverse-debug
+
+	${CXX} -o3 -std=${STD} cpp/optimalSolver/fastAStar-pdb/*.hpp cpp/optimalSolver/fastAStar-pdb/tiles.cc cpp/optimalSolver/fastAStar-pdb/fatal.cc cpp/optimalSolver/pdb/*.hpp cpp/optimalSolver/pdb/* -o ${release_dir}/tile-pdb-heavy-inverse
+
+	${CXX} -g -std=${STD} cpp/optimalSolver/fastAStar-pdb/*.hpp cpp/optimalSolver/fastAStar-pdb/tiles.cc cpp/optimalSolver/fastAStar-pdb/fatal.cc cpp/optimalSolver/pdb/*.hpp cpp/optimalSolver/pdb/* -o ${debug_dir}/tile-pdb-heavy-inverse-debug
+
+	chmod a+x ${release_dir}/tile-pdb-heavy-inverse
+	chmod a+x ${debug_dir}/tile-pdb-heavy-inverse-debug
+
+tile-uniform:
+	rm -rf ${release_dir}/tile-uniform
+	rm -rf ${debug_dir}/tile-uniform-debug
+
+	${CXX} -o3 -std=${STD} cpp/optimalSolver/fastAStar/*.cc -o ${release_dir}/tile-uniform
+
+	${CXX} -g -std=${STD} cpp/optimalSolver/fastAStar/*.cc -o ${debug_dir}/tile-uniform-debug
+
+	chmod a+x ${release_dir}/tile-uniform
+	chmod a+x ${debug_dir}/tile-uniform-debug
+
 #g++ -o3 -std=c++11 -static ../cpp/distributionPractice.cpp -o ../../build_release/distributionPractice
 #g++ -g -std=c++11 -static ../cpp/distributionPractice.cpp -o ../../build_debug/distributionPractice
 #g++ -g -std=c++11 -static ../cpp/collect.cpp -o ../../build_release/collect
