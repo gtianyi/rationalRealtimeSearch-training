@@ -29,16 +29,36 @@ collect:
 	chmod a+x ${release_dir}/collect
 	chmod a+x ${debug_dir}/collect-debug
 
+tile-pdb-heavy-inverse-batch:
+	rm -rf ${release_dir}/tile-pdb-heavy-inverse-batch
+	rm -rf ${debug_dir}/tile-pdb-heavy-inverse-batch-debug
+
+	${CXX} -o3 -std=${STD} -static cpp/optimalSolver/fastAStar-pdb-batch/*.cc -o ${release_dir}/tile-pdb-heavy-inverse-batch
+	${CXX} -g -D DEBUG -std=${STD} -static cpp/optimalSolver/fastAStar-pdb-batch/*.cc -o ${debug_dir}/tile-pdb-heavy-inverse-batch-debug
+
+	chmod a+x ${release_dir}/tile-pdb-heavy-batch-inverse
+	chmod a+x ${debug_dir}/tile-pdb-heavy-inverse-batch-debug
+
 tile-pdb-heavy-inverse:
 	rm -rf ${release_dir}/tile-pdb-heavy-inverse
 	rm -rf ${debug_dir}/tile-pdb-heavy-inverse-debug
 
-	${CXX} -o3 -std=${STD} cpp/optimalSolver/fastAStar-pdb/*.hpp cpp/optimalSolver/fastAStar-pdb/tiles.cc cpp/optimalSolver/fastAStar-pdb/fatal.cc cpp/optimalSolver/pdb/*.hpp cpp/optimalSolver/pdb/* -o ${release_dir}/tile-pdb-heavy-inverse
-
-	${CXX} -g -std=${STD} cpp/optimalSolver/fastAStar-pdb/*.hpp cpp/optimalSolver/fastAStar-pdb/tiles.cc cpp/optimalSolver/fastAStar-pdb/fatal.cc cpp/optimalSolver/pdb/*.hpp cpp/optimalSolver/pdb/* -o ${debug_dir}/tile-pdb-heavy-inverse-debug
+	${CXX} -o3 -std=${STD} -static cpp/optimalSolver/fastAStar-pdb/*.cc -o ${release_dir}/tile-pdb-heavy-inverse
+	${CXX} -g -D DEBUG -std=${STD} -static cpp/optimalSolver/fastAStar-pdb/*.cc -o ${debug_dir}/tile-pdb-heavy-inverse-debug
 
 	chmod a+x ${release_dir}/tile-pdb-heavy-inverse
 	chmod a+x ${debug_dir}/tile-pdb-heavy-inverse-debug
+
+pdb-generator:
+	rm -rf ${release_dir}/pdb-generator
+	rm -rf ${debug_dir}/pdb-generator-debug
+
+	${CXX} -o3 -std=${STD} cpp/optimalSolver/fastAStar-pdb/*.hpp cpp/optimalSolver/fastAStar-pdb/tiles.cc cpp/optimalSolver/fastAStar-pdb/fatal.cc cpp/optimalSolver/pdb/*.hpp cpp/optimalSolver/pdb/* -o ${release_dir}/pdb-generator
+
+	${CXX} -g -std=${STD} cpp/optimalSolver/fastAStar-pdb/*.hpp cpp/optimalSolver/fastAStar-pdb/tiles.cc cpp/optimalSolver/fastAStar-pdb/fatal.cc cpp/optimalSolver/pdb/*.hpp cpp/optimalSolver/pdb/* -o ${debug_dir}/pdb-generator-debug
+
+	chmod a+x ${release_dir}/pdb-generator
+	chmod a+x ${debug_dir}/pdb-generator-debug
 
 tile-uniform:
 	rm -rf ${release_dir}/tile-uniform

@@ -1,13 +1,13 @@
 // Copyright 2012 Ethan Burns. All rights reserved.
 // Use of this source code is governed by an MIT-style
 // license that can be found in the LICENSE file.
-#include <sys/stat.h>
-#include <cstring>
-#include <memory>
-#include "astar.hpp"
+#include "inverseTiles-pdb.hpp"
 #include "heavyTiles-pdb.hpp"
 #include "idastar.hpp"
-#include "inverseTiles-pdb.hpp"
+#include "astar.hpp"
+#include <cstring>
+#include <memory>
+#include <sys/stat.h>
 
 using namespace std;
 
@@ -45,16 +45,16 @@ void initializePDB(std::unordered_map<uint64_t, float>& htable1,
             {"heavy", {{0, 10, 11, 12, 13, 14, 15}, {0, 4, 5, 6, 7, 8, 9}}},
             {"inverse", {{0, 1, 2, 3, 4, 5, 6}, {0, 7, 8, 9, 10, 11, 12}}}};
 
-    pattern1 = pdbPatterns[tileType][0];
-    pattern2 = pdbPatterns[tileType][1];
+	pattern1 = pdbPatterns[tileType][0];
+	pattern2 = pdbPatterns[tileType][1];
 }
 
 void computeTile(const char* argv[],
-        istream& input,
-        ostream& output,
+        ifstream& input,
+        ofstream& output,
         std::unordered_map<uint64_t, float>& htable1,
         std::unordered_map<uint64_t, float>& htable2,
-        const std::vector<int>& pattern1,
+		const std::vector<int>& pattern1,
         const std::vector<int>& pattern2) {
     try {
         shared_ptr<TilesPDB> tiles;
@@ -94,6 +94,7 @@ void computeTile(const char* argv[],
         output << "solution length " << path.cost << endl;
         output << "end" << endl;
 
+        output.close();
     } catch (const Fatal& f) {
         fputs(f.msg, stderr);
         fputc('\n', stderr);
@@ -129,8 +130,9 @@ bool checkisGoodPuzzle(ifstream& input) {
 }
 
 int main(int argc, const char* argv[]) {
-    if (argc != 3)
-        throw Fatal("Usage: tiles <algorithm> <tiletype>");
+    if (argc != 6)
+        throw Fatal("Usage: tiles <algorithm> <tiletype> <trainingType> <start instance> "
+                    "<number of instance to run>");
 
     std::unordered_map<uint64_t, float> htable1;
     std::unordered_map<uint64_t, float> htable2;
@@ -138,12 +140,69 @@ int main(int argc, const char* argv[]) {
     std::vector<int> sixTiles1;
     std::vector<int> sixTiles2;
 
-    // cout<<"initial table\n";
+	// create result directory if not exist
+    string resultDir = "/home/aifs1/gu/phd/research/workingPaper/"
+                       "realtime-nancy/results/SlidingTilePuzzle/"
+                       "sampleData/" +
+            string(argv[2]) + "/" + string(argv[3]);
+
+    string mkdirCMD = "mkdir -p " + resultDir;
+    std::system(mkdirCMD.c_str());
+
+    string inputDir = "/home/aifs1/gu/phd/research/workingPaper/"
+                      "realtime-nancy/results/SlidingTilePuzzle/"
+                      "sampleProblem/" +
+            string(argv[2]) + "/" + string(argv[3]);
+
+	//cout<<"initial table\n";
     std::string tileType = argv[2];
     initializePDB(htable1, htable2, tileType, sixTiles1, sixTiles2);
     // cout<<"initial finished\n";
 
-    computeTile(argv, cin, cout, htable1, htable2, sixTiles1, sixTiles2);
+    int startInstance = stoi(argv[4]);
+    int numberOfInstance = stoi(argv[5]);
+
+    for (int i = 0; i < numberOfInstance; i++) {
+        int instanceID = startInstance + i;
+        string resultFile = resultDir + "/" + to_string(instanceID) + ".txt";
+        ifstream checkRetExist(resultFile);
+        ifstream checkProcessExist(resultFile+".temp");
+        if (checkRetExist.good() || checkProcessExist.good()) {
+            continue;
+        }
+
+		//create a place holder for the process
+		ofstream processPlaceHolder(resultFile+".temp");
+        processPlaceHolder << "a";
+		processPlaceHolder.close();
+
+        ofstream output(resultFile);
+
+        string inputFile = inputDir + "/" + to_string(instanceID) + ".st";
+
+        ifstream input(inputFile);
+        ifstream inputcheck(inputFile);
+
+        if (!input.good()) {
+            cout << "no input file exists!" << inputFile << endl;
+            continue;
+        }
+
+        if (!checkisGoodPuzzle(inputcheck)) {
+            cout << "not good puzzle!" << inputFile << endl;
+            continue;
+        }
+
+        // cout << "start " << instanceID << endl;
+
+        computeTile(
+                argv, input, output, htable1, htable2, sixTiles1, sixTiles2);
+
+        string rmScript = "exec rm -rf " + resultFile + ".temp";
+        std::system(rmScript.c_str());
+    }
 
     return 0;
 }
+
+

@@ -13,7 +13,7 @@ public:
     typedef double CostType;
 
     //InverseTilesPDB(FILE* f) : Tiles(f) {}
-    TilesPDB(std::istream& input,
+    TilesPDB(std::ifstream& input,
             std::unordered_map<uint64_t, float>& htable1,
             std::unordered_map<uint64_t, float>& htable2,
             const std::vector<int>& pattern1,

@@ -12,7 +12,7 @@ class HeavyTilesPDB : public TilesPDB {
 public:
     typedef double CostType;
     //InverseTilesPDB(FILE* f) : Tiles(f) {}
-    HeavyTilesPDB(std::istream& input,
+    HeavyTilesPDB(std::ifstream& input,
             std::unordered_map<uint64_t, float>& htable1,
             std::unordered_map<uint64_t, float>& htable2,
             const std::vector<int>& pattern1,
