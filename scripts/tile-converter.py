@@ -13,7 +13,7 @@ import sys
 
 
 def printUsage():
-    print "usage: python tile-converter.py input output"
+    print("usage: python tile-converter.py input output")
 
 
 def main():
