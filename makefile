@@ -29,25 +29,25 @@ collect:
 	chmod a+x ${release_dir}/collect
 	chmod a+x ${debug_dir}/collect-debug
 
-tile-pdb-heavy-inverse-batch:
-	rm -rf ${release_dir}/tile-pdb-heavy-inverse-batch
-	rm -rf ${debug_dir}/tile-pdb-heavy-inverse-batch-debug
+tile-pdb-batch:
+	rm -rf ${release_dir}/tile-pdb-batch
+	rm -rf ${debug_dir}/tile-pdb-batch-debug
 
-	${CXX} -o3 -std=${STD} -static cpp/optimalSolver/fastAStar-pdb-batch/*.cc -o ${release_dir}/tile-pdb-heavy-inverse-batch
-	${CXX} -g -D DEBUG -std=${STD} -static cpp/optimalSolver/fastAStar-pdb-batch/*.cc -o ${debug_dir}/tile-pdb-heavy-inverse-batch-debug
+	${CXX} -o3 -std=${STD} -static cpp/optimalSolver/fastAStar-pdb-batch/*.cc -o ${release_dir}/tile-pdb-batch
+	${CXX} -g -D DEBUG -std=${STD} -static cpp/optimalSolver/fastAStar-pdb-batch/*.cc -o ${debug_dir}/tile-pdb-batch-debug
 
 	chmod a+x ${release_dir}/tile-pdb-heavy-batch-inverse
-	chmod a+x ${debug_dir}/tile-pdb-heavy-inverse-batch-debug
+	chmod a+x ${debug_dir}/tile-pdb-batch-debug
 
-tile-pdb-heavy-inverse:
-	rm -rf ${release_dir}/tile-pdb-heavy-inverse
-	rm -rf ${debug_dir}/tile-pdb-heavy-inverse-debug
+tile-pdb:
+	rm -rf ${release_dir}/tile-pdb
+	rm -rf ${debug_dir}/tile-pdb-debug
 
-	${CXX} -o3 -std=${STD} -static cpp/optimalSolver/fastAStar-pdb/*.cc -o ${release_dir}/tile-pdb-heavy-inverse
-	${CXX} -g -D DEBUG -std=${STD} -static cpp/optimalSolver/fastAStar-pdb/*.cc -o ${debug_dir}/tile-pdb-heavy-inverse-debug
+	${CXX} -o3 -std=${STD} -static cpp/optimalSolver/fastAStar-pdb/*.cc -o ${release_dir}/tile-pdb
+	${CXX} -g -D DEBUG -std=${STD} -static cpp/optimalSolver/fastAStar-pdb/*.cc -o ${debug_dir}/tile-pdb-debug
 
-	chmod a+x ${release_dir}/tile-pdb-heavy-inverse
-	chmod a+x ${debug_dir}/tile-pdb-heavy-inverse-debug
+	chmod a+x ${release_dir}/tile-pdb
+	chmod a+x ${debug_dir}/tile-pdb-debug
 
 pdb-generator:
 	rm -rf ${release_dir}/pdb-generator

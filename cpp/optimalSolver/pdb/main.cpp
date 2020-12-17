@@ -17,7 +17,7 @@ int main(int argc, const char* argv[]) {
     if (argc != 3) {
         cout << "Usage: ./pdb <pattern> <tileType>\n";
         cout << "pattern: 61 or 62\n";
-        cout << "tile type: heavy or inverse\n";
+        cout << "tile type: heavy or inverse or reverse\n";
 		exit(1);
     }
 

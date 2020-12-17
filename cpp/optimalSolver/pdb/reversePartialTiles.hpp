@@ -40,8 +40,8 @@ public:
     void generatePattern(int patternSizewithID) {
         init[0] = 0;
         if (patternSizewithID == 61) {
-            int sixTiles[6] = {10, 11, 12, 13, 14, 15};
-            int converedTiles[9] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+            int sixTiles[6] = {1, 2, 3, 4, 5, 6};
+            int converedTiles[9] = {7, 8, 9, 10, 11, 12, 13, 14, 15};
 
             for (int i = 0; i <= 5; i++) {
                 init[sixTiles[i]] = sixTiles[i];
@@ -51,8 +51,8 @@ public:
                 init[converedTiles[i]] = 1;
             }
         } else if (patternSizewithID == 62) {
-            int sixTiles[6] = {4, 5, 6, 7, 8, 9};
-            int converedTiles[9] = {1, 2, 3, 10, 11, 12, 13, 14, 15};
+            int sixTiles[6] = {7, 8, 9, 10, 11, 12};
+            int converedTiles[9] = {1, 2, 3, 4, 5, 6, 13, 14, 15};
 
             for (int i = 0; i <= 5; i++) {
                 init[sixTiles[i]] = sixTiles[i];

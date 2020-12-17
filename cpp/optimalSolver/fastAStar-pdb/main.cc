@@ -8,6 +8,7 @@
 #include "heavyTiles-pdb.hpp"
 #include "idastar.hpp"
 #include "inverseTiles-pdb.hpp"
+#include "reverseTiles-pdb.hpp"
 
 using namespace std;
 
@@ -43,6 +44,7 @@ void initializePDB(std::unordered_map<uint64_t, float>& htable1,
 
     std::unordered_map<string, std::vector<std::vector<int>>> pdbPatterns = {
             {"heavy", {{0, 10, 11, 12, 13, 14, 15}, {0, 4, 5, 6, 7, 8, 9}}},
+            {"reverse", {{0, 1, 2, 3, 4, 5, 6}, {0, 7, 8, 9, 10, 11, 12}}},
             {"inverse", {{0, 1, 2, 3, 4, 5, 6}, {0, 7, 8, 9, 10, 11, 12}}}};
 
     pattern1 = pdbPatterns[tileType][0];
@@ -65,9 +67,12 @@ void computeTile(const char* argv[],
         } else if (strcmp(argv[2], "heavy") == 0) {
             tiles = make_shared<HeavyTilesPDB>(
                     input, htable1, htable2, pattern1, pattern2);
+        }  else if (strcmp(argv[2], "reverse") == 0) {
+            tiles = make_shared<ReverseTilesPDB>(
+                    input, htable1, htable2, pattern1, pattern2);
         } else {
             std::cout << argv[2] << "tile type not found!\n";
-            throw Fatal("avaible tile types: inverse or heavy");
+            throw Fatal("avaible tile types: inverse or heavy or reverse");
         }
 
         SearchAlg<Tiles>* search = NULL;
