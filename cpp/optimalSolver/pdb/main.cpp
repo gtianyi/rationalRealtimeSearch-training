@@ -7,6 +7,7 @@
 #include "pdb.hpp"
 #include "heavyPartialTiles.hpp"
 #include "inversePartialTiles.hpp"
+#include "reversePartialTiles.hpp"
 #include <string>
 #include <vector>
 
@@ -29,5 +30,9 @@ int main(int argc, const char* argv[]) {
     } else if (subDomain == "inverse") {
         PDB<InversePartialTiles> pdb;
         pdb.generateDisjointPDB(argv[1]);
+    } else if (subDomain == "reverse") {
+        PDB<ReversePartialTiles> pdb;
+        pdb.generateDisjointPDB(argv[1]);
     }
+
 }
