@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
 		("d,domain", "domain type: randomtree, tile, pancake, racetrack", 
 		 cxxopts::value<std::string>()->default_value("pancake"))
 
-		("s,subdomain", "puzzle type: uniform, inverse, heavy, sqrt; "
+		("s,subdomain", "puzzle type: uniform, inverse, heavy, reverse, sqrt; "
 		                "pancake type: regular, heavy, sumheavy;"
 						"racetrack map : barto-big, barto-bigger, hanse-bigger-double, uniform", 
 		 cxxopts::value<std::string>()->default_value("heavy"))
@@ -68,6 +68,8 @@ int main(int argc, char** argv) {
             world = new HeavyTilePuzzle(cin);
         } else if (sd == "inverse") {
             world = new InverseTilePuzzle(cin);
+        }  else if (sd == "reverse") {
+            world = new ReverseTilePuzzle(cin);
         } else {
             cout << "wrong tile type!\n";
             exit(1);
