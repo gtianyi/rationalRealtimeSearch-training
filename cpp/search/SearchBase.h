@@ -5,6 +5,7 @@
 #include "../domain/HeavyTilePuzzle.h"
 #include "../domain/InverseTilePuzzle.h"
 #include "../domain/ReverseTilePuzzle.h"
+#include "../domain/SqrtTilePuzzle.h"
 #include "../domain/TreeWorld.h"
 #include "../domain/PancakePuzzle.h"
 #include "../domain/RaceTrack.h"

@@ -70,6 +70,8 @@ int main(int argc, char** argv) {
             world = new InverseTilePuzzle(cin);
         }  else if (sd == "reverse") {
             world = new ReverseTilePuzzle(cin);
+        }  else if (sd == "sqrt") {
+            world = new SqrtTilePuzzle(cin);
         } else {
             cout << "wrong tile type!\n";
             exit(1);

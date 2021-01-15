@@ -1,5 +1,6 @@
 #pragma once
 #include <algorithm>
+#include <cmath>
 #include <iomanip>
 #include <limits>
 #include <ostream>
