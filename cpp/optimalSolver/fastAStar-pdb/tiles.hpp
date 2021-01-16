@@ -7,7 +7,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cassert>
-#include <stdint.h>
+#include <cstdint>
 #include <iostream>
 
 struct Tiles {

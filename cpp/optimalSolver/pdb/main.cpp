@@ -8,6 +8,7 @@
 #include "heavyPartialTiles.hpp"
 #include "inversePartialTiles.hpp"
 #include "reversePartialTiles.hpp"
+#include "sqrtPartialTiles.hpp"
 #include <string>
 #include <vector>
 
@@ -33,6 +34,8 @@ int main(int argc, const char* argv[]) {
     } else if (subDomain == "reverse") {
         PDB<ReversePartialTiles> pdb;
         pdb.generateDisjointPDB(argv[1]);
+    } else if (subDomain == "sqrt") {
+        PDB<SqrtPartialTiles> pdb;
+        pdb.generateDisjointPDB(argv[1]);
     }
-
 }

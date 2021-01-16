@@ -10,7 +10,9 @@ using namespace std;
 
 class InversePartialTiles : public PartialTiles {
 public:
-    InversePartialTiles(int patternSize) : PartialTiles(){};
+    InversePartialTiles(int patternSize) : PartialTiles(){
+        generatePattern(patternSize);
+    };
     InversePartialTiles() :PartialTiles(){};
 
     Edge<Tiles> apply(State& s, int newb) const {
