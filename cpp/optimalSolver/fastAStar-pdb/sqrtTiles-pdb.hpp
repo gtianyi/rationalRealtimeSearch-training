@@ -1,17 +1,19 @@
-#include <cmath>
-#include <fstream>
-#include <iostream>
-#include <sstream>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
 #include "tiles-pdb.hpp"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <unordered_map>
+#include <sstream>
+#include <unordered_set>
+#include <cmath>
 
-class ReverseTilesPDB : public TilesPDB {
+class SqrtTilesPDB : public TilesPDB {
 public:
     typedef double CostType;
-    // InverseTilesPDB(FILE* f) : Tiles(f) {}
-    ReverseTilesPDB(std::istream& input,
+
+    //SqrtTilesPDB(FILE* f) : Tiles(f) {}
+    SqrtTilesPDB(std::istream& input,
             std::unordered_map<uint64_t, float>& htable1,
             std::unordered_map<uint64_t, float>& htable2,
             const std::vector<int>& pattern1,
@@ -21,20 +23,20 @@ public:
     Edge<Tiles> apply(State& s, int newb) const {
         int tile = s.tiles[newb];
 
-        Edge<Tiles> e((16 - (double)tile), newb, s.blank);
+        Edge<Tiles> e(sqrt((double)tile), newb, s.blank);
 
         e.undo.h = s.h;
         e.undo.blank = s.blank;
 
         s.tiles[(int)s.blank] = tile;
-        s.h += mdincr[tile][newb][(int)s.blank] * (16 - (double)tile);
+        s.h += mdincr[tile][newb][(int)s.blank] * sqrt((double)tile);
         s.blank = newb;
-        s.tiles[newb] = 0;
+		s.tiles[newb] = 0;
 
         return e;
     }
 
-    bool isgoal(const State& s) const { return s.currenth <= 0.1; }
+    bool isgoal(const State& s) const { return s.currenth <= 0.05; }
 
     double h(State& s) const {
         double db1h = getPartialPDBValue(s, 1);
@@ -47,6 +49,7 @@ public:
         return s.currenth;
     }
 
+
 protected:
     // mdist returns the Manhattan distance of the given tile array.
     // this only work for initialization
@@ -57,7 +60,7 @@ protected:
                 continue;
             int row = i / Width, col = i % Width;
             int grow = tiles[i] / Width, gcol = tiles[i] % Width;
-            sum += ((double)tiles[i]) * (abs(gcol - col) + abs(grow - row));
+            sum += (1.0/(double)tiles[i]) * (abs(gcol - col) + abs(grow - row));
         }
         return sum;
     }
@@ -70,13 +73,13 @@ protected:
             if (sixTiles[s.tiles[i]])
                 partialState.tiles[i] = s.tiles[i];
             else
-                partialState.tiles[i] = 15;
+                partialState.tiles[i] = 1;
         }
 
-        partialState.blank = s.blank;
+		partialState.blank = s.blank;
 
         PackedState ps;
-        pack(ps, partialState);
+        pack(ps,partialState);
 
         auto& htable = isDB1 ? htable1 : htable2;
 
@@ -86,6 +89,6 @@ protected:
             s.patternh = -1.0;
         }
 
-        return htable.at(ps.word);
-    }
+		return htable.at(ps.word);
+	}
 };
