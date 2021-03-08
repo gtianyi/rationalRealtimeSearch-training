@@ -1,7 +1,7 @@
 # ABOUT 
 This is a codebase for collecting non-parametric heuristic data error model. We run suboptimal search algorithm such as weighted A* and Lsslrta* to collect observed states. Then use optimal solver such as A*, IDA*(CR) (sometime with stronger heuristc) to compute the optimal cost-to-go value. In short, we generate histogram for h.
 
-#Paper
+# PAPER
 [1] Maximilian Fickert, Tianyi Gu, Leonhard Staut, Wheeler Ruml, Joerg Hoffmann, and Marek Petrik, Beliefs We Can Believe In: Replacing Assumptions with Data in Real-Time Search. Proceedings of the Thirty-fourth AAAI Conference on Artificial Intelligence (AAAI-20), 2020.
 
 [[pdf]](http://cs.unh.edu/~tg1034/publication/DDNancy.pdf) [[slides]](http://cs.unh.edu/~tg1034/slides/DDNancy_slides.pdf) [[poster]](http://cs.unh.edu/~tg1034/slides/DDNancy_poster.pdf)
@@ -10,7 +10,7 @@ This is a codebase for collecting non-parametric heuristic data error model. We 
 
 [[pdf]](http://cs.unh.edu/~tg1034/publication/DDNancy-PRL.pdf) [[talk]](https://youtu.be/4f1ual5R4s0) [[slides]](http://cs.unh.edu/~tg1034/slides/prl_nancy_slides.pdf) [[poster]](http://cs.unh.edu/~tg1034/slides/prl_nancy_poster.pdf)
 
-#How to build. 
+# Build. 
 ```console
 mkdir ../realtime-nancy
 cd ../realtime-nancy
