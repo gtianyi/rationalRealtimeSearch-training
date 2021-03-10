@@ -92,3 +92,7 @@ make
     python distribtuion.py uniform postd
     ```
     This should generate another json file that contains the data that represent the histogram.
+
+# Problem Instances
+All the instances can be found [here](https://github.com/gtianyi/searchDomainInstanceFiles)
+
