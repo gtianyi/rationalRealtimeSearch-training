@@ -10,7 +10,7 @@ This is a codebase for collecting non-parametric heuristic data error model. We 
 
 [[pdf]](http://cs.unh.edu/~tg1034/publication/DDNancy-PRL.pdf) [[talk]](https://youtu.be/4f1ual5R4s0) [[slides]](http://cs.unh.edu/~tg1034/slides/prl_nancy_slides.pdf) [[poster]](http://cs.unh.edu/~tg1034/slides/prl_nancy_poster.pdf)
 
-# Build. 
+# BUILD. 
 ```console
 mkdir ../realtime-nancy
 cd ../realtime-nancy
@@ -93,6 +93,6 @@ make
     ```
     This should generate another json file that contains the data that represent the histogram.
 
-# Problem Instances
+# PROBLEM INSTANCES
 All the instances can be found [here](https://github.com/gtianyi/searchDomainInstanceFiles)
 
